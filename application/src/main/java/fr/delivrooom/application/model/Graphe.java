@@ -1,5 +1,7 @@
 package fr.delivrooom.application.model;
 
+import java.util.List;
+
 public interface Graphe {
 
 	/**
@@ -20,6 +22,8 @@ public interface Graphe {
 	 * @return true si <code>(i,j)</code> est un arc de <code>this</code>
 	 */
 	public abstract boolean estArc(int i, int j);
+
+    public abstract List<Integer> arcs(int i);
 
 
 }
