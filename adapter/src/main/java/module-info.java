@@ -10,4 +10,5 @@ module fr.delivrooom.adapter {
     exports fr.delivrooom.adapter.out;
 
     requires fr.delivrooom.application;
+    requires java.xml;
 }
