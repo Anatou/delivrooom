@@ -2,13 +2,15 @@ package fr.delivrooom.application.tsp;
 
 import fr.delivrooom.application.model.Graphe;
 
+import java.util.List;
+
 public class GrapheComplet implements Graphe {
-	
+
 	private static final int COUT_MAX = 40;
 	private static final int COUT_MIN = 10;
 	int nbSommets;
 	int[][] cout;
-	
+
 	/**
 	 * Cree un graphe complet dont les aretes ont un cout compris entre COUT_MIN et COUT_MAX
 	 * @param nbSommets
@@ -48,5 +50,10 @@ public class GrapheComplet implements Graphe {
 			return false;
 		return i != j;
 	}
+
+    @Override
+    public List<Integer> arcs(int i) {
+        return List.of();
+    }
 
 }
