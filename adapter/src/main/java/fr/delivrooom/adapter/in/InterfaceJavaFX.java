@@ -1,17 +1,12 @@
 package fr.delivrooom.adapter.in;
 
-import fr.delivrooom.application.port.out.NameRepository;
-import fr.delivrooom.application.service.GetNameService;
 import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-
-import java.io.IOException;
 
 import fr.delivrooom.application.port.in.GetNameUseCase;
 
@@ -28,7 +23,7 @@ public class InterfaceJavaFX extends Application {
     Button button = new Button("Get Name");
 
     @Override
-    public void start(Stage stage) throws IOException {
+    public void start(Stage stage) {
 
         VBox root = new VBox();
         root.setPadding(new Insets(20));
