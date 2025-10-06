@@ -1,4 +1,4 @@
-package tsp;
+package fr.insalyon.delivrooom.tsp;
 
 import java.util.Collection;
 import java.util.Iterator;

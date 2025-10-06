@@ -1,12 +1,12 @@
-package tsp;
+package fr.insalyon.delivrooom.tsp;
 
 public class GrapheComplet implements Graphe {
-	
+
 	private static final int COUT_MAX = 40;
 	private static final int COUT_MIN = 10;
 	int nbSommets;
 	int[][] cout;
-	
+
 	/**
 	 * Cree un graphe complet dont les aretes ont un cout compris entre COUT_MIN et COUT_MAX
 	 * @param nbSommets
