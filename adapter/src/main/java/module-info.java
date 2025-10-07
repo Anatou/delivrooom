@@ -7,6 +7,7 @@ module fr.delivrooom.adapter {
     exports fr.delivrooom.adapter.out;
     exports fr.delivrooom.adapter.in.javafxgui;
     opens fr.delivrooom.adapter.in.javafxgui to javafx.fxml;
+    opens fr.delivrooom.adapter.out to javafx.fxml;
 
     requires fr.delivrooom.application;
     requires java.xml;

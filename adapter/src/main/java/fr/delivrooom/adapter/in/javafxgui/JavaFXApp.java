@@ -1,5 +1,6 @@
 package fr.delivrooom.adapter.in.javafxgui;
 
+import fr.delivrooom.application.port.in.GetConfigPropertyUseCase;
 import fr.delivrooom.application.port.in.GetNameUseCase;
 import fr.delivrooom.application.port.in.GuiUseCase;
 import javafx.scene.Scene;
@@ -9,17 +10,26 @@ public class JavaFXApp extends javafx.application.Application {
 
     private static GetNameUseCase getNameUseCase;
     private static GuiUseCase guiUseCase;
+    private static GetConfigPropertyUseCase getConfigPropertyUseCase;
+
+
+    public static void launchGUI(GetNameUseCase getNameUseCase, GuiUseCase guiUseCase, GetConfigPropertyUseCase getConfigPropertyUseCase) {
+        JavaFXApp.getNameUseCase = getNameUseCase;
+        JavaFXApp.guiUseCase = guiUseCase;
+        JavaFXApp.getConfigPropertyUseCase = getConfigPropertyUseCase;
+        javafx.application.Application.launch(JavaFXApp.class);
+    }
+
     protected static GetNameUseCase getNameUseCase() {
         return getNameUseCase;
     }
+
     protected static GuiUseCase guiUseCase() {
         return guiUseCase;
     }
 
-    public static void launchGUI(GetNameUseCase getNameUseCase, GuiUseCase guiUseCase) {
-        JavaFXApp.getNameUseCase = getNameUseCase;
-        JavaFXApp.guiUseCase = guiUseCase;
-        javafx.application.Application.launch(JavaFXApp.class);
+    protected static GetConfigPropertyUseCase getConfigPropertyUseCase() {
+        return getConfigPropertyUseCase;
     }
 
     @Override
