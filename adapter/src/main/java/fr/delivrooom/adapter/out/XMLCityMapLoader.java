@@ -34,6 +34,7 @@ public class XMLCityMapLoader implements CityMapRepository {
                 double longitude = Double.parseDouble(node.getAttribute("longitude"));
                 long id = Long.parseLong(node.getAttribute("id"));
                 intersections.put(id, new Intersection(id, latitude, longitude));
+                System.out.println("new intersection point : " + id + " (" + latitude + ", " + longitude + ")");
             }
 
             NodeList roadNodes = document.getElementsByTagName("troncon");
