@@ -12,4 +12,5 @@ module fr.delivrooom.adapter {
     requires java.xml;
     requires javafx.graphics;
     requires javafx.base;
+    requires javafx.web;
 }
