@@ -1,8 +1,6 @@
 package fr.delivrooom.adapter.in.javafxgui;
 
-import fr.delivrooom.application.model.CityMap;
-import fr.delivrooom.application.model.Intersection;
-import fr.delivrooom.application.model.Road;
+import fr.delivrooom.application.model.*;
 import javafx.beans.InvalidationListener;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -31,7 +29,12 @@ public class MapCanvas extends Canvas {
             if (getWidth() == 0 || getHeight() == 0) {
                 return;
             }
-            drawMap(getGraphicsContext2D(), getWidth(), getHeight(), JavaFXApp.guiUseCase().getCityMap());
+            String XML_map = "petitPlan";
+            String XML_deliveries = "demandePetit1";
+
+            CityMap cityMap = JavaFXApp.guiUseCase().getCityMap(XML_map);
+            DeliveriesDemand deliveriesDemand = JavaFXApp.guiUseCase().getDeliveriesDemand(cityMap, XML_deliveries);
+            drawMap(getGraphicsContext2D(), getWidth(), getHeight(), cityMap, deliveriesDemand);
         };
         widthProperty().addListener(canvasResizeListener);
         heightProperty().addListener(canvasResizeListener);
@@ -61,7 +64,7 @@ public class MapCanvas extends Canvas {
         }
     }
 
-    private void drawMap(GraphicsContext gc, double width, double height, CityMap cityMap) {
+    private void drawMap(GraphicsContext gc, double width, double height, CityMap cityMap, DeliveriesDemand deliveriesDemand ) {
         double padding = 30e-7; // Paddings depend on the map scale
         double minX = cityMap.getIntersections().stream().mapToDouble(Intersection::getNormalizedX).min().orElse(0) - padding;
         double maxX = cityMap.getIntersections().stream().mapToDouble(Intersection::getNormalizedX).max().orElse(1) + padding;
@@ -102,6 +105,20 @@ public class MapCanvas extends Canvas {
         for (Intersection intersection : cityMap.getIntersections()) {
             drawIntersection(gc, scale, minX, minY, intersection, 1.3 * road_width);
         }
+
+        // Draw deliveries points in red
+        for (Delivery delivery : deliveriesDemand.getDeliveries()) {
+
+            // takeout point in red, delivery point in blue
+            gc.setFill(Color.RED);
+            drawIntersection(gc, scale, minX, minY, delivery.getTakeoutIntersection(), 2 * road_width); // Draw takeout point in red
+            gc.setFill(Color.BLUE);
+            drawIntersection(gc, scale, minX, minY, delivery.getDeliveryIntersection(), 2 * road_width); // Draw delivery point in blue
+        }
+        // Draw warehouse point in green
+        gc.setFill(Color.GREEN);
+        System.out.println("point de livraison : " + deliveriesDemand.getStore().getId());
+        drawIntersection(gc, scale, minX, minY, deliveriesDemand.getStore(), 2 * road_width);
     }
 
     private void drawSatelliteTiles(GraphicsContext gc, double scale, double minX, double maxX, double minY, double maxY) {

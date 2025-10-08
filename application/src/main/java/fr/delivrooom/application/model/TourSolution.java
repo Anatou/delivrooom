@@ -15,7 +15,7 @@ public class TourSolution {
         return intersectionsOrder;
     }
 
-    public DeliveriesDemand getDeliveriesDemand() {
+    public DeliveriesDemand getDeliveriesDemand(CityMap cityMap, String deliveriesName) {
         return deliveriesDemand;
     }
 }

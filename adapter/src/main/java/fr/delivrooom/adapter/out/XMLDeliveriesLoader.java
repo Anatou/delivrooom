@@ -1,5 +1,6 @@
 package fr.delivrooom.adapter.out;
 
+import fr.delivrooom.application.model.CityMap;
 import fr.delivrooom.application.model.DeliveriesDemand;
 import fr.delivrooom.application.model.Delivery;
 import fr.delivrooom.application.model.Intersection;
@@ -17,11 +18,11 @@ import java.util.List;
 public class XMLDeliveriesLoader implements DeliveriesRepository {
 
     @Override
-    public DeliveriesDemand getDeliveriesDemand() {
+    public DeliveriesDemand getDeliveriesDemand(CityMap cityMap, String deliveriesName) {
         List<Delivery> deliveries = new ArrayList<>();
         Intersection store = null;
         try {
-            InputStream inputStream = getClass().getResourceAsStream("/xml/myDeliverRequest.xml");
+            InputStream inputStream = getClass().getResourceAsStream("/xml/" + deliveriesName + ".xml");
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
             Document document = builder.parse(inputStream);
@@ -30,9 +31,11 @@ public class XMLDeliveriesLoader implements DeliveriesRepository {
             Element storeElement = (Element) document.getElementsByTagName("entrepot").item(0);
             long storeId = Long.parseLong(storeElement.getAttribute("adresse"));
 
-            //TODO : remplacer par les vraies coordonnées du noeud
-            store = new Intersection(storeId, 0, 0);
-            System.out.println("store point : " + storeId);
+            // Use coordinates from the city map
+            store = cityMap.getIntersections().stream()
+                    .filter(intersection -> intersection.getId() == storeId)
+                    .findFirst()
+                    .orElseThrow(() -> new Exception("Store intersection not found in city map"));
 
             NodeList deliveryNodes = document.getElementsByTagName("livraison");
             for (int i = 0; i < deliveryNodes.getLength(); i++) {
@@ -41,10 +44,18 @@ public class XMLDeliveriesLoader implements DeliveriesRepository {
                 long deliveryId = Long.parseLong(node.getAttribute("adresseLivraison"));
                 int takeoutDuration = Integer.parseInt(node.getAttribute("dureeEnlevement"));
                 int deliveryDuration = Integer.parseInt(node.getAttribute("dureeLivraison"));
-                Intersection takeout = new Intersection(takeoutId, 0, 0);
-                Intersection delivery = new Intersection(deliveryId, 0, 0);
-                deliveries.add(new Delivery(takeout, delivery, takeoutDuration, deliveryDuration));
-                System.out.println("new delivery point : " + takeoutId + " -> " + deliveryId);
+
+                // Use coordinates from the city map
+                Intersection takeoutIntersection = cityMap.getIntersections().stream()
+                        .filter(intersection -> intersection.getId() == takeoutId)
+                        .findFirst()
+                        .orElseThrow(() -> new Exception("Takeout intersection not found in city map"));
+
+                Intersection deliveryIntersection = cityMap.getIntersections().stream()
+                        .filter(intersection -> intersection.getId() == deliveryId)
+                        .findFirst()
+                        .orElseThrow(() -> new Exception("Delivery intersection not found in city map"));
+                deliveries.add(new Delivery(takeoutIntersection, deliveryIntersection, takeoutDuration, deliveryDuration));
             }
         } catch (Exception e) {
             e.printStackTrace();

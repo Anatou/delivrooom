@@ -5,7 +5,7 @@ import fr.delivrooom.application.model.DeliveriesDemand;
 import fr.delivrooom.application.model.TourSolution;
 
 public interface GuiUseCase {
-    CityMap getCityMap();
-    DeliveriesDemand getDeliveriesDemand();
+    CityMap getCityMap(String mapName);
+    DeliveriesDemand getDeliveriesDemand(CityMap citymap, String deliveriesName);
     TourSolution getTourSolution();
 }

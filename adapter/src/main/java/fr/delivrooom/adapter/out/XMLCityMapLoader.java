@@ -17,11 +17,11 @@ import java.util.List;
 public class XMLCityMapLoader implements CityMapRepository {
 
     @Override
-    public CityMap getCityMap() {
+    public CityMap getCityMap(String mapName) {
         HashMap<Long, Intersection> intersections = new HashMap<>();
         List<Road> roads = new ArrayList<>();
         try {
-            InputStream inputStream = XMLCityMapLoader.class.getResourceAsStream("/xml/petitPlan.xml");
+            InputStream inputStream = XMLCityMapLoader.class.getResourceAsStream("/xml/" + mapName + ".xml");
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
             Document document = builder.parse(inputStream);
@@ -34,7 +34,6 @@ public class XMLCityMapLoader implements CityMapRepository {
                 double longitude = Double.parseDouble(node.getAttribute("longitude"));
                 long id = Long.parseLong(node.getAttribute("id"));
                 intersections.put(id, new Intersection(id, latitude, longitude));
-                System.out.println("new intersection point : " + id + " (" + latitude + ", " + longitude + ")");
             }
 
             NodeList roadNodes = document.getElementsByTagName("troncon");

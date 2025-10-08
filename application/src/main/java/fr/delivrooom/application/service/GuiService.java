@@ -18,13 +18,13 @@ public class GuiService implements GuiUseCase {
     }
 
     @Override
-    public CityMap getCityMap() {
-        return cityMapRepository.getCityMap();
+    public CityMap getCityMap(String mapName) {
+        return cityMapRepository.getCityMap(mapName);
     }
 
     @Override
-    public DeliveriesDemand getDeliveriesDemand() {
-        return deliveriesRepository.getDeliveriesDemand();
+    public DeliveriesDemand getDeliveriesDemand(CityMap cityMap, String deliveriesName) {
+        return deliveriesRepository.getDeliveriesDemand(cityMap, deliveriesName);
     }
 
     @Override
