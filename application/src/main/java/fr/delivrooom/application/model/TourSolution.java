@@ -3,20 +3,20 @@ package fr.delivrooom.application.model;
 import java.util.List;
 
 public class TourSolution {
-    protected List<Intersection> intersectionsOrder;
-    protected DeliveriesDemand deliveriesDemand;
+    protected List<Path> paths;
+    protected float totalLentgh;
 
-    public TourSolution(List<Intersection> intersectionsOrder, DeliveriesDemand deliveriesDemand) {
-        this.intersectionsOrder = intersectionsOrder;
-        this.deliveriesDemand = deliveriesDemand;
+    public TourSolution(List<Path> paths, float totalLentgh) {
+        this.paths = paths;
+        this.totalLentgh = totalLentgh;
     }
 
-    public List<Intersection> getIntersectionsOrder() {
-        return intersectionsOrder;
+    public List<Path> getPaths() {
+        return paths;
     }
 
-    public DeliveriesDemand getDeliveriesDemand(CityMap cityMap, String deliveriesName) {
-        return deliveriesDemand;
+    public float getTotalLentgh() {
+        return totalLentgh;
     }
 }
 

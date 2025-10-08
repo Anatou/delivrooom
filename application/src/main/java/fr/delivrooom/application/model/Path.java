@@ -3,19 +3,19 @@ package fr.delivrooom.application.model;
 import java.util.List;
 
 public class Path {
-    protected List<Intersection> intersections;
-    protected int length;
+    protected List<Road> intersections;
+    protected float totalLength;
 
-    public Path(List<Intersection> intersections, int length) {
+    public Path(List<Road> intersections, float totalLength) {
         this.intersections = intersections;
-        this.length = length;
+        this.totalLength = totalLength;
     }
 
-    public List<Intersection> getIntersections() {
+    public List<Road> getIntersections() {
         return intersections;
     }
 
-    public int getLength() {
-        return length;
+    public float getTotalLength() {
+        return totalLength;
     }
 }
