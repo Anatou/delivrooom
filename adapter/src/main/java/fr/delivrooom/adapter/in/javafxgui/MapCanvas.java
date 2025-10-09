@@ -29,8 +29,8 @@ public class MapCanvas extends Canvas {
             if (getWidth() == 0 || getHeight() == 0) {
                 return;
             }
-            String XML_map = "petitPlan";
-            String XML_deliveries = "demandePetit1";
+            String XML_map = "moyenPlan";
+            String XML_deliveries = "demandeMoyen5";
 
             CityMap cityMap = JavaFXApp.guiUseCase().getCityMap(XML_map);
             DeliveriesDemand deliveriesDemand = JavaFXApp.guiUseCase().getDeliveriesDemand(cityMap, XML_deliveries);
@@ -103,22 +103,23 @@ public class MapCanvas extends Canvas {
         gc.setFill(Color.WHITE);
         gc.setStroke(Color.rgb(220, 220, 220));
         for (Intersection intersection : cityMap.getIntersections()) {
-            drawIntersection(gc, scale, minX, minY, intersection, 1.3 * road_width);
+            drawIntersection(gc, scale, minX, minY, intersection, 1.3 * road_width, true);
         }
 
         // Draw deliveries points in red
         for (Delivery delivery : deliveriesDemand.getDeliveries()) {
 
-            // takeout point in red, delivery point in blue
+            // takeout point is a red square, delivery point in blue circle
+
             gc.setFill(Color.RED);
-            drawIntersection(gc, scale, minX, minY, delivery.getTakeoutIntersection(), 2 * road_width); // Draw takeout point in red
+            drawIntersection(gc, scale, minX, minY, delivery.getTakeoutIntersection(), 2 * road_width, false); // Draw takeout point in red
             gc.setFill(Color.BLUE);
-            drawIntersection(gc, scale, minX, minY, delivery.getDeliveryIntersection(), 2 * road_width); // Draw delivery point in blue
+            drawIntersection(gc, scale, minX, minY, delivery.getDeliveryIntersection(), 2 * road_width, true); // Draw delivery point in blue
         }
         // Draw warehouse point in green
         gc.setFill(Color.GREEN);
         System.out.println("point de livraison : " + deliveriesDemand.getStore().getId());
-        drawIntersection(gc, scale, minX, minY, deliveriesDemand.getStore(), 2 * road_width);
+        drawIntersection(gc, scale, minX, minY, deliveriesDemand.getStore(), 2 * road_width, true);
     }
 
     private void drawSatelliteTiles(GraphicsContext gc, double scale, double minX, double maxX, double minY, double maxY) {
@@ -152,11 +153,14 @@ public class MapCanvas extends Canvas {
         }
     }
 
-    private void drawIntersection(GraphicsContext gc, double scale, double minX, double minY, Intersection intersection, double radius) {
+    private void drawIntersection(GraphicsContext gc, double scale, double minX, double minY, Intersection intersection, double radius, boolean circle) {
         double x = (intersection.getNormalizedX() - minX) * scale;
         double y = (intersection.getNormalizedY() - minY) * scale;
 
-        gc.fillOval(x - radius, y - radius, 2 * radius, 2 * radius);
+        if (circle)
+            gc.fillOval(x - radius, y - radius, 2 * radius, 2 * radius);
+        else
+            gc.fillRect(x - radius, y - radius, 2 * radius, 2 * radius);
     }
 
     private void drawRoad(GraphicsContext gc, double scale, double minX, double minY, Road road) {
