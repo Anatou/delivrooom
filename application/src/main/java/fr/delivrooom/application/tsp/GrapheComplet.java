@@ -9,7 +9,7 @@ public class GrapheComplet implements Graphe {
 	private static final int COUT_MAX = 40;
 	private static final int COUT_MIN = 10;
 	int nbSommets;
-	int[][] cout;
+	long[][] cout;
 
 	/**
 	 * Cree un graphe complet dont les aretes ont un cout compris entre COUT_MIN et COUT_MAX
@@ -18,7 +18,7 @@ public class GrapheComplet implements Graphe {
 	public GrapheComplet(int nbSommets){
 		this.nbSommets = nbSommets;
 		int iseed = 1;
-		cout = new int[nbSommets][nbSommets];
+		cout = new long[nbSommets][nbSommets];
 		for (int i=0; i<nbSommets; i++){
 		    for (int j=0; j<nbSommets; j++){
 		        if (i == j) cout[i][j] = -1;
@@ -38,21 +38,21 @@ public class GrapheComplet implements Graphe {
 	}
 
 	@Override
-	public int getCout(int i, int j) {
+	public float getCout(long i, long j) {
 		if (i<0 || i>=nbSommets || j<0 || j>=nbSommets)
 			return -1;
-		return cout[i][j];
+		return cout[(int)i][(int)j];
 	}
 
 	@Override
-	public boolean estArc(int i, int j) {
+	public boolean estArc(long i, long j) {
 		if (i<0 || i>=nbSommets || j<0 || j>=nbSommets)
 			return false;
 		return i != j;
 	}
 
     @Override
-    public List<Integer> arcs(int i) {
+    public List<Long> arcs(long i) {
         return List.of();
     }
 

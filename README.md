@@ -22,3 +22,9 @@ Run the app with maven running the `javafx:run` goal on the `config` module afte
 cd config
 ../mvnw javafx:run
 ```
+
+
+## Implementations delivered (so far)
+
+- When the app starts, it loads the intersection points from the xml map files and displays those on a real map.
+- Then, deliveries points are loaded from another xml file and are displayed on the map. Blue points are delivery points, red points are pickup points. Tne green point is the warehouse.
