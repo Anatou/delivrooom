@@ -27,7 +27,7 @@ public class TemplateTourCalculator implements TourCalculator{
         return 0;
     }
 
-    protected HashMap<Integer, Path> findShortestPaths(int startIntersectionId , HashSet<Integer> targets) {
+    protected HashMap<Long, Path> findShortestPaths(long startIntersectionId , HashSet<Long> targets) {
 
         // as of now, only one target is acceptable
         if (targets.size() > 1) {
@@ -36,13 +36,13 @@ public class TemplateTourCalculator implements TourCalculator{
         return TargetedDijkstraSearch(startIntersectionId, targets);
     }
 
-    protected HashMap<Integer, Path> TargetedDijkstraSearch(int startIntersectionId, HashSet<Integer> targets) throws RuntimeException {
+    protected HashMap<Long, Path> TargetedDijkstraSearch(long startIntersectionId, HashSet<Long> targets) throws RuntimeException {
         //
         int n = graph.getNbSommets();
-        HashMap<Integer, Float> distances = new HashMap<Integer, Float>();
-        HashMap<Integer, Integer> predecessors = new HashMap<Integer, Integer>();
-        PriorityQueue<Integer> queue = new PriorityQueue<Integer>(Comparator.comparing(distances::get)); // might be unsafe, TODO: test
-        HashSet<Integer> settled = new HashSet<Integer>();
+        HashMap<Long, Float> distances = new HashMap<Long, Float>();
+        HashMap<Long, Long> predecessors = new HashMap<Long, Long>();
+        PriorityQueue<Long> queue = new PriorityQueue<Long>(Comparator.comparing(distances::get)); // might be unsafe, TODO: test
+        HashSet<Long> settled = new HashSet<Long>();
         int targetsRemaining = targets.size();
 
         // init
@@ -50,7 +50,7 @@ public class TemplateTourCalculator implements TourCalculator{
         predecessors.put(startIntersectionId, null);
         queue.add(startIntersectionId);
 
-        int selectedIntersectionId = startIntersectionId;
+        long selectedIntersectionId = startIntersectionId;
         while (!queue.isEmpty() && targetsRemaining > 0) {
             selectedIntersectionId = queue.poll();
             if (!settled.contains(selectedIntersectionId)) {
@@ -58,7 +58,7 @@ public class TemplateTourCalculator implements TourCalculator{
                 if (targets.contains(selectedIntersectionId)) {
                     --targetsRemaining;
                 }
-                for (Integer newIntersectionId : graph.arcs(selectedIntersectionId)) {
+                for (Long newIntersectionId : graph.arcs(selectedIntersectionId)) {
                     if (!settled.contains(newIntersectionId)) {
                         float newDistance = distances.get(selectedIntersectionId) + graph.getCout(selectedIntersectionId, newIntersectionId);
                         if (!distances.containsKey(newIntersectionId) || newDistance < distances.get(newIntersectionId)) {
