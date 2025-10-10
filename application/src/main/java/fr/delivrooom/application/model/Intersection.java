@@ -66,4 +66,13 @@ public class Intersection {
 
         return R * c;
     }
+
+    @Override
+    public String toString() {
+        return "Intersection{" +
+                "id=" + id +
+                ", longitude=" + longitude +
+                ", latitude=" + latitude +
+                '}';
+    }
 }
