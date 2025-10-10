@@ -20,12 +20,12 @@ public class GuiService implements GuiUseCase {
     }
 
     @Override
-    public CityMap getCityMap(URL mapURL) {
+    public CityMap getCityMap(URL mapURL) throws Exception {
         return cityMapRepository.getCityMap(mapURL);
     }
 
     @Override
-    public DeliveriesDemand getDeliveriesDemand(CityMap cityMap, URL deliveriesURL) {
+    public DeliveriesDemand getDeliveriesDemand(CityMap cityMap, URL deliveriesURL) throws Exception {
         return deliveriesRepository.getDeliveriesDemand(cityMap, deliveriesURL);
     }
 

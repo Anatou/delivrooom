@@ -5,6 +5,6 @@ import fr.delivrooom.application.model.DeliveriesDemand;
 import java.net.URL;
 
 public interface DeliveriesRepository {
-    DeliveriesDemand getDeliveriesDemand(CityMap cityMap, URL deliveriesURL);
+    DeliveriesDemand getDeliveriesDemand(CityMap cityMap, URL deliveriesURL) throws Exception;
 
 }

@@ -80,7 +80,7 @@ public class AppController {
             System.out.println("Map loaded successfully: " + url);
         } catch (Exception e) {
             System.err.println("Error loading map file: " + e.getMessage());
-            e.printStackTrace();
+            showError("An error occurred", e.getMessage());
         }
     }
 
@@ -94,11 +94,10 @@ public class AppController {
         try {
             this.deliveriesDemand = JavaFXApp.guiUseCase().getDeliveriesDemand(cityMap, url);
             updateMapCanvas();
-            System.out.println("Deliveries loaded successfully: " + file.getName());
+            System.out.println("Deliveries loaded successfully: " + url);
         } catch (Exception e) {
             System.err.println("Error loading deliveries file: " + e.getMessage());
-            e.printStackTrace();
-            showError("error", e.getMessage());
+            showError("An error occurred", e.getMessage());
         }
     }
 

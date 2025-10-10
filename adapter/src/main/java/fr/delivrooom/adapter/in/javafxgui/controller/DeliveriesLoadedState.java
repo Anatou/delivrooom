@@ -3,6 +3,7 @@ package fr.delivrooom.adapter.in.javafxgui.controller;
 import javafx.scene.control.Alert;
 
 import java.io.File;
+import java.net.MalformedURLException;
 
 /**
  * Deliveries loaded state - both map and deliveries have been loaded.
@@ -21,7 +22,7 @@ public class DeliveriesLoadedState implements State {
         if (file != null && file.exists()) {
             try {
                 controller.loadMapFile(file.toURI().toURL());
-            } catch (Exception e) {
+            } catch (MalformedURLException e) {
                 showError("Error loading map file", e.getMessage());
             }
         } else {
@@ -34,7 +35,7 @@ public class DeliveriesLoadedState implements State {
         if (file != null && file.exists()) {
             try {
                 controller.loadDeliveriesFile(file.toURI().toURL());
-            } catch (Exception e) {
+            } catch (MalformedURLException e) {
                 showError("Error loading deliveries file", e.getMessage());
             }
         } else {
