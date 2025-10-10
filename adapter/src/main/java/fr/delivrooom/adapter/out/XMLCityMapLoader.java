@@ -30,6 +30,9 @@ public class XMLCityMapLoader implements CityMapRepository {
             document.getDocumentElement().normalize();
 
             NodeList intersectionsNodes = document.getElementsByTagName("noeud");
+            if (intersectionsNodes.getLength() == 0) {
+                throw new Exception("No intersections found in the XML file.");
+            }
             for (int i = 0; i < intersectionsNodes.getLength(); i++) {
                 Element node = (Element) intersectionsNodes.item(i);
                 double latitude = Double.parseDouble(node.getAttribute("latitude"));
@@ -39,6 +42,9 @@ public class XMLCityMapLoader implements CityMapRepository {
             }
 
             NodeList roadNodes = document.getElementsByTagName("troncon");
+            if (roadNodes.getLength() == 0) {
+                throw new Exception("No roads found in the XML file.");
+            }
             for (int i = 0; i < roadNodes.getLength(); i++) {
                 Element node = (Element) roadNodes.item(i);
                 Intersection from = intersections.get(Long.parseLong(node.getAttribute("origine")));

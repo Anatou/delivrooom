@@ -4,10 +4,9 @@ import java.util.*;
 
 public class TemplateTourCalculator implements TourCalculator{
 
-    protected Graphe graph;
-    protected CityMap cityMap;
+    protected CityGraph graph;
 
-    public TemplateTourCalculator(Graphe g) {
+    public TemplateTourCalculator(CityGraph g) {
         // create a Tour calculator with a graph
         this.graph = g;
     }
@@ -81,9 +80,24 @@ public class TemplateTourCalculator implements TourCalculator{
             throw new RuntimeException("Input graph is not connex, no path could be found for at least a target");
         }
 
-        // add a function to build Path objects to each target from predecessors
-        return null;
+        // build Path objects to each target from predecessors
+        HashMap<Long, Path> pathToTarget = new HashMap<>();
+
+        for (long targetId : targets) {
+            List<Road> roads = new ArrayList<>();
+            long nodeId = targetId;
+            float pathLentgh = 0.f;
+            while (nodeId != startIntersectionId) {
+                long parentId = predecessors.get(nodeId);
+                Road road = graph.getCityMap().getRoad(parentId, nodeId);
+                roads.add(road);
+                pathLentgh += road.getLength();
+
+                nodeId = parentId;
+            }
+            pathToTarget.put(targetId, new Path(roads, pathLentgh));
+        }
+
+        return pathToTarget;
     }
-
-
 }

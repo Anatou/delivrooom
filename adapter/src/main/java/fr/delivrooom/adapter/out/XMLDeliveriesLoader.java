@@ -19,47 +19,51 @@ import java.util.List;
 public class XMLDeliveriesLoader implements DeliveriesRepository {
 
     @Override
-    public DeliveriesDemand getDeliveriesDemand(CityMap cityMap, URL deliveriesURL) {
+    public DeliveriesDemand getDeliveriesDemand(CityMap cityMap, URL deliveriesURL) throws Exception {
         List<Delivery> deliveries = new ArrayList<>();
         Intersection store = null;
-        try {
-            InputStream inputStream = deliveriesURL.openStream();
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            Document document = builder.parse(inputStream);
-            document.getDocumentElement().normalize();
+        InputStream inputStream = deliveriesURL.openStream();
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        Document document = builder.parse(inputStream);
+        document.getDocumentElement().normalize();
 
-            Element storeElement = (Element) document.getElementsByTagName("entrepot").item(0);
-            long storeId = Long.parseLong(storeElement.getAttribute("adresse"));
+        Element storeElement = (Element) document.getElementsByTagName("entrepot").item(0);
+        if (storeElement == null) {
+            throw new Exception("No store found in the XML file.");
+        }
+        long storeId = Long.parseLong(storeElement.getAttribute("adresse"));
+        if (!cityMap.getIntersections().containsKey(storeId)) {
+            throw new Exception("Store intersection not found in city map. Maybe the deliveries file does not match the city map.");
+        }
+        // Use coordinates from the city map
+        store = cityMap.getIntersections().values().stream()
+                .filter(intersection -> intersection.getId() == storeId)
+                .findFirst()
+                .orElseThrow(() -> new Exception("Store intersection not found in city map"));
+
+        NodeList deliveryNodes = document.getElementsByTagName("livraison");
+        if (deliveryNodes.getLength() == 0) {
+            throw new Exception("No deliveries found in the XML file.");
+        }
+        for (int i = 0; i < deliveryNodes.getLength(); i++) {
+            Element node = (Element) deliveryNodes.item(i);
+            long takeoutId = Long.parseLong(node.getAttribute("adresseEnlevement"));
+            long deliveryId = Long.parseLong(node.getAttribute("adresseLivraison"));
+            int takeoutDuration = Integer.parseInt(node.getAttribute("dureeEnlevement"));
+            int deliveryDuration = Integer.parseInt(node.getAttribute("dureeLivraison"));
 
             // Use coordinates from the city map
-            store = cityMap.getIntersections().values().stream()
-                    .filter(intersection -> intersection.getId() == storeId)
+            Intersection takeoutIntersection = cityMap.getIntersections().values().stream()
+                    .filter(intersection -> intersection.getId() == takeoutId)
                     .findFirst()
-                    .orElseThrow(() -> new Exception("Store intersection not found in city map"));
+                    .orElseThrow(() -> new Exception("Takeout intersection not found in city map"));
 
-            NodeList deliveryNodes = document.getElementsByTagName("livraison");
-            for (int i = 0; i < deliveryNodes.getLength(); i++) {
-                Element node = (Element) deliveryNodes.item(i);
-                long takeoutId = Long.parseLong(node.getAttribute("adresseEnlevement"));
-                long deliveryId = Long.parseLong(node.getAttribute("adresseLivraison"));
-                int takeoutDuration = Integer.parseInt(node.getAttribute("dureeEnlevement"));
-                int deliveryDuration = Integer.parseInt(node.getAttribute("dureeLivraison"));
-
-                // Use coordinates from the city map
-                Intersection takeoutIntersection = cityMap.getIntersections().values().stream()
-                        .filter(intersection -> intersection.getId() == takeoutId)
-                        .findFirst()
-                        .orElseThrow(() -> new Exception("Takeout intersection not found in city map"));
-
-                Intersection deliveryIntersection = cityMap.getIntersections().values().stream()
-                        .filter(intersection -> intersection.getId() == deliveryId)
-                        .findFirst()
-                        .orElseThrow(() -> new Exception("Delivery intersection not found in city map"));
-                deliveries.add(new Delivery(takeoutIntersection, deliveryIntersection, takeoutDuration, deliveryDuration));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+            Intersection deliveryIntersection = cityMap.getIntersections().values().stream()
+                    .filter(intersection -> intersection.getId() == deliveryId)
+                    .findFirst()
+                    .orElseThrow(() -> new Exception("Delivery intersection not found in city map"));
+            deliveries.add(new Delivery(takeoutIntersection, deliveryIntersection, takeoutDuration, deliveryDuration));
         }
         return new DeliveriesDemand(deliveries, store);
     }

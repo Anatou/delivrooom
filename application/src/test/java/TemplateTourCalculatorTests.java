@@ -86,6 +86,6 @@ public class TemplateTourCalculatorTests {
         System.out.println("AAAAAAA");
         System.out.println(out);
         System.out.println(out.get(2L).getTotalLength());
-        Assertions.assertEquals(1.0, out.get(2L).getTotalLength());
+        Assertions.assertEquals(1.f, out.get(2L).getTotalLength());
     }
 }

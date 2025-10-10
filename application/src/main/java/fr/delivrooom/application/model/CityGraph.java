@@ -9,14 +9,10 @@ public class CityGraph implements Graphe {
     protected HashMap<Long, HashMap<Long, Float>> cost;
     protected HashMap<Long, List<Long>> adjacencyList;
     protected int intersectionsCount;
-
-    public CityGraph(HashMap<Long, HashMap<Long, Float>> cost, HashMap<Long, List<Long>> adjacencyList, int intersectionsCount) {
-        this.cost = cost;
-        this.adjacencyList = adjacencyList;
-        this.intersectionsCount = intersectionsCount;
-    }
+    protected CityMap cityMap;
 
     public CityGraph(CityMap cityMap) {
+        this.cityMap = cityMap;
         this.intersectionsCount = cityMap.getIntersections().size();
         this.cost = new HashMap<>();
         this.adjacencyList = new HashMap<>();
@@ -61,5 +57,9 @@ public class CityGraph implements Graphe {
             return this.adjacencyList.get(i);
         }
         return null;
+    }
+
+    public CityMap getCityMap() {
+        return cityMap;
     }
 }

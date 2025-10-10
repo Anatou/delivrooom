@@ -4,6 +4,7 @@ import fr.delivrooom.adapter.in.javafxgui.JavaFXApp;
 import fr.delivrooom.adapter.in.javafxgui.MapCanvas;
 import fr.delivrooom.application.model.CityMap;
 import fr.delivrooom.application.model.DeliveriesDemand;
+import javafx.scene.control.Alert;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -51,6 +52,20 @@ public class AppController {
     }
 
     /**
+     * Display an error alert dialog.
+     *
+     * @param title The title of the error and @param message The error message
+     */
+    private void showError(String title, String message) {
+
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    /**
      * Load a map file using the application service.
      * Called by state implementations.
      *
@@ -84,9 +99,11 @@ public class AppController {
             this.deliveriesDemand = JavaFXApp.guiUseCase().getDeliveriesDemand(cityMap, file.toURI().toURL());
             updateMapCanvas();
             System.out.println("Deliveries loaded successfully: " + file.getName());
-        } catch (MalformedURLException e) {
-            System.err.println("Error loading deliveries file: " + e.getMessage());
+        }
+        catch (Exception e) {
+            System.err.println("Error processing deliveries file: " + e.getMessage());
             e.printStackTrace();
+            showError("error", e.getMessage());
         }
     }
 
