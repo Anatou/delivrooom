@@ -1,22 +1,23 @@
 package fr.delivrooom.application.model;
 
+import java.util.HashMap;
 import java.util.List;
 
 public class CityMap {
 
-    private final List<Intersection> intersections;
-    private final List<Road> roads;
+    private final HashMap<Long, Intersection> intersections;
+    private final HashMap<Long, HashMap<Long, Road>> roads;
 
-    public CityMap(List<Intersection> intersections, List<Road> roads) {
+    public CityMap(HashMap<Long, Intersection> intersections, HashMap<Long, HashMap<Long, Road>> roads) {
         this.intersections = intersections;
         this.roads = roads;
     }
 
-    public List<Intersection> getIntersections() {
+    public HashMap<Long, Intersection> getIntersections() {
         return intersections;
     }
 
-    public List<Road> getRoads() {
+    public HashMap<Long, HashMap<Long, Road>> getRoads() {
         return roads;
     }
 }

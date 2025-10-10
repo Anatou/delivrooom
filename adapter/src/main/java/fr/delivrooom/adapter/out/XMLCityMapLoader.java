@@ -21,7 +21,7 @@ public class XMLCityMapLoader implements CityMapRepository {
     @Override
     public CityMap getCityMap(URL cityMapURL) {
         HashMap<Long, Intersection> intersections = new HashMap<>();
-        List<Road> roads = new ArrayList<>();
+        HashMap<Long, HashMap<Long, Road>> roads = new HashMap<>();
         try {
             InputStream inputStream = cityMapURL.openStream();
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -35,7 +35,7 @@ public class XMLCityMapLoader implements CityMapRepository {
                 double latitude = Double.parseDouble(node.getAttribute("latitude"));
                 double longitude = Double.parseDouble(node.getAttribute("longitude"));
                 long id = Long.parseLong(node.getAttribute("id"));
-                intersections.put(id, new Intersection(id, latitude, longitude));
+                intersections.putIfAbsent(id, new Intersection(id, latitude, longitude));
             }
 
             NodeList roadNodes = document.getElementsByTagName("troncon");
@@ -49,12 +49,14 @@ public class XMLCityMapLoader implements CityMapRepository {
                 if (from == null || to == null) {
                     throw new Exception("Invalid road: " + node);
                 }
-                roads.add(new Road(from, to, length, name));
+                Road road = new Road(from, to, length, name);
+                roads.putIfAbsent(from.getId(), new HashMap<>());
+                roads.get(from.getId()).put(to.getId(), road);
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return new CityMap(new ArrayList<>(intersections.values()), roads);
+        return new CityMap(intersections, roads);
     }
 }
