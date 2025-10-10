@@ -7,9 +7,11 @@ import fr.delivrooom.application.port.out.CityMapRepository;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,11 +19,11 @@ import java.util.List;
 public class XMLCityMapLoader implements CityMapRepository {
 
     @Override
-    public CityMap getCityMap(String mapName) {
+    public CityMap getCityMap(URL cityMapURL) {
         HashMap<Long, Intersection> intersections = new HashMap<>();
         List<Road> roads = new ArrayList<>();
         try {
-            InputStream inputStream = XMLCityMapLoader.class.getResourceAsStream("/xml/" + mapName + ".xml");
+            InputStream inputStream = cityMapURL.openStream();
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
             Document document = builder.parse(inputStream);

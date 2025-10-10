@@ -1,5 +1,6 @@
 package fr.delivrooom.adapter.in.javafxgui;
 
+import fr.delivrooom.adapter.out.XMLCityMapLoader;
 import fr.delivrooom.application.model.*;
 import javafx.beans.InvalidationListener;
 import javafx.scene.canvas.Canvas;
@@ -7,6 +8,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 
+import java.net.URL;
 import java.util.ArrayList;
 
 public class MapCanvas extends StackPane {
@@ -27,6 +29,12 @@ public class MapCanvas extends StackPane {
     }
 
     private void setupCanvas() {
+        URL cityMapURL = XMLCityMapLoader.class.getResource("/xml/grandPlan.xml");
+        URL deliveriesURL = XMLCityMapLoader.class.getResource("/xml/demandeGrand7.xml");
+        CityMap cityMap = JavaFXApp.guiUseCase().getCityMap(cityMapURL);
+        DeliveriesDemand deliveriesDemand = JavaFXApp.guiUseCase().getDeliveriesDemand(cityMap, deliveriesURL);
+
+
         InvalidationListener canvasResizeListener = (o) -> {
             if (getWidth() == 0 || getHeight() == 0) {
                 return;
@@ -37,11 +45,6 @@ public class MapCanvas extends StackPane {
             overlayCanvas.setWidth(getWidth());
             overlayCanvas.setHeight(getHeight());
 
-            String XML_map = "moyenPlan";
-            String XML_deliveries = "demandeMoyen5";
-
-            CityMap cityMap = JavaFXApp.guiUseCase().getCityMap(XML_map);
-            DeliveriesDemand deliveriesDemand = JavaFXApp.guiUseCase().getDeliveriesDemand(cityMap, XML_deliveries);
             drawMap(getWidth(), getHeight(), cityMap, deliveriesDemand);
         };
         widthProperty().addListener(canvasResizeListener);

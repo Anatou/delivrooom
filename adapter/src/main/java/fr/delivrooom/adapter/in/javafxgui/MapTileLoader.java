@@ -63,7 +63,6 @@ public class MapTileLoader {
                     throw new IOException("Failed to load image");
                 }
 
-                System.out.println("Loaded tile, returning image " + tileKey);
                 return image;
             } catch (IOException e) {
                 System.err.println("Failed to load tile " + tileKey + ": " + e.getMessage());

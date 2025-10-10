@@ -12,17 +12,18 @@ import org.w3c.dom.NodeList;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 public class XMLDeliveriesLoader implements DeliveriesRepository {
 
     @Override
-    public DeliveriesDemand getDeliveriesDemand(CityMap cityMap, String deliveriesName) {
+    public DeliveriesDemand getDeliveriesDemand(CityMap cityMap, URL deliveriesURL) {
         List<Delivery> deliveries = new ArrayList<>();
         Intersection store = null;
         try {
-            InputStream inputStream = getClass().getResourceAsStream("/xml/" + deliveriesName + ".xml");
+            InputStream inputStream = deliveriesURL.openStream();
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
             Document document = builder.parse(inputStream);

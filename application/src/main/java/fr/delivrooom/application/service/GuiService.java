@@ -7,6 +7,8 @@ import fr.delivrooom.application.port.in.GuiUseCase;
 import fr.delivrooom.application.port.out.CityMapRepository;
 import fr.delivrooom.application.port.out.DeliveriesRepository;
 
+import java.net.URL;
+
 public class GuiService implements GuiUseCase {
 
     private final CityMapRepository cityMapRepository;
@@ -18,13 +20,13 @@ public class GuiService implements GuiUseCase {
     }
 
     @Override
-    public CityMap getCityMap(String mapName) {
-        return cityMapRepository.getCityMap(mapName);
+    public CityMap getCityMap(URL mapURL) {
+        return cityMapRepository.getCityMap(mapURL);
     }
 
     @Override
-    public DeliveriesDemand getDeliveriesDemand(CityMap cityMap, String deliveriesName) {
-        return deliveriesRepository.getDeliveriesDemand(cityMap, deliveriesName);
+    public DeliveriesDemand getDeliveriesDemand(CityMap cityMap, URL deliveriesURL) {
+        return deliveriesRepository.getDeliveriesDemand(cityMap, deliveriesURL);
     }
 
     @Override
