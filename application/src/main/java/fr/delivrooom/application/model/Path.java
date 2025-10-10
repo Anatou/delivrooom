@@ -18,4 +18,12 @@ public class Path {
     public float getTotalLength() {
         return totalLength;
     }
+
+    @Override
+    public String toString() {
+        return "Path{" +
+                "intersections=" + intersections +
+                ", totalLength=" + totalLength +
+                '}';
+    }
 }
