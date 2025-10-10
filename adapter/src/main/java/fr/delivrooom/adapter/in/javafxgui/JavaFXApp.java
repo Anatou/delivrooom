@@ -1,5 +1,6 @@
 package fr.delivrooom.adapter.in.javafxgui;
 
+import atlantafx.base.theme.PrimerLight;
 import fr.delivrooom.application.port.in.GetConfigPropertyUseCase;
 import fr.delivrooom.application.port.in.GetNameUseCase;
 import fr.delivrooom.application.port.in.GuiUseCase;
@@ -35,6 +36,8 @@ public class JavaFXApp extends javafx.application.Application {
     @Override
     public void start(Stage stage) {
         MainPane mainPane = new MainPane();
+
+        setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
 
         stage.setTitle("Delivrooom");
         stage.setScene(new Scene(mainPane, 800, 500));

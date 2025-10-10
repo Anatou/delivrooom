@@ -15,4 +15,5 @@ module fr.delivrooom.adapter {
     requires javafx.base;
     requires javafx.web;
     requires java.desktop;
+    requires atlantafx.base;
 }
