@@ -29,16 +29,12 @@ public class CityGraph implements Graphe {
 
             // If the fromd or toId are not in the map, add them
             this.cost.putIfAbsent(fromId, new HashMap<>());
-            this.cost.putIfAbsent(toId, new HashMap<>());
             // Add the cost of the road
             this.cost.get(fromId).put(toId, roadCost);
-            this.cost.get(toId).put(fromId, roadCost);
 
             // Ajouter l'arc dans la liste d'adjacence
             this.adjacencyList.putIfAbsent(fromId, new java.util.ArrayList<>());
             this.adjacencyList.get(fromId).add(toId);
-            this.adjacencyList.putIfAbsent(toId, new java.util.ArrayList<>());
-            this.adjacencyList.get(toId).add(fromId);
         }
     }
 
