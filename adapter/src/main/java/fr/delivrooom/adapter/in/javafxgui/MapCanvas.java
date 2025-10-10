@@ -11,6 +11,7 @@ import org.controlsfx.control.tableview2.filter.filtereditor.SouthFilter;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class MapCanvas extends StackPane {
 
@@ -55,10 +56,10 @@ public class MapCanvas extends StackPane {
 
     private void drawMap(double width, double height, CityMap cityMap, DeliveriesDemand deliveriesDemand) {
         double padding = 30e-7; // Paddings depend on the map scale
-        double minX = cityMap.getIntersections().stream().mapToDouble(Intersection::getNormalizedX).min().orElse(0) - padding;
-        double maxX = cityMap.getIntersections().stream().mapToDouble(Intersection::getNormalizedX).max().orElse(1) + padding;
-        double minY = cityMap.getIntersections().stream().mapToDouble(Intersection::getNormalizedY).min().orElse(0) - padding;
-        double maxY = cityMap.getIntersections().stream().mapToDouble(Intersection::getNormalizedY).max().orElse(1) + padding;
+        double minX = cityMap.getIntersections().values().stream().mapToDouble(Intersection::getNormalizedX).min().orElse(0) - padding;
+        double maxX = cityMap.getIntersections().values().stream().mapToDouble(Intersection::getNormalizedX).max().orElse(1) + padding;
+        double minY = cityMap.getIntersections().values().stream().mapToDouble(Intersection::getNormalizedY).min().orElse(0) - padding;
+        double maxY = cityMap.getIntersections().values().stream().mapToDouble(Intersection::getNormalizedY).max().orElse(1) + padding;
 
         // Calculate scale factor between normalized coordinates and canvas coordinates
         double scale = Math.min(width / (maxX - minX), height / (maxY - minY));
@@ -128,13 +129,15 @@ public class MapCanvas extends StackPane {
         // Draw roads
         gc.setStroke(Color.rgb(220, 220, 220));
         gc.setLineWidth(road_width);
-        for (Road road : cityMap.getRoads()) {
-            drawRoad(gc, scale, minX, minY, road);
+        for (HashMap<Long, Road> subMap : cityMap.getRoads().values()) {
+            for (Road road : subMap.values()) {
+                drawRoad(gc, scale, minX, minY, road);
+            }
         }
         // Draw intersections
         gc.setFill(Color.WHITE);
         gc.setStroke(Color.rgb(220, 220, 220));
-        for (Intersection intersection : cityMap.getIntersections()) {
+        for (Intersection intersection : cityMap.getIntersections().values()) {
             drawIntersection(gc, scale, minX, minY, intersection, 1.3 * road_width, true);
         }
         // Takeout point is a red square, delivery point in blue circle

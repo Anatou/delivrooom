@@ -21,20 +21,22 @@ public class CityGraph implements Graphe {
         this.cost = new HashMap<>();
         this.adjacencyList = new HashMap<>();
 
-        for (Road road : cityMap.getRoads()) {
-            long fromId = road.getOrigin().getId();
-            long toId = road.getDestination().getId();
-            // the cost of a road is its length
-            float roadCost = road.getLength();
+        for (HashMap<Long, Road> subMap : cityMap.getRoads().values()) {
+            for (Road road : subMap.values()) {
+                long fromId = road.getOrigin().getId();
+                long toId = road.getDestination().getId();
+                // the cost of a road is its length
+                float roadCost = road.getLength();
 
-            // If the fromd or toId are not in the map, add them
-            this.cost.putIfAbsent(fromId, new HashMap<>());
-            // Add the cost of the road
-            this.cost.get(fromId).put(toId, roadCost);
+                // If the fromd or toId are not in the map, add them
+                this.cost.putIfAbsent(fromId, new HashMap<>());
+                // Add the cost of the road
+                this.cost.get(fromId).put(toId, roadCost);
 
-            // Ajouter l'arc dans la liste d'adjacence
-            this.adjacencyList.putIfAbsent(fromId, new java.util.ArrayList<>());
-            this.adjacencyList.get(fromId).add(toId);
+                // Ajouter l'arc dans la liste d'adjacence
+                this.adjacencyList.putIfAbsent(fromId, new java.util.ArrayList<>());
+                this.adjacencyList.get(fromId).add(toId);
+            }
         }
     }
 

@@ -33,7 +33,7 @@ public class XMLDeliveriesLoader implements DeliveriesRepository {
             long storeId = Long.parseLong(storeElement.getAttribute("adresse"));
 
             // Use coordinates from the city map
-            store = cityMap.getIntersections().stream()
+            store = cityMap.getIntersections().values().stream()
                     .filter(intersection -> intersection.getId() == storeId)
                     .findFirst()
                     .orElseThrow(() -> new Exception("Store intersection not found in city map"));
@@ -47,12 +47,12 @@ public class XMLDeliveriesLoader implements DeliveriesRepository {
                 int deliveryDuration = Integer.parseInt(node.getAttribute("dureeLivraison"));
 
                 // Use coordinates from the city map
-                Intersection takeoutIntersection = cityMap.getIntersections().stream()
+                Intersection takeoutIntersection = cityMap.getIntersections().values().stream()
                         .filter(intersection -> intersection.getId() == takeoutId)
                         .findFirst()
                         .orElseThrow(() -> new Exception("Takeout intersection not found in city map"));
 
-                Intersection deliveryIntersection = cityMap.getIntersections().stream()
+                Intersection deliveryIntersection = cityMap.getIntersections().values().stream()
                         .filter(intersection -> intersection.getId() == deliveryId)
                         .findFirst()
                         .orElseThrow(() -> new Exception("Delivery intersection not found in city map"));
