@@ -29,4 +29,14 @@ public class Road {
     public String getName() {
         return name;
     }
+
+    @Override
+    public String toString() {
+        return "Road{" +
+                "origin=" + origin +
+                ", destination=" + destination +
+                ", length=" + length +
+                ", name='" + name + '\'' +
+                '}';
+    }
 }
