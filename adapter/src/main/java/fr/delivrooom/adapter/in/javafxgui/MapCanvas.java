@@ -4,23 +4,25 @@ import fr.delivrooom.application.model.*;
 import javafx.beans.InvalidationListener;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.image.Image;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
 
-public class MapCanvas extends Canvas {
+public class MapCanvas extends StackPane {
 
-    private static final String MAPTILER_API_KEY = JavaFXApp.getConfigPropertyUseCase().getProperty("maptiler.api.key");
-    private static final String MAPTILER_URL = JavaFXApp.getConfigPropertyUseCase().getProperty("maptiler.url", "https://api.maptiler.com/tiles/satellite-v2/");
     private static final int ZOOM_LEVEL = JavaFXApp.getConfigPropertyUseCase().getIntProperty("maptiler.zoom.level", 14);
-
-    private final Map<String, Image> tileCache = new HashMap<>();
+    private final MapTileLoader tileLoader;
+    private final Canvas tileCanvas = new Canvas();
+    private final Canvas overlayCanvas = new Canvas();
 
     public MapCanvas() {
+        tileLoader = new MapTileLoader();
+
+        setStyle("-fx-background-color: #8D8E7F;");
+        setMinSize(0, 0);
+
+        getChildren().addAll(tileCanvas, overlayCanvas);
         setupCanvas();
     }
 
@@ -29,42 +31,25 @@ public class MapCanvas extends Canvas {
             if (getWidth() == 0 || getHeight() == 0) {
                 return;
             }
+
+            tileCanvas.setWidth(getWidth());
+            tileCanvas.setHeight(getHeight());
+            overlayCanvas.setWidth(getWidth());
+            overlayCanvas.setHeight(getHeight());
+
             String XML_map = "moyenPlan";
             String XML_deliveries = "demandeMoyen5";
 
             CityMap cityMap = JavaFXApp.guiUseCase().getCityMap(XML_map);
             DeliveriesDemand deliveriesDemand = JavaFXApp.guiUseCase().getDeliveriesDemand(cityMap, XML_deliveries);
-            drawMap(getGraphicsContext2D(), getWidth(), getHeight(), cityMap, deliveriesDemand);
+            drawMap(getWidth(), getHeight(), cityMap, deliveriesDemand);
         };
         widthProperty().addListener(canvasResizeListener);
         heightProperty().addListener(canvasResizeListener);
     }
 
 
-    /**
-     * Get or download a MapTiler tile
-     */
-    private Image getTile(int z, int x, int y) {
-        String tileKey = z + "/" + x + "/" + y;
-
-        if (tileCache.containsKey(tileKey)) {
-            return tileCache.get(tileKey);
-        }
-
-        try {
-            String urlStr = MAPTILER_URL + z + "/" + x + "/" + y + ".jpg?key=" + MAPTILER_API_KEY;
-            System.out.println("Downloading tile " + x + "/" + y + " zoom " + z);
-            URL url = new URL(urlStr);
-            Image image = new Image(url.toString());
-            tileCache.put(tileKey, image);
-            return image;
-        } catch (IOException e) {
-            System.err.println("Failed to load tile " + tileKey + ": " + e.getMessage());
-            return null;
-        }
-    }
-
-    private void drawMap(GraphicsContext gc, double width, double height, CityMap cityMap, DeliveriesDemand deliveriesDemand ) {
+    private void drawMap(double width, double height, CityMap cityMap, DeliveriesDemand deliveriesDemand) {
         double padding = 30e-7; // Paddings depend on the map scale
         double minX = cityMap.getIntersections().stream().mapToDouble(Intersection::getNormalizedX).min().orElse(0) - padding;
         double maxX = cityMap.getIntersections().stream().mapToDouble(Intersection::getNormalizedX).max().orElse(1) + padding;
@@ -73,7 +58,6 @@ public class MapCanvas extends Canvas {
 
         // Calculate scale factor between normalized coordinates and canvas coordinates
         double scale = Math.min(width / (maxX - minX), height / (maxY - minY));
-        double road_width = 2e-7 * scale; // Road width depends on the map scale
 
         // Center the map on the canvas by editing the min/max coordinates on the non-restricting axis
         if (width / scale > maxX - minX) {
@@ -86,43 +70,14 @@ public class MapCanvas extends Canvas {
             maxY += extraY;
         }
 
-        // Clear canvas
-        gc.clearRect(0, 0, width, height);
+        GraphicsContext gcTiles = tileCanvas.getGraphicsContext2D();
+        GraphicsContext gcOverlay = overlayCanvas.getGraphicsContext2D();
 
-        // Draw tiles
-        drawSatelliteTiles(gc, scale, minX, maxX, minY, maxY);
-
-        // Draw roads
-        gc.setStroke(Color.rgb(220, 220, 220));
-        gc.setLineWidth(road_width);
-        for (Road road : cityMap.getRoads()) {
-            drawRoad(gc, scale, minX, minY, road);
-        }
-
-        // Draw intersections
-        gc.setFill(Color.WHITE);
-        gc.setStroke(Color.rgb(220, 220, 220));
-        for (Intersection intersection : cityMap.getIntersections()) {
-            drawIntersection(gc, scale, minX, minY, intersection, 1.3 * road_width, true);
-        }
-
-        // Draw deliveries points in red
-        for (Delivery delivery : deliveriesDemand.getDeliveries()) {
-
-            // takeout point is a red square, delivery point in blue circle
-
-            gc.setFill(Color.RED);
-            drawIntersection(gc, scale, minX, minY, delivery.getTakeoutIntersection(), 2 * road_width, false); // Draw takeout point in red
-            gc.setFill(Color.BLUE);
-            drawIntersection(gc, scale, minX, minY, delivery.getDeliveryIntersection(), 2 * road_width, true); // Draw delivery point in blue
-        }
-        // Draw warehouse point in green
-        gc.setFill(Color.GREEN);
-        System.out.println("point de livraison : " + deliveriesDemand.getStore().getId());
-        drawIntersection(gc, scale, minX, minY, deliveriesDemand.getStore(), 2 * road_width, true);
+        drawTiles(gcTiles, scale, minX, maxX, minY, maxY);
+        drawOverlay(gcOverlay, width, height, cityMap, deliveriesDemand, scale, minX, minY);
     }
 
-    private void drawSatelliteTiles(GraphicsContext gc, double scale, double minX, double maxX, double minY, double maxY) {
+    private void drawTiles(GraphicsContext gc, double scale, double minX, double maxX, double minY, double maxY) {
         int zoomLevel = ZOOM_LEVEL;
         int tilesPerSide = (int) Math.pow(2, zoomLevel);
 
@@ -131,15 +86,20 @@ public class MapCanvas extends Canvas {
         int minTileY = (int) Math.floor(minY * tilesPerSide);
         int maxTileY = (int) Math.floor(maxY * tilesPerSide);
 
+        ArrayList<String> requestedTiles = new ArrayList<>();
+
         for (int tileX = minTileX; tileX <= maxTileX; tileX++) {
             for (int tileY = minTileY; tileY <= maxTileY; tileY++) {
-                Image tile = getTile(zoomLevel, tileX, tileY);
-                if (tile != null) {
+                final int finalTileX = tileX;
+                final int finalTileY = tileY;
+
+                // Get tile with callback to draw it when loaded
+                String key = tileLoader.getTile(zoomLevel, tileX, tileY, loadedImage -> {
                     // Normalized tile coordinates
-                    double tileLeft = (double) tileX / tilesPerSide;
-                    double tileTop = (double) tileY / tilesPerSide;
-                    double tileRight = (double) (tileX + 1) / tilesPerSide;
-                    double tileBottom = (double) (tileY + 1) / tilesPerSide;
+                    double tileLeft = (double) finalTileX / tilesPerSide;
+                    double tileTop = (double) finalTileY / tilesPerSide;
+                    double tileRight = (double) (finalTileX + 1) / tilesPerSide;
+                    double tileBottom = (double) (finalTileY + 1) / tilesPerSide;
 
                     // Calculate tile origin and size on canvas
                     double x1 = (tileLeft - minX) * scale;
@@ -147,10 +107,42 @@ public class MapCanvas extends Canvas {
                     double w = (tileRight - tileLeft) * scale;
                     double h = (tileBottom - tileTop) * scale;
 
-                    gc.drawImage(tile, x1, y1, w, h);
-                }
+                    // Draw the loaded tile
+                    gc.drawImage(loadedImage, x1, y1, w, h);
+                });
+                requestedTiles.add(key);
             }
         }
+        tileLoader.cancelTilesRequestsNotIn(requestedTiles);
+    }
+
+    private void drawOverlay(GraphicsContext gc, double width, double height, CityMap cityMap, DeliveriesDemand deliveriesDemand, double scale, double minX, double minY) {
+        double road_width = 2e-7 * scale; // Road width depends on the map scale
+
+        // Clear canvas
+        gc.clearRect(0, 0, width, height);
+        // Draw roads
+        gc.setStroke(Color.rgb(220, 220, 220));
+        gc.setLineWidth(road_width);
+        for (Road road : cityMap.getRoads()) {
+            drawRoad(gc, scale, minX, minY, road);
+        }
+        // Draw intersections
+        gc.setFill(Color.WHITE);
+        gc.setStroke(Color.rgb(220, 220, 220));
+        for (Intersection intersection : cityMap.getIntersections()) {
+            drawIntersection(gc, scale, minX, minY, intersection, 1.3 * road_width, true);
+        }
+        // Takeout point is a red square, delivery point in blue circle
+        for (Delivery delivery : deliveriesDemand.getDeliveries()) {
+            gc.setFill(Color.RED);
+            drawIntersection(gc, scale, minX, minY, delivery.getTakeoutIntersection(), 2 * road_width, false); // Draw takeout point in red
+            gc.setFill(Color.BLUE);
+            drawIntersection(gc, scale, minX, minY, delivery.getDeliveryIntersection(), 2 * road_width, true); // Draw delivery point in blue
+        }
+        // Draw warehouse point in green
+        gc.setFill(Color.GREEN);
+        drawIntersection(gc, scale, minX, minY, deliveriesDemand.getStore(), 2 * road_width, true);
     }
 
     private void drawIntersection(GraphicsContext gc, double scale, double minX, double minY, Intersection intersection, double radius, boolean circle) {
