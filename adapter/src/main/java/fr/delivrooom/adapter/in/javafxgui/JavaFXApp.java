@@ -25,7 +25,7 @@ public class JavaFXApp extends javafx.application.Application {
         return getNameUseCase;
     }
 
-    protected static GuiUseCase guiUseCase() {
+    public static GuiUseCase guiUseCase() {
         return guiUseCase;
     }
 
@@ -36,6 +36,9 @@ public class JavaFXApp extends javafx.application.Application {
     @Override
     public void start(Stage stage) {
         MainPane mainPane = new MainPane();
+
+        // Set the stage reference for file chooser dialogs
+        mainPane.setStage(stage);
 
         setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
 
