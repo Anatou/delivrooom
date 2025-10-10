@@ -11,6 +11,12 @@ import java.util.Properties;
  */
 public class ConfigLoader implements ConfigRepository {
 
+    private final InputStream configInputStream;
+
+    public ConfigLoader(InputStream configInputStream) {
+        this.configInputStream = configInputStream;
+    }
+
     public Properties loadConfigProperties() {
         Properties properties = new Properties();
         try (InputStream input = ConfigLoader.class.getClassLoader()

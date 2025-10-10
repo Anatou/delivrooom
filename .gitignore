@@ -36,4 +36,4 @@ build/
 .DS_Store
 
 # Configuration files with secrets
-adapter/src/main/resources/config.properties
+config/src/main/resources/config.properties

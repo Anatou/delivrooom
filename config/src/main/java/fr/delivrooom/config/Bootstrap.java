@@ -13,11 +13,24 @@ import fr.delivrooom.application.service.ConfigService;
 import fr.delivrooom.application.service.GetNameService;
 import fr.delivrooom.application.service.GuiService;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 public class Bootstrap {
     public static void main(String[] args) {
 
+        ConfigRepository configRepository;
+        try (InputStream configInputStream = ConfigLoader.class.getClassLoader()
+                .getResourceAsStream("config.properties")) {
+            if (configInputStream == null) {
+                throw new RuntimeException("config.properties file not found in resources. Please create a copy of config.properties.template and customize it.");
+            }
+            configRepository = new ConfigLoader(configInputStream);
+        } catch (IOException ex) {
+            throw new RuntimeException("Failed to load configuration", ex);
+        }
+
         NameRepository nameRepository = new NameAdapterMock();
-        ConfigRepository configRepository = new ConfigLoader();
         CityMapRepository cityMapRepository = new XMLCityMapLoader();
         DeliveriesRepository deliveriesRepository = new XMLDeliveriesLoader();
 
