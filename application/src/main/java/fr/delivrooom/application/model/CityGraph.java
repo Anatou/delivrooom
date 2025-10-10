@@ -11,12 +11,6 @@ public class CityGraph implements Graphe {
     protected int intersectionsCount;
     protected CityMap cityMap;
 
-    public CityGraph(HashMap<Long, HashMap<Long, Float>> cost, HashMap<Long, List<Long>> adjacencyList, int intersectionsCount) {
-        this.cost = cost;
-        this.adjacencyList = adjacencyList;
-        this.intersectionsCount = intersectionsCount;
-    }
-
     public CityGraph(CityMap cityMap) {
         this.cityMap = cityMap;
         this.intersectionsCount = cityMap.getIntersections().size();
