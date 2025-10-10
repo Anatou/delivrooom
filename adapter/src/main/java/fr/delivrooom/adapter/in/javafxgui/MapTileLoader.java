@@ -73,7 +73,6 @@ public class MapTileLoader {
 
         pendingTiles.put(tileKey, future);
         future.thenAccept(image -> {
-            System.out.println("Tile " + tileKey + " loaded");
             pendingTiles.remove(tileKey);
             if (image != null) {
                 tileCache.put(tileKey, image);
@@ -88,7 +87,7 @@ public class MapTileLoader {
     public void cancelTilesRequestsNotIn(ArrayList<String> requestedTiles) {
         for (String tileKey : new ArrayList<>(pendingTiles.keySet())) {
             if (!requestedTiles.contains(tileKey)) {
-                System.out.println("Cancelling tile " + tileKey);
+                System.out.println("Cancelling tile request " + tileKey);
                 pendingTiles.get(tileKey).cancel(true);
                 pendingTiles.remove(tileKey);
             }

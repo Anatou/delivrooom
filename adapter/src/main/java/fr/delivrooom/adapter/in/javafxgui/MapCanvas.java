@@ -157,13 +157,13 @@ public class MapCanvas extends StackPane {
             // Takeout point is a red square, delivery point in blue circle
             for (Delivery delivery : deliveriesDemand.getDeliveries()) {
                 gc.setFill(Color.RED);
-                drawIntersection(gc, scale, minX, minY, delivery.getTakeoutIntersection(), 2 * road_width, false); // Draw takeout point in red
+                drawIntersection(gc, scale, minX, minY, delivery.getTakeoutIntersection(), 3 * road_width, false); // Draw takeout point in red
                 gc.setFill(Color.BLUE);
-                drawIntersection(gc, scale, minX, minY, delivery.getDeliveryIntersection(), 2 * road_width, true); // Draw delivery point in blue
+                drawIntersection(gc, scale, minX, minY, delivery.getDeliveryIntersection(), 3 * road_width, true); // Draw delivery point in blue
             }
             // Draw warehouse point in green
             gc.setFill(Color.GREEN);
-            drawIntersection(gc, scale, minX, minY, deliveriesDemand.getStore(), 2 * road_width, true);
+            drawIntersection(gc, scale, minX, minY, deliveriesDemand.getStore(), 5 * road_width, true);
         }
     }
 

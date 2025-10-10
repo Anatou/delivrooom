@@ -19,9 +19,11 @@ public class DeliveriesLoadedState implements State {
     @Override
     public void openMapFile(File file) {
         if (file != null && file.exists()) {
-            controller.loadMapFile(file);
-            // Transition back to MapLoadedState since deliveries need to be reloaded
-            controller.setState(new MapLoadedState(controller));
+            try {
+                controller.loadMapFile(file.toURI().toURL());
+            } catch (Exception e) {
+                showError("Error loading map file", e.getMessage());
+            }
         } else {
             showError("Invalid map file", "Please select a valid map file.");
         }
@@ -30,8 +32,11 @@ public class DeliveriesLoadedState implements State {
     @Override
     public void openDeliveriesFile(File file) {
         if (file != null && file.exists()) {
-            controller.loadDeliveriesFile(file);
-            // Stay in DeliveriesLoadedState
+            try {
+                controller.loadDeliveriesFile(file.toURI().toURL());
+            } catch (Exception e) {
+                showError("Error loading deliveries file", e.getMessage());
+            }
         } else {
             showError("Invalid deliveries file", "Please select a valid deliveries file.");
         }
