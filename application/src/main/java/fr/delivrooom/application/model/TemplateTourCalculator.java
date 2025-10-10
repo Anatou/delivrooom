@@ -12,6 +12,8 @@ public class TemplateTourCalculator implements TourCalculator{
         this.graph = g;
     }
 
+    public Graphe getGraph() { return graph; }
+
     @Override
     public void findOptimalTour(DeliveriesDemand demand) {
         // first : find all shortest paths between any pair of nodes in the graph
@@ -33,10 +35,14 @@ public class TemplateTourCalculator implements TourCalculator{
         if (targets.size() > 1) {
             throw new RuntimeException("Only single-target search is currently implemented");
         }
-        return TargetedDijkstraSearch(startIntersectionId, targets);
+        return targetedDijkstraSearch(startIntersectionId, targets);
     }
 
-    protected HashMap<Long, Path> TargetedDijkstraSearch(long startIntersectionId, HashSet<Long> targets) throws RuntimeException {
+    public HashMap<Long, Path> targetedDijkstraSearchTest(long startIntersectionId, HashSet<Long> targets) throws RuntimeException {
+        return this.targetedDijkstraSearch(startIntersectionId, targets);
+    }
+
+    protected HashMap<Long, Path> targetedDijkstraSearch(long startIntersectionId, HashSet<Long> targets) throws RuntimeException {
         //
         int n = graph.getNbSommets();
         HashMap<Long, Float> distances = new HashMap<Long, Float>();

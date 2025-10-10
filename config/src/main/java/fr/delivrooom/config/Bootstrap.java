@@ -42,6 +42,4 @@ public class Bootstrap {
         JavaFXApp.launchGUI(getNameService, guiService, configService);
 
     }
-
-
 }
