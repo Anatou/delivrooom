@@ -8,11 +8,11 @@ Follow the conventional commits specification listed [here](https://www.conventi
 
 ## Setup
 
-Clone the config file `adapter/src/main/resources/config.properties.template` to `adapter/src/main/resources/config.properties` and fill it with your
+Clone the config file `config/src/main/resources/config.properties.template` to `config/src/main/resources/config.properties` and fill it with your
 own values.
 
 ```bash
-cp adapter/src/main/resources/config.properties.template adapter/src/main/resources/config.properties
+cp config/src/main/resources/config.properties.template config/src/main/resources/config.properties
 ```
 
 ## Run

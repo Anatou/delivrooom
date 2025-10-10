@@ -1,15 +1,12 @@
 package fr.delivrooom.adapter.in.javafxgui;
 
-import fr.delivrooom.adapter.out.XMLCityMapLoader;
 import fr.delivrooom.application.model.*;
 import javafx.beans.InvalidationListener;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import org.controlsfx.control.tableview2.filter.filtereditor.SouthFilter;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -19,6 +16,9 @@ public class MapCanvas extends StackPane {
     private final MapTileLoader tileLoader;
     private final Canvas tileCanvas = new Canvas();
     private final Canvas overlayCanvas = new Canvas();
+
+    private CityMap currentCityMap;
+    private DeliveriesDemand currentDeliveriesDemand;
 
     public MapCanvas() {
         tileLoader = new MapTileLoader();
@@ -31,12 +31,6 @@ public class MapCanvas extends StackPane {
     }
 
     private void setupCanvas() {
-        URL cityMapURL = XMLCityMapLoader.class.getResource("/xml/grandPlan.xml");
-        URL deliveriesURL = XMLCityMapLoader.class.getResource("/xml/demandeGrand7.xml");
-        CityMap cityMap = JavaFXApp.guiUseCase().getCityMap(cityMapURL);
-        DeliveriesDemand deliveriesDemand = JavaFXApp.guiUseCase().getDeliveriesDemand(cityMap, deliveriesURL);
-
-
         InvalidationListener canvasResizeListener = (o) -> {
             if (getWidth() == 0 || getHeight() == 0) {
                 return;
@@ -47,10 +41,27 @@ public class MapCanvas extends StackPane {
             overlayCanvas.setWidth(getWidth());
             overlayCanvas.setHeight(getHeight());
 
-            drawMap(getWidth(), getHeight(), cityMap, deliveriesDemand);
+            if (currentCityMap != null) {
+                drawMap(getWidth(), getHeight(), currentCityMap, currentDeliveriesDemand);
+            }
         };
         widthProperty().addListener(canvasResizeListener);
         heightProperty().addListener(canvasResizeListener);
+    }
+
+    /**
+     * Update the map with new data from the controller.
+     *
+     * @param cityMap          The city map to display (required)
+     * @param deliveriesDemand The deliveries to display (optional, can be null)
+     */
+    public void updateMap(CityMap cityMap, DeliveriesDemand deliveriesDemand) {
+        this.currentCityMap = cityMap;
+        this.currentDeliveriesDemand = deliveriesDemand;
+
+        if (getWidth() > 0 && getHeight() > 0) {
+            drawMap(getWidth(), getHeight(), cityMap, deliveriesDemand);
+        }
     }
 
 
@@ -140,16 +151,20 @@ public class MapCanvas extends StackPane {
         for (Intersection intersection : cityMap.getIntersections().values()) {
             drawIntersection(gc, scale, minX, minY, intersection, 1.3 * road_width, true);
         }
-        // Takeout point is a red square, delivery point in blue circle
-        for (Delivery delivery : deliveriesDemand.getDeliveries()) {
-            gc.setFill(Color.RED);
-            drawIntersection(gc, scale, minX, minY, delivery.getTakeoutIntersection(), 2 * road_width, false); // Draw takeout point in red
-            gc.setFill(Color.BLUE);
-            drawIntersection(gc, scale, minX, minY, delivery.getDeliveryIntersection(), 2 * road_width, true); // Draw delivery point in blue
+
+        // Only draw deliveries if they are loaded
+        if (deliveriesDemand != null) {
+            // Takeout point is a red square, delivery point in blue circle
+            for (Delivery delivery : deliveriesDemand.getDeliveries()) {
+                gc.setFill(Color.RED);
+                drawIntersection(gc, scale, minX, minY, delivery.getTakeoutIntersection(), 2 * road_width, false); // Draw takeout point in red
+                gc.setFill(Color.BLUE);
+                drawIntersection(gc, scale, minX, minY, delivery.getDeliveryIntersection(), 2 * road_width, true); // Draw delivery point in blue
+            }
+            // Draw warehouse point in green
+            gc.setFill(Color.GREEN);
+            drawIntersection(gc, scale, minX, minY, deliveriesDemand.getStore(), 2 * road_width, true);
         }
-        // Draw warehouse point in green
-        gc.setFill(Color.GREEN);
-        drawIntersection(gc, scale, minX, minY, deliveriesDemand.getStore(), 2 * road_width, true);
     }
 
     private void drawIntersection(GraphicsContext gc, double scale, double minX, double minY, Intersection intersection, double radius, boolean circle) {
