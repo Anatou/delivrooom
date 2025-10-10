@@ -20,4 +20,12 @@ public class CityMap {
     public HashMap<Long, HashMap<Long, Road>> getRoads() {
         return roads;
     }
+
+    public boolean HasRoad(long origin, long destination) {
+        return (roads.containsKey(origin) && roads.get(origin).containsKey(destination));
+    }
+
+    public Road getRoad(long origin, long destination) {
+        return  roads.get(origin).get(destination);
+    }
 }
