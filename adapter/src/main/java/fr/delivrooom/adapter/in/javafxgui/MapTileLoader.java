@@ -20,6 +20,7 @@ public class MapTileLoader {
     private final Map<String, CompletableFuture<Image>> pendingTiles = new ConcurrentHashMap<>();
 
     public MapTileLoader() {
+        System.out.println("Loaded MapTileLoader with maptiler url: " + MAPTILER_URL);
     }
 
     /**
