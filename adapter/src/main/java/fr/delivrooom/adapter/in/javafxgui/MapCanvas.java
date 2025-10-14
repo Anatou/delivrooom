@@ -4,12 +4,18 @@ import fr.delivrooom.application.model.*;
 import javafx.beans.InvalidationListener;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+import javafx.scene.Cursor;
 
+import javafx.scene.control.Label;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import atlantafx.base.controls.Popover;
 
 public class MapCanvas extends StackPane {
 
@@ -17,6 +23,9 @@ public class MapCanvas extends StackPane {
     private final MapTileLoader tileLoader;
     private final Canvas tileCanvas = new Canvas();
     private final Canvas overlayCanvas = new Canvas();
+
+    private final Pane interactiveLayer = new Pane();
+
 
     private CityMap currentCityMap;
     private DeliveriesDemand currentDeliveriesDemand;
@@ -28,7 +37,7 @@ public class MapCanvas extends StackPane {
         setStyle("-fx-background-color: #8D8E7F;");
         setMinSize(0, 0);
 
-        getChildren().addAll(tileCanvas, overlayCanvas);
+        getChildren().addAll(tileCanvas, overlayCanvas,interactiveLayer);
         setupCanvas();
     }
 
@@ -176,6 +185,42 @@ public class MapCanvas extends StackPane {
                 drawIntersection(gc, scale, minX, minY, delivery.getTakeoutIntersection(), 3 * road_width, false); // Draw takeout point in red
                 gc.setFill(Color.BLUE);
                 drawIntersection(gc, scale, minX, minY, delivery.getDeliveryIntersection(), 3 * road_width, true); // Draw delivery point in blue
+
+                // Add interactive circle over delivery point
+                Intersection deliveryIntersection = delivery.getDeliveryIntersection();
+                double deliveryX = (deliveryIntersection.getNormalizedX() - minX) * scale;
+                double deliveryY = (deliveryIntersection.getNormalizedY() - minY) * scale;
+                double radius = 3;
+
+                Circle deliveryCircle = new Circle(deliveryX, deliveryY, radius, Color.TRANSPARENT);
+                deliveryCircle.setStroke(Color.TRANSPARENT);
+                deliveryCircle.setStrokeWidth(2);
+                deliveryCircle.setCursor(Cursor.HAND);
+
+                deliveryCircle.setOnMouseClicked(event -> {
+                    Label content = new Label("Delivery ID : " + deliveryIntersection.getId());
+                    Popover popover = new Popover(content);
+                    popover.setArrowLocation(Popover.ArrowLocation.TOP_CENTER);
+                    popover.show(deliveryCircle, event.getScreenX(), event.getScreenY());
+                });
+                interactiveLayer.getChildren().add(deliveryCircle);
+
+                Intersection pickupIntersection = delivery.getTakeoutIntersection();
+                double pickupX = (pickupIntersection.getNormalizedX() - minX) * scale;
+                double pickupY = (pickupIntersection.getNormalizedY() - minY) * scale;
+
+                Circle pickupCircle = new Circle(pickupX, pickupY, radius, Color.TRANSPARENT);
+                pickupCircle.setStroke(Color.TRANSPARENT);
+                pickupCircle.setStrokeWidth(2);
+                pickupCircle.setCursor(Cursor.HAND);
+
+                pickupCircle.setOnMouseClicked(event -> {
+                    Label content = new Label("Pickup ID : " + pickupIntersection.getId());
+                    Popover popover = new Popover(content);
+                    popover.setArrowLocation(Popover.ArrowLocation.TOP_CENTER);
+                    popover.show(pickupCircle, event.getScreenX(), event.getScreenY());
+                });
+                interactiveLayer.getChildren().add(pickupCircle);
             }
             // Draw warehouse point in green
             gc.setFill(Color.GREEN);
