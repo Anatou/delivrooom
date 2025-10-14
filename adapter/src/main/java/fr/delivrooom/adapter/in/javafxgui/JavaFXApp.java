@@ -37,13 +37,11 @@ public class JavaFXApp extends javafx.application.Application {
     public void start(Stage stage) {
         MainPane mainPane = new MainPane();
 
-        // Set the stage reference for file chooser dialogs
-        mainPane.setStage(stage);
-
         setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
 
         stage.setTitle("Delivrooom");
         stage.setScene(new Scene(mainPane, 800, 500));
+        mainPane.setStageAndScene(stage, stage.getScene());
         stage.show();
     }
 }

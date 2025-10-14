@@ -2,12 +2,13 @@ package fr.delivrooom.adapter.in.javafxgui.controller;
 
 import fr.delivrooom.adapter.in.javafxgui.JavaFXApp;
 import fr.delivrooom.adapter.in.javafxgui.MapCanvas;
+import fr.delivrooom.adapter.out.XMLCityMapLoader;
 import fr.delivrooom.application.model.CityMap;
 import fr.delivrooom.application.model.DeliveriesDemand;
 import javafx.scene.control.Alert;
 
 import java.io.File;
-import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * Main application controller implementing the State design pattern.
@@ -69,17 +70,17 @@ public class AppController {
      * Load a map file using the application service.
      * Called by state implementations.
      *
-     * @param file The map file to load
+     * @param url The map url to load
      */
-    protected void loadMapFile(File file) {
+    protected void loadMapFile(URL url) {
         try {
-            this.cityMap = JavaFXApp.guiUseCase().getCityMap(file.toURI().toURL());
+            this.cityMap = JavaFXApp.guiUseCase().getCityMap(url);
             this.deliveriesDemand = null; // Clear deliveries when loading new map
             updateMapCanvas();
-            System.out.println("Map loaded successfully: " + file.getName());
-        } catch (MalformedURLException e) {
+            System.out.println("Map loaded successfully: " + url);
+        } catch (Exception e) {
             System.err.println("Error loading map file: " + e.getMessage());
-            e.printStackTrace();
+            showError("An error occurred", e.getMessage());
         }
     }
 
@@ -87,23 +88,16 @@ public class AppController {
      * Load a deliveries file using the application service.
      * Called by state implementations.
      *
-     * @param file The deliveries file to load
+     * @param url The deliveries file to load
      */
-    protected void loadDeliveriesFile(File file) {
-        if (cityMap == null) {
-            System.err.println("Cannot load deliveries without a map");
-            return;
-        }
-
+    protected void loadDeliveriesFile(URL url) {
         try {
-            this.deliveriesDemand = JavaFXApp.guiUseCase().getDeliveriesDemand(cityMap, file.toURI().toURL());
+            this.deliveriesDemand = JavaFXApp.guiUseCase().getDeliveriesDemand(cityMap, url);
             updateMapCanvas();
-            System.out.println("Deliveries loaded successfully: " + file.getName());
-        }
-        catch (Exception e) {
-            System.err.println("Error processing deliveries file: " + e.getMessage());
-            e.printStackTrace();
-            showError("error", e.getMessage());
+            System.out.println("Deliveries loaded successfully: " + url);
+        } catch (Exception e) {
+            System.err.println("Error loading deliveries file: " + e.getMessage());
+            showError("An error occurred", e.getMessage());
         }
     }
 
@@ -152,5 +146,12 @@ public class AppController {
      */
     public DeliveriesDemand getDeliveriesDemand() {
         return deliveriesDemand;
+    }
+
+    public void handleLoadDefaultFiles() {
+        URL cityMapURL = XMLCityMapLoader.class.getResource("/xml/grandPlan.xml");
+        URL deliveriesURL = XMLCityMapLoader.class.getResource("/xml/demandeGrand7.xml");
+        loadMapFile(cityMapURL);
+        loadDeliveriesFile(deliveriesURL);
     }
 }

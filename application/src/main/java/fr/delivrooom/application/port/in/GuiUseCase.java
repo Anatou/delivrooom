@@ -7,8 +7,8 @@ import fr.delivrooom.application.model.TourSolution;
 import java.net.URL;
 
 public interface GuiUseCase {
-    CityMap getCityMap(URL mapURL);
+    CityMap getCityMap(URL mapURL) throws Exception;
 
-    DeliveriesDemand getDeliveriesDemand(CityMap cityMapURL, URL deliveriesURL);
+    DeliveriesDemand getDeliveriesDemand(CityMap cityMapURL, URL deliveriesURL) throws Exception;
     TourSolution getTourSolution();
 }
