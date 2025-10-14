@@ -85,14 +85,18 @@ public class MapCanvas extends StackPane {
         double maxY = cityMap.getIntersections().values().stream().mapToDouble(Intersection::getNormalizedY).max().orElse(1) + padding;
 
         // Calculate scale factor between normalized coordinates and canvas coordinates
-        double scale = Math.min(width / (maxX - minX), height / (maxY - minY));
+        double scale;
+        double scaleByWidth = width / (maxX - minX);
+        double scaleByHeight = height / (maxY - minY);
 
         // Center the map on the canvas by editing the min/max coordinates on the non-restricting axis
-        if (width / scale > maxX - minX) {
+        if (scaleByHeight < scaleByWidth) {
+            scale = scaleByHeight;
             double extraX = (width / scale - (maxX - minX)) / 2;
             minX -= extraX;
             maxX += extraX;
-        } else if (height / scale > maxY - minY) {
+        } else {
+            scale = scaleByWidth;
             double extraY = (height / scale - (maxY - minY)) / 2;
             minY -= extraY;
             maxY += extraY;
