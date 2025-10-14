@@ -4,19 +4,19 @@ import java.util.List;
 
 public class TourSolution {
     protected List<Path> paths;
-    protected float totalLentgh;
+    protected float totalLength;
 
-    public TourSolution(List<Path> paths, float totalLentgh) {
+    public TourSolution(List<Path> paths, float totalLength) {
         this.paths = paths;
-        this.totalLentgh = totalLentgh;
+        this.totalLength = totalLength;
     }
 
     public List<Path> getPaths() {
         return paths;
     }
 
-    public float getTotalLentgh() {
-        return totalLentgh;
+    public float getTotalLength() {
+        return totalLength;
     }
 }
 

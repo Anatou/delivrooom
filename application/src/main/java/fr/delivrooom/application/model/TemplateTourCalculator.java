@@ -5,10 +5,13 @@ import java.util.*;
 public class TemplateTourCalculator implements TourCalculator{
 
     protected CityGraph graph;
+    protected TourSolution tourSolution;
+    protected DeliveriesDemand calculatedDemand;
 
     public TemplateTourCalculator(CityGraph g) {
         // create a Tour calculator with a graph
         this.graph = g;
+        this.tourSolution = null;
     }
 
     public Graphe getGraph() { return graph; }
@@ -16,16 +19,24 @@ public class TemplateTourCalculator implements TourCalculator{
     @Override
     public void findOptimalTour(DeliveriesDemand demand) {
         // first : find all shortest paths between any pair of nodes in the graph
+        if (tourSolution == null || !calculatedDemand.equals(demand)) {
+            // faire le dijkstra
+        }
+        // todo: recalculate only the needed deliveries
     }
 
     @Override
     public TourSolution getOptimalTour() {
-        return null;
+        return tourSolution;
     }
 
     @Override
     public float getTourLength() {
-        return 0;
+        if (tourSolution != null) {
+            return tourSolution.getTotalLength();
+        } else {
+            return  -1f;
+        }
     }
 
     protected HashMap<Long, Path> findShortestPaths(long startIntersectionId , HashSet<Long> targets) {
