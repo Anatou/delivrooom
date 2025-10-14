@@ -36,6 +36,7 @@ public class MapTileLoader {
         // Return the cached tile if available
         if (tileCache.containsKey(tileKey)) {
             onLoad.accept(tileCache.get(tileKey));
+            return tileKey;
         }
         // If the tile is already being loaded, return null
         if (pendingTiles.containsKey(tileKey)) {
@@ -45,7 +46,6 @@ public class MapTileLoader {
         loadTileAsync(tileKey, onLoad);
         return tileKey;
     }
-
     /**
      * Load a tile asynchronously
      */
