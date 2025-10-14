@@ -2,17 +2,24 @@ package fr.delivrooom.adapter.in.javafxgui;
 
 import fr.delivrooom.application.model.*;
 import javafx.beans.InvalidationListener;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Button;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import org.kordamp.ikonli.fontawesome6.FontAwesomeSolid;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class MapCanvas extends StackPane {
 
-    private static final int ZOOM_LEVEL = JavaFXApp.getConfigPropertyUseCase().getIntProperty("maptiler.zoom.level", 14);
     private final MapTileLoader tileLoader;
     private final Canvas tileCanvas = new Canvas();
     private final Canvas overlayCanvas = new Canvas();
@@ -20,14 +27,29 @@ public class MapCanvas extends StackPane {
     private CityMap currentCityMap;
     private DeliveriesDemand currentDeliveriesDemand;
 
+    private static final double TILE_SIZE_PX = 256.0;
+    private static final double ZOOM_STEP = 1.5;
+    // Zoom config
+    private final double ZOOM_SCALE_FACTOR; // tunable factor between canvas scale and tile zoom level
+    // View state
+    private boolean autoFraming = true;
+    private double manualScale = 1.0;      // pixels per normalized unit
+    private double manualMinX = 0.0;       // normalized coord of left
+    private double manualMinY = 0.0;       // normalized coord of top
+    private double lastMouseX;
+    private double lastMouseY;
+    private boolean dragging = false;
+
     public MapCanvas() {
         tileLoader = new MapTileLoader();
+        ZOOM_SCALE_FACTOR = JavaFXApp.getConfigPropertyUseCase().getDoubleProperty("map.zoom.scaleFactor", 1.0);
 
         setStyle("-fx-background-color: #8D8E7F;");
         setMinSize(0, 0);
 
         getChildren().addAll(tileCanvas, overlayCanvas);
         setupCanvas();
+        setupControlsAndInteractions();
     }
 
     private void setupCanvas() {
@@ -42,11 +64,109 @@ public class MapCanvas extends StackPane {
             overlayCanvas.setHeight(getHeight());
 
             if (currentCityMap != null) {
-                drawMap(getWidth(), getHeight(), currentCityMap, currentDeliveriesDemand);
+                drawMap(currentCityMap, currentDeliveriesDemand);
             }
         };
         widthProperty().addListener(canvasResizeListener);
         heightProperty().addListener(canvasResizeListener);
+    }
+
+    private void setupControlsAndInteractions() {
+        // Controls
+        Button zoomInBtn = new Button("", new FontIcon(FontAwesomeSolid.PLUS));
+        Button zoomOutBtn = new Button("", new FontIcon(FontAwesomeSolid.MINUS));
+        Button resetBtn = new Button("", new FontIcon(FontAwesomeSolid.EXPAND));
+
+
+        zoomInBtn.setOnAction(e -> {
+            if (currentCityMap == null) return;
+            ensureManualFromAuto();
+            zoomAt(getWidth() / 2.0, getHeight() / 2.0, ZOOM_STEP);
+        });
+        zoomOutBtn.setOnAction(e -> {
+            if (currentCityMap == null) return;
+            ensureManualFromAuto();
+            zoomAt(getWidth() / 2.0, getHeight() / 2.0, 1.0 / ZOOM_STEP);
+        });
+        resetBtn.setOnAction(e -> {
+            autoFraming = true;
+            redraw();
+        });
+
+        VBox controls = new VBox(5, zoomInBtn, zoomOutBtn, resetBtn);
+        StackPane.setAlignment(controls, Pos.BOTTOM_RIGHT);
+        StackPane.setMargin(controls, new Insets(10));
+        getChildren().add(controls);
+
+        // Mouse interactions
+        addEventHandler(ScrollEvent.SCROLL, e -> {
+            if (currentCityMap == null) return;
+            ensureManualFromAuto();
+            double factor = e.getDeltaY() > 0 ? Math.pow(ZOOM_STEP, 0.15) : 1.0 / Math.pow(ZOOM_STEP, 0.15);
+            zoomAt(e.getX(), e.getY(), factor);
+            e.consume();
+        });
+
+        addEventHandler(MouseEvent.MOUSE_PRESSED, e -> {
+            if (e.isPrimaryButtonDown()) {
+                lastMouseX = e.getX();
+                lastMouseY = e.getY();
+                dragging = true;
+            }
+        });
+
+        addEventHandler(MouseEvent.MOUSE_DRAGGED, e -> {
+            if (!dragging) return;
+            if (currentCityMap == null) return;
+            ensureManualFromAuto();
+            double dx = e.getX() - lastMouseX;
+            double dy = e.getY() - lastMouseY;
+            panByPixels(dx, dy);
+            lastMouseX = e.getX();
+            lastMouseY = e.getY();
+            e.consume();
+        });
+
+        addEventHandler(MouseEvent.MOUSE_RELEASED, e -> dragging = false);
+    }
+
+    private void ensureManualFromAuto() {
+        if (!autoFraming) return;
+        if (currentCityMap == null || getWidth() == 0 || getHeight() == 0) return;
+        AutoView v = computeAutoView(getWidth(), getHeight(), currentCityMap);
+        manualScale = v.scale;
+        manualMinX = v.minX;
+        manualMinY = v.minY;
+        autoFraming = false;
+    }
+
+    private void panByPixels(double dx, double dy) {
+        // Move the view so the content follows the cursor
+        manualMinX -= dx / manualScale;
+        manualMinY -= dy / manualScale;
+        redraw();
+    }
+
+    private void zoomAt(double canvasX, double canvasY, double factor) {
+        double oldScale = manualScale;
+        double newScale = oldScale * factor;
+        if (newScale < 1e-12) newScale = 1e-12;
+
+        // Keep the world point under the cursor fixed
+        double worldX = manualMinX + canvasX / oldScale;
+        double worldY = manualMinY + canvasY / oldScale;
+
+        manualScale = newScale;
+        manualMinX = worldX - canvasX / newScale;
+        manualMinY = worldY - canvasY / newScale;
+
+        redraw();
+    }
+
+    private void redraw() {
+        if (currentCityMap != null && getWidth() > 0 && getHeight() > 0) {
+            drawMap(currentCityMap, currentDeliveriesDemand);
+        }
     }
 
     /**
@@ -59,13 +179,15 @@ public class MapCanvas extends StackPane {
         this.currentCityMap = cityMap;
         this.currentDeliveriesDemand = deliveriesDemand;
 
+        // Reset to automatic framing whenever data changes
+        autoFraming = true;
+
         if (getWidth() > 0 && getHeight() > 0) {
-            drawMap(getWidth(), getHeight(), cityMap, deliveriesDemand);
+            drawMap(cityMap, deliveriesDemand);
         }
     }
 
-
-    private void drawMap(double width, double height, CityMap cityMap, DeliveriesDemand deliveriesDemand) {
+    private AutoView computeAutoView(double width, double height, CityMap cityMap) {
         double padding = 30e-7; // Paddings depend on the map scale
         double minX = cityMap.getIntersections().values().stream().mapToDouble(Intersection::getNormalizedX).min().orElse(0) - padding;
         double maxX = cityMap.getIntersections().values().stream().mapToDouble(Intersection::getNormalizedX).max().orElse(1) + padding;
@@ -89,16 +211,58 @@ public class MapCanvas extends StackPane {
             minY -= extraY;
             maxY += extraY;
         }
+        AutoView v = new AutoView();
+        v.minX = minX;
+        v.minY = minY;
+        v.maxX = maxX;
+        v.maxY = maxY;
+        v.scale = scale;
+        return v;
+    }
+
+    private void drawMap(CityMap cityMap, DeliveriesDemand deliveriesDemand) {
+        double minX;
+        double minY;
+        double maxX;
+        double maxY;
+        double scale;
+
+        if (autoFraming) {
+            AutoView v = computeAutoView(getWidth(), getHeight(), cityMap);
+            minX = v.minX;
+            minY = v.minY;
+            maxX = v.maxX;
+            maxY = v.maxY;
+            scale = v.scale;
+        } else {
+            scale = manualScale;
+            minX = manualMinX;
+            minY = manualMinY;
+            maxX = minX + getWidth() / scale;
+            maxY = minY + getHeight() / scale;
+        }
 
         GraphicsContext gcTiles = tileCanvas.getGraphicsContext2D();
         GraphicsContext gcOverlay = overlayCanvas.getGraphicsContext2D();
 
+        // Clear canvases
+        gcTiles.clearRect(0, 0, getWidth(), getHeight());
+        gcOverlay.clearRect(0, 0, getWidth(), getHeight());
+
         drawTiles(gcTiles, scale, minX, maxX, minY, maxY);
-        drawOverlay(gcOverlay, width, height, cityMap, deliveriesDemand, scale, minX, minY);
+        drawOverlay(gcOverlay, getWidth(), getHeight(), cityMap, deliveriesDemand, scale, minX, minY);
+    }
+
+    private int computeZoomLevel(double scale) {
+        double z = Math.log(scale / (TILE_SIZE_PX * ZOOM_SCALE_FACTOR)) / Math.log(2);
+        int zi = (int) Math.round(z);
+        if (zi < 0) zi = 0;
+        if (zi > 22) zi = 22;
+        return zi;
     }
 
     private void drawTiles(GraphicsContext gc, double scale, double minX, double maxX, double minY, double maxY) {
-        int zoomLevel = ZOOM_LEVEL;
+        int zoomLevel = computeZoomLevel(scale);
         int tilesPerSide = (int) Math.pow(2, zoomLevel);
 
         int minTileX = (int) Math.floor(minX * tilesPerSide);
@@ -106,10 +270,16 @@ public class MapCanvas extends StackPane {
         int minTileY = (int) Math.floor(minY * tilesPerSide);
         int maxTileY = (int) Math.floor(maxY * tilesPerSide);
 
+        // Clamp to valid tile index range
+        int startX = Math.max(0, minTileX);
+        int endX = Math.min(tilesPerSide - 1, maxTileX);
+        int startY = Math.max(0, minTileY);
+        int endY = Math.min(tilesPerSide - 1, maxTileY);
+
         ArrayList<String> requestedTiles = new ArrayList<>();
 
-        for (int tileX = minTileX; tileX <= maxTileX; tileX++) {
-            for (int tileY = minTileY; tileY <= maxTileY; tileY++) {
+        for (int tileX = startX; tileX <= endX; tileX++) {
+            for (int tileY = startY; tileY <= endY; tileY++) {
                 final int finalTileX = tileX;
                 final int finalTileY = tileY;
 
@@ -139,8 +309,7 @@ public class MapCanvas extends StackPane {
     private void drawOverlay(GraphicsContext gc, double width, double height, CityMap cityMap, DeliveriesDemand deliveriesDemand, double scale, double minX, double minY) {
         double road_width = 2e-7 * scale; // Road width depends on the map scale
 
-        // Clear canvas
-        gc.clearRect(0, 0, width, height);
+        // Clear canvas (already cleared in drawMap)
         // Draw roads
         gc.setStroke(Color.rgb(220, 220, 220));
         gc.setLineWidth(road_width);
@@ -193,4 +362,11 @@ public class MapCanvas extends StackPane {
         gc.strokeLine(x1, y1, x2, y2);
     }
 
+    private static class AutoView {
+        double minX;
+        double minY;
+        double maxX;
+        double maxY;
+        double scale;
+    }
 }
