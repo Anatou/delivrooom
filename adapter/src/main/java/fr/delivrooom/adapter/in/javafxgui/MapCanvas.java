@@ -1,38 +1,36 @@
 package fr.delivrooom.adapter.in.javafxgui;
 
+import atlantafx.base.controls.Popover;
 import fr.delivrooom.application.model.*;
 import javafx.beans.InvalidationListener;
 import javafx.geometry.Insets;
+import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
+import javafx.scene.Cursor;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.layout.Pane;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.scene.Cursor;
+import org.controlsfx.control.PopOver;
 import org.kordamp.ikonli.fontawesome6.FontAwesomeSolid;
 import org.kordamp.ikonli.javafx.FontIcon;
 
-import javafx.scene.control.Label;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import atlantafx.base.controls.Popover;
-
 public class MapCanvas extends StackPane {
-
-    private static final int ZOOM_LEVEL = JavaFXApp.getConfigPropertyUseCase().getIntProperty("maptiler.zoom.level", 14);
     private final MapTileLoader tileLoader;
     private final Canvas tileCanvas = new Canvas();
     private final Canvas overlayCanvas = new Canvas();
-
     private final Pane interactiveLayer = new Pane();
-
+    private final Pane controlsPane = new Pane();
 
     private CityMap currentCityMap;
     private DeliveriesDemand currentDeliveriesDemand;
@@ -57,9 +55,9 @@ public class MapCanvas extends StackPane {
         setStyle("-fx-background-color: #8D8E7F;");
         setMinSize(0, 0);
 
-        getChildren().addAll(tileCanvas, overlayCanvas, interactiveLayer);
+        getChildren().addAll(tileCanvas, overlayCanvas, interactiveLayer, controlsPane);
         setupCanvas();
-        setupControlsAndInteractions();
+        setupControls();
     }
 
     private void setupCanvas() {
@@ -67,25 +65,30 @@ public class MapCanvas extends StackPane {
             if (getWidth() == 0 || getHeight() == 0) {
                 return;
             }
-
             tileCanvas.setWidth(getWidth());
             tileCanvas.setHeight(getHeight());
             overlayCanvas.setWidth(getWidth());
             overlayCanvas.setHeight(getHeight());
-
-            if (currentCityMap != null) {
-                drawMap(currentCityMap, currentDeliveriesDemand);
-            }
+            drawMap();
         };
         widthProperty().addListener(canvasResizeListener);
         heightProperty().addListener(canvasResizeListener);
     }
 
-    private void setupControlsAndInteractions() {
+    private void setupControls() {
+        // Controls not visible by default
+        controlsPane.setVisible(false);
+
         // Controls
         Button zoomInBtn = new Button("", new FontIcon(FontAwesomeSolid.PLUS));
         Button zoomOutBtn = new Button("", new FontIcon(FontAwesomeSolid.MINUS));
         Button resetBtn = new Button("", new FontIcon(FontAwesomeSolid.EXPAND));
+        zoomInBtn.setPadding(new Insets(0));
+        zoomInBtn.setMinSize(30, 30);
+        zoomOutBtn.setPadding(new Insets(0));
+        zoomOutBtn.setMinSize(30, 30);
+        resetBtn.setPadding(new Insets(0));
+        resetBtn.setMinSize(30, 30);
 
 
         zoomInBtn.setOnAction(e -> {
@@ -104,9 +107,11 @@ public class MapCanvas extends StackPane {
         });
 
         VBox controls = new VBox(5, zoomInBtn, zoomOutBtn, resetBtn);
-        StackPane.setAlignment(controls, Pos.BOTTOM_RIGHT);
-        StackPane.setMargin(controls, new Insets(10));
-        getChildren().add(controls);
+
+        StackPane.setAlignment(controlsPane, Pos.TOP_RIGHT);
+        StackPane.setMargin(controlsPane, new Insets(10));
+        controlsPane.setMaxSize(30, 0);
+        controlsPane.getChildren().setAll(controls);
 
         // Mouse interactions
         addEventHandler(ScrollEvent.SCROLL, e -> {
@@ -174,8 +179,8 @@ public class MapCanvas extends StackPane {
     }
 
     private void redraw() {
-        if (currentCityMap != null && getWidth() > 0 && getHeight() > 0) {
-            drawMap(currentCityMap, currentDeliveriesDemand);
+        if (getWidth() > 0 && getHeight() > 0) {
+            drawMap();
         }
     }
 
@@ -189,11 +194,9 @@ public class MapCanvas extends StackPane {
         this.currentCityMap = cityMap;
         this.currentDeliveriesDemand = deliveriesDemand;
 
-        // Reset to automatic framing whenever data changes
         autoFraming = true;
-
         if (getWidth() > 0 && getHeight() > 0) {
-            drawMap(cityMap, deliveriesDemand);
+            drawMap();
         }
     }
 
@@ -230,15 +233,27 @@ public class MapCanvas extends StackPane {
         return v;
     }
 
-    private void drawMap(CityMap cityMap, DeliveriesDemand deliveriesDemand) {
+    private void drawMap() {
+        GraphicsContext gcTiles = tileCanvas.getGraphicsContext2D();
+        GraphicsContext gcOverlay = overlayCanvas.getGraphicsContext2D();
+
+        // Clear canvases
+        gcTiles.clearRect(0, 0, getWidth(), getHeight());
+        gcOverlay.clearRect(0, 0, getWidth(), getHeight());
+        interactiveLayer.getChildren().clear();
+        controlsPane.setVisible(currentCityMap != null);
+
+        // Return if no city map is loaded
+        if (currentCityMap == null) return;
+
+        // Compute visible area
         double minX;
         double minY;
         double maxX;
         double maxY;
         double scale;
-
         if (autoFraming) {
-            AutoView v = computeAutoView(getWidth(), getHeight(), cityMap);
+            AutoView v = computeAutoView(getWidth(), getHeight(), currentCityMap);
             minX = v.minX;
             minY = v.minY;
             maxX = v.maxX;
@@ -252,15 +267,10 @@ public class MapCanvas extends StackPane {
             maxY = minY + getHeight() / scale;
         }
 
-        GraphicsContext gcTiles = tileCanvas.getGraphicsContext2D();
-        GraphicsContext gcOverlay = overlayCanvas.getGraphicsContext2D();
-
-        // Clear canvases
-        gcTiles.clearRect(0, 0, getWidth(), getHeight());
-        gcOverlay.clearRect(0, 0, getWidth(), getHeight());
-
+        // Update tiles and overlay
         drawTiles(gcTiles, scale, minX, maxX, minY, maxY);
-        drawOverlay(gcOverlay, getWidth(), getHeight(), cityMap, deliveriesDemand, scale, minX, minY);
+        drawOverlay(gcOverlay, scale, minX, minY);
+        updateInteractiveLayer(scale, minX, minY);
     }
 
     private int computeZoomLevel(double scale) {
@@ -316,14 +326,13 @@ public class MapCanvas extends StackPane {
         tileLoader.cancelTilesRequestsNotIn(requestedTiles);
     }
 
-    private void drawOverlay(GraphicsContext gc, double width, double height, CityMap cityMap, DeliveriesDemand deliveriesDemand, double scale, double minX, double minY) {
+    private void drawOverlay(GraphicsContext gc, double scale, double minX, double minY) {
         double road_width = 2e-7 * scale; // Road width depends on the map scale
 
-        // Clear canvas (already cleared in drawMap)
         // Draw roads
         gc.setStroke(Color.rgb(220, 220, 220));
         gc.setLineWidth(road_width);
-        for (HashMap<Long, Road> subMap : cityMap.getRoads().values()) {
+        for (HashMap<Long, Road> subMap : currentCityMap.getRoads().values()) {
             for (Road road : subMap.values()) {
                 drawRoad(gc, scale, minX, minY, road);
             }
@@ -331,58 +340,65 @@ public class MapCanvas extends StackPane {
         // Draw intersections
         gc.setFill(Color.WHITE);
         gc.setStroke(Color.rgb(220, 220, 220));
-        for (Intersection intersection : cityMap.getIntersections().values()) {
+        for (Intersection intersection : currentCityMap.getIntersections().values()) {
             drawIntersection(gc, scale, minX, minY, intersection, 1.3 * road_width, true);
         }
 
-        // Only draw deliveries if they are loaded
-        if (deliveriesDemand != null) {
-            // Takeout point is a red square, delivery point in blue circle
-            for (Delivery delivery : deliveriesDemand.getDeliveries()) {
-                gc.setFill(Color.RED);
-                drawIntersection(gc, scale, minX, minY, delivery.getTakeoutIntersection(), 3 * road_width, false); // Draw takeout point in red
-                gc.setFill(Color.BLUE);
-                drawIntersection(gc, scale, minX, minY, delivery.getDeliveryIntersection(), 3 * road_width, true); // Draw delivery point in blue
+        // Draw deliveries demands
+        if (currentDeliveriesDemand != null) {
 
-                // Add interactive circle over delivery point
-                Intersection deliveryIntersection = delivery.getDeliveryIntersection();
-                double deliveryX = (deliveryIntersection.getNormalizedX() - minX) * scale;
-                double deliveryY = (deliveryIntersection.getNormalizedY() - minY) * scale;
-                double radius = 3;
-
-                Circle deliveryCircle = new Circle(deliveryX, deliveryY, radius, Color.TRANSPARENT);
-                deliveryCircle.setStroke(Color.TRANSPARENT);
-                deliveryCircle.setStrokeWidth(2);
-                deliveryCircle.setCursor(Cursor.HAND);
-
-                deliveryCircle.setOnMouseClicked(event -> {
-                    Label content = new Label("Delivery ID : " + deliveryIntersection.getId());
-                    Popover popover = new Popover(content);
-                    popover.setArrowLocation(Popover.ArrowLocation.TOP_CENTER);
-                    popover.show(deliveryCircle, event.getScreenX(), event.getScreenY());
-                });
-                interactiveLayer.getChildren().add(deliveryCircle);
-
-                Intersection pickupIntersection = delivery.getTakeoutIntersection();
-                double pickupX = (pickupIntersection.getNormalizedX() - minX) * scale;
-                double pickupY = (pickupIntersection.getNormalizedY() - minY) * scale;
-
-                Circle pickupCircle = new Circle(pickupX, pickupY, radius, Color.TRANSPARENT);
-                pickupCircle.setStroke(Color.TRANSPARENT);
-                pickupCircle.setStrokeWidth(2);
-                pickupCircle.setCursor(Cursor.HAND);
-
-                pickupCircle.setOnMouseClicked(event -> {
-                    Label content = new Label("Pickup ID : " + pickupIntersection.getId());
-                    Popover popover = new Popover(content);
-                    popover.setArrowLocation(Popover.ArrowLocation.TOP_CENTER);
-                    popover.show(pickupCircle, event.getScreenX(), event.getScreenY());
-                });
-                interactiveLayer.getChildren().add(pickupCircle);
-            }
             // Draw warehouse point in green
             gc.setFill(Color.GREEN);
-            drawIntersection(gc, scale, minX, minY, deliveriesDemand.getStore(), 5 * road_width, true);
+            drawIntersection(gc, scale, minX, minY, currentDeliveriesDemand.getStore(), 4 * road_width, true);
+
+            // Takeout point is a red square, delivery point in blue circle
+            for (Delivery delivery : currentDeliveriesDemand.getDeliveries()) {
+                gc.setFill(Color.RED);
+                drawIntersection(gc, scale, minX, minY, delivery.getTakeoutIntersection(), 4 * road_width, false);
+                gc.setFill(Color.BLUE);
+                drawIntersection(gc, scale, minX, minY, delivery.getDeliveryIntersection(), 4 * road_width, true);
+            }
+        }
+    }
+
+    private void updateInteractiveLayer(double scale, double minX, double minY) {
+        double road_width = 2e-7 * scale; // Road width depends on the map scale
+        if (currentDeliveriesDemand == null) return;
+
+        for (Delivery delivery : currentDeliveriesDemand.getDeliveries()) {
+            // Add interactive circle over delivery point
+            Intersection deliveryIntersection = delivery.getDeliveryIntersection();
+            double deliveryX = (deliveryIntersection.getNormalizedX() - minX) * scale;
+            double deliveryY = (deliveryIntersection.getNormalizedY() - minY) * scale;
+            double radius = 12 * road_width;
+
+            Circle deliveryCircle = new Circle(deliveryX, deliveryY, radius, Color.TRANSPARENT);
+            deliveryCircle.setCursor(Cursor.HAND);
+
+            deliveryCircle.setOnMouseClicked(event -> {
+                Label content = new Label("Delivery ID : " + deliveryIntersection.getId());
+                Popover popover = new Popover(content);
+                popover.setArrowLocation(Popover.ArrowLocation.TOP_CENTER);
+                Point2D screen = interactiveLayer.localToScreen(deliveryX, deliveryY);
+                popover.show(deliveryCircle, screen.getX() - 10, screen.getY());
+            });
+            interactiveLayer.getChildren().add(deliveryCircle);
+
+            Intersection pickupIntersection = delivery.getTakeoutIntersection();
+            double pickupX = (pickupIntersection.getNormalizedX() - minX) * scale;
+            double pickupY = (pickupIntersection.getNormalizedY() - minY) * scale;
+
+            Circle pickupCircle = new Circle(pickupX, pickupY, radius, Color.TRANSPARENT);
+            pickupCircle.setCursor(Cursor.HAND);
+
+            pickupCircle.setOnMouseClicked(event -> {
+                Label content = new Label("Pickup ID : " + pickupIntersection.getId());
+                PopOver popover = new PopOver(content);
+                popover.setArrowLocation(PopOver.ArrowLocation.TOP_CENTER);
+                Point2D screen = interactiveLayer.localToScreen(pickupX, pickupY);
+                popover.show(pickupCircle, screen.getX() - 10, screen.getY());
+            });
+            interactiveLayer.getChildren().add(pickupCircle);
         }
     }
 
