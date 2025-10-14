@@ -9,6 +9,7 @@ import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class MapCanvas extends StackPane {
 
@@ -19,6 +20,7 @@ public class MapCanvas extends StackPane {
 
     private CityMap currentCityMap;
     private DeliveriesDemand currentDeliveriesDemand;
+    private TourCalculator tourCalculator;
 
     public MapCanvas() {
         tileLoader = new MapTileLoader();
@@ -58,6 +60,17 @@ public class MapCanvas extends StackPane {
     public void updateMap(CityMap cityMap, DeliveriesDemand deliveriesDemand) {
         this.currentCityMap = cityMap;
         this.currentDeliveriesDemand = deliveriesDemand;
+
+        // Recalculate the tour only if the deliveries have changed (or if there was no previous calculation)
+        if (tourCalculator == null ){
+                CityGraph cityGraph = new CityGraph(cityMap);
+                tourCalculator = new TemplateTourCalculator(cityGraph);
+        }
+        if (tourCalculator.doesCalculatedTourNeedsToBeChanged(deliveriesDemand)) {
+            tourCalculator.findOptimalTour(deliveriesDemand);
+        }
+
+
 
         if (getWidth() > 0 && getHeight() > 0) {
             drawMap(getWidth(), getHeight(), cityMap, deliveriesDemand);
@@ -164,6 +177,19 @@ public class MapCanvas extends StackPane {
             // Draw warehouse point in green
             gc.setFill(Color.GREEN);
             drawIntersection(gc, scale, minX, minY, deliveriesDemand.getStore(), 5 * road_width, true);
+        }
+        // Draw calculated tour if available
+        if (tourCalculator != null && tourCalculator.getOptimalTour() != null) {
+            gc.setStroke(Color.ORANGE);
+            gc.setLineWidth(2 * road_width);
+            TourSolution tourSolution = tourCalculator.getOptimalTour();
+            for (Path path : tourSolution.getPaths()) {
+                List<Road> intersections = path.getIntersections();
+                for (Road road : intersections) {
+                    gc.setFill(Color.LIMEGREEN);
+                    drawRoad(gc, scale, minX, minY, road);
+                }
+            }
         }
     }
 

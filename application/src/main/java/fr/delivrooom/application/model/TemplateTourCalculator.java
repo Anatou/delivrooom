@@ -16,11 +16,23 @@ public class TemplateTourCalculator implements TourCalculator{
 
     public Graphe getGraph() { return graph; }
 
+    public boolean doesCalculatedTourNeedsToBeChanged(DeliveriesDemand demand) {
+        // checks if the demand is different from the last calculated one or if no tour has been calculated yet
+        if (calculatedDemand == null){
+            if (demand == null) {
+                return false;
+            } else {
+                return true;
+            }
+        } else {
+            return !calculatedDemand.equals(demand);
+        }
+    }
+
     @Override
     public void findOptimalTour(DeliveriesDemand demand) {
         // first : find all shortest paths between any pair of nodes in the graph
         if (tourSolution == null || !calculatedDemand.equals(demand)) {
-            // faire le dijkstra
             Delivery delivery = demand.getDeliveries().getFirst();
             Intersection warehouse = demand.getStore();
             Long firstPickupId = delivery.getTakeoutIntersection().getId();
@@ -47,6 +59,9 @@ public class TemplateTourCalculator implements TourCalculator{
     }
 
     protected HashMap<Long, Path> findShortestPaths(long startIntersectionId , HashSet<Long> targets) {
+        /* find the shortest paths from startIntersectionId to all targets
+         * using Dijkstra's algorithm (for now)
+         */
 
         // as of now, only one target is acceptable
         if (targets.size() > 1) {
