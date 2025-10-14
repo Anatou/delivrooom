@@ -21,6 +21,13 @@ public class TemplateTourCalculator implements TourCalculator{
         // first : find all shortest paths between any pair of nodes in the graph
         if (tourSolution == null || !calculatedDemand.equals(demand)) {
             // faire le dijkstra
+            Delivery delivery = demand.getDeliveries().getFirst();
+            Intersection warehouse = demand.getStore();
+            Long firstPickupId = delivery.getTakeoutIntersection().getId();
+            HashSet<Long> targets = new HashSet<>(Set.of(firstPickupId));
+            HashMap<Long, Path> solution = findShortestPaths(warehouse.getId(), targets);
+            Path pathToFirstPickup = solution.get(firstPickupId);
+            tourSolution = new TourSolution(new ArrayList<>(List.of(pathToFirstPickup)), pathToFirstPickup.getTotalLength());
         }
         // todo: recalculate only the needed deliveries
     }
