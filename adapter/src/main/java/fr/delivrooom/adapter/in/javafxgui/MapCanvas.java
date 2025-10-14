@@ -4,11 +4,8 @@ import fr.delivrooom.application.model.*;
 import javafx.beans.InvalidationListener;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
-import javafx.scene.Cursor;
 
 import javafx.scene.control.Label;
 import java.util.ArrayList;
@@ -29,7 +26,6 @@ public class MapCanvas extends StackPane {
 
     private CityMap currentCityMap;
     private DeliveriesDemand currentDeliveriesDemand;
-    private TourCalculator tourCalculator;
 
     public MapCanvas() {
         tileLoader = new MapTileLoader();
@@ -37,7 +33,7 @@ public class MapCanvas extends StackPane {
         setStyle("-fx-background-color: #8D8E7F;");
         setMinSize(0, 0);
 
-        getChildren().addAll(tileCanvas, overlayCanvas,interactiveLayer);
+        getChildren().addAll(tileCanvas, overlayCanvas);
         setupCanvas();
     }
 
@@ -69,16 +65,6 @@ public class MapCanvas extends StackPane {
     public void updateMap(CityMap cityMap, DeliveriesDemand deliveriesDemand) {
         this.currentCityMap = cityMap;
         this.currentDeliveriesDemand = deliveriesDemand;
-
-        // Recalculate the tour when this method is called since it means the data has changed
-        CityGraph cityGraph = new CityGraph(cityMap);
-        tourCalculator = new TemplateTourCalculator(cityGraph);
-
-        if (tourCalculator.doesCalculatedTourNeedsToBeChanged(deliveriesDemand)) {
-            tourCalculator.findOptimalTour(deliveriesDemand);
-        }
-
-
 
         if (getWidth() > 0 && getHeight() > 0) {
             drawMap(getWidth(), getHeight(), cityMap, deliveriesDemand);
