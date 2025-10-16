@@ -1,6 +1,6 @@
 package fr.delivrooom.application.model;
 
-import fr.delivrooom.application.tsp.example.IteratorSeq;
+import fr.delivrooom.application.tsp.custom.IteratorSeq;
 import fr.delivrooom.application.tsp.custom.TemplateTSP;
 import fr.delivrooom.application.tsp.custom.TSP1;
 
