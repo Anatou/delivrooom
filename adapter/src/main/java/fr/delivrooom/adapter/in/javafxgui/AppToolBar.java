@@ -1,6 +1,8 @@
 package fr.delivrooom.adapter.in.javafxgui;
 
 
+import atlantafx.base.controls.Spacer;
+import atlantafx.base.controls.ToggleSwitch;
 import atlantafx.base.theme.PrimerDark;
 import atlantafx.base.theme.PrimerLight;
 import fr.delivrooom.adapter.in.javafxgui.command.AddDeliveryCommand;
@@ -11,20 +13,20 @@ import fr.delivrooom.application.model.Delivery;
 import fr.delivrooom.application.model.Intersection;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToolBar;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.kordamp.ikonli.fontawesome6.FontAwesomeSolid;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.File;
 
 public class AppToolBar extends ToolBar {
 
     private final AppController controller;
-    private final ToggleButton themeToggle;
+    private final ToggleSwitch themeToggle;
     private Stage stage;
     private Scene scene;
-    //private final CommandManager commandManager = new CommandManager();
 
     public AppToolBar(AppController controller) {
         super();
@@ -39,7 +41,6 @@ public class AppToolBar extends ToolBar {
         Button loadDefaultBtn = new Button("Load Default");
         loadDefaultBtn.setOnAction(e -> handleLoadDefault());
 
-        ///ajout/supprimer commande, undo (mettre dans stack les modif)
         Button addDeliveryBtn = new Button("Add Delivery");
         addDeliveryBtn.setOnAction(e -> handleAddDelivery());
 
@@ -54,12 +55,12 @@ public class AppToolBar extends ToolBar {
 
 
 
-        themeToggle = new ToggleButton("🌙");
-        themeToggle.setOnAction(e -> handleThemeSwitch());
+        themeToggle = new ToggleSwitch("");
+        themeToggle.setGraphic(new FontIcon(FontAwesomeSolid.MOON));
+        themeToggle.selectedProperty().addListener(o -> handleThemeSwitch());
         themeToggle.setTooltip(new javafx.scene.control.Tooltip("Switch Dark/Light Theme"));
 
-        this.getItems().addAll(openMapBtn, openDemandsBtn, loadDefaultBtn,addDeliveryBtn, removeDeliveryBtn, undoBtn, redoBtn, themeToggle);
-        System.out.println("ToolBar items: " + this.getItems());
+        this.getItems().addAll(openMapBtn, openDemandsBtn, loadDefaultBtn, new Spacer(), addDeliveryBtn, removeDeliveryBtn, undoBtn, redoBtn, new Spacer(), themeToggle);
 
     }
 
@@ -131,11 +132,11 @@ public class AppToolBar extends ToolBar {
         if (themeToggle.isSelected()) {
             // Dark theme
             JavaFXApp.setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
-            themeToggle.setText("☀️");
+            themeToggle.setGraphic(new FontIcon(FontAwesomeSolid.SUN));
         } else {
             // Light theme
             JavaFXApp.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
-            themeToggle.setText("🌙");
+            themeToggle.setGraphic(new FontIcon(FontAwesomeSolid.MOON));
         }
     }
 }

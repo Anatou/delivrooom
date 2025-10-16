@@ -1,9 +1,6 @@
 package fr.delivrooom.adapter.in.javafxgui.controller;
 
-import javafx.scene.control.Alert;
-
-import java.io.File;
-import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * Initial state - no map or deliveries loaded yet.
@@ -18,22 +15,14 @@ public class InitialState implements State {
     }
 
     @Override
-    public void openMapFile(File file) {
-        if (file != null && file.exists()) {
-            try {
-                controller.loadMapFile(file.toURI().toURL());
-                controller.setState(new MapLoadedState(controller));
-            } catch (MalformedURLException e) {
-                showError("Error loading map file", e.getMessage());
-            }
-        } else {
-            showError("Invalid map file", "Please select a valid map file.");
-        }
+    public void openMapFile(URL url) {
+        controller.loadMapFile(url);
+        controller.setState(new MapLoadedState(controller));
     }
 
     @Override
-    public void openDeliveriesFile(File file) {
-        showError("No map loaded", "Please load a map file first before loading deliveries.");
+    public void openDeliveriesFile(URL url) {
+        controller.showError("No map loaded", "Please load a map file first before loading deliveries.");
     }
 
     @Override
@@ -41,11 +30,4 @@ public class InitialState implements State {
         return "InitialState";
     }
 
-    private void showError(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
 }
