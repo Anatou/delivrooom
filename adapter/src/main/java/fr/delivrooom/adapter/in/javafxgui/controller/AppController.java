@@ -1,10 +1,12 @@
 package fr.delivrooom.adapter.in.javafxgui.controller;
 
+import fr.delivrooom.adapter.in.javafxgui.command.CommandManager;
 import fr.delivrooom.adapter.in.javafxgui.JavaFXApp;
 import fr.delivrooom.adapter.in.javafxgui.MapCanvas;
 import fr.delivrooom.adapter.out.XMLCityMapLoader;
 import fr.delivrooom.application.model.CityMap;
 import fr.delivrooom.application.model.DeliveriesDemand;
+import fr.delivrooom.application.model.Delivery;
 import javafx.scene.control.Alert;
 
 import java.io.File;
@@ -20,9 +22,12 @@ public class AppController {
     private MapCanvas mapCanvas;
     private CityMap cityMap;
     private DeliveriesDemand deliveriesDemand;
+    private CommandManager commandManager;
+
 
     public AppController() {
         this.currentState = new InitialState(this);
+        this.commandManager = new CommandManager();
     }
 
     /**
@@ -148,10 +153,36 @@ public class AppController {
         return deliveriesDemand;
     }
 
+    public CommandManager getCommandManager() {
+        return commandManager;
+    }
+
     public void handleLoadDefaultFiles() {
         URL cityMapURL = XMLCityMapLoader.class.getResource("/xml/petitPlan.xml");
         URL deliveriesURL = XMLCityMapLoader.class.getResource("/xml/demandePetit1.xml");
         loadMapFile(cityMapURL);
         loadDeliveriesFile(deliveriesURL);
+    }
+
+    public void addDelivery(Delivery delivery) {
+        System.out.println("addDelivery");
+        if (delivery !=null) {
+            this.deliveriesDemand.getDeliveries().add(delivery);
+        }
+        System.out.println("liste deliveriesDemand = ");
+        for (Delivery d : this.deliveriesDemand.getDeliveries()) {
+            System.out.println(d.getTakeoutIntersection().getId());
+        }
+
+    }
+    public void removeDelivery(Delivery delivery) {
+        System.out.println("removeDelivery");
+        if (delivery != null && this.deliveriesDemand.getDeliveries().contains(delivery) ) {
+            this.deliveriesDemand.getDeliveries().remove(delivery);
+        }
+        System.out.println("liste deliveriesDemand = ");
+        for (Delivery d : this.deliveriesDemand.getDeliveries()) {
+            System.out.println(d.getTakeoutIntersection().getId());
+        }
     }
 }
