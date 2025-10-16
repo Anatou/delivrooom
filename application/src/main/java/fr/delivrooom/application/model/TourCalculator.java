@@ -71,6 +71,15 @@ public class TourCalculator {
             // Create a complete graph of g by running djikstra from each node to get the shortest path to every other node
             ShortestPathsGraph shortestPathsGraph;
             HashMap<Long, HashMap<Long, Path>> shortestPathsMatrix = new HashMap<>();
+
+            // initialize targets;
+            HashSet<Long> targets = new HashSet<>();
+            for (Delivery d : demand.getDeliveries()) {
+                targets.add(d.getTakeoutIntersection().getId());
+                targets.add(d.getDeliveryIntersection().getId());
+            }
+            targets.add(demand.getStore().getId());
+
             // for each intersection in the graph, run dijkstra to find the shortest path to every other intersection
 
             for (Long intersectionId : targets) {
@@ -82,6 +91,7 @@ public class TourCalculator {
                 System.out.println("Targets: " + targetWithoutIntersectionId);
                 HashMap<Long, Path> pathsFromIntersection = findShortestPaths(intersectionId, targetWithoutIntersectionId);
                 shortestPathsMatrix.put(intersectionId, pathsFromIntersection);
+                System.out.println("Shortest paths from intersection " + intersectionId + " calculated");
             }
             System.out.println("Shortest paths matrix calculated");
 
