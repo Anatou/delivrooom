@@ -1,5 +1,6 @@
 package fr.delivrooom.application.model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -56,7 +57,7 @@ public class CityGraph implements Graphe {
         if (this.adjacencyList.containsKey(i)) {
             return this.adjacencyList.get(i);
         }
-        return null;
+        return new ArrayList<>();
     }
 
     public CityMap getCityMap() {

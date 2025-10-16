@@ -1,5 +1,7 @@
 package fr.delivrooom.application.model;
 
+import fr.delivrooom.application.tsp.TemplateTSP;
+
 import java.util.*;
 
 public class TemplateTourCalculator implements TourCalculator{
@@ -32,16 +34,55 @@ public class TemplateTourCalculator implements TourCalculator{
     @Override
     public void findOptimalTour(DeliveriesDemand demand) {
         // first : find all shortest paths between any pair of nodes in the graph
-        if (tourSolution == null || !calculatedDemand.equals(demand)) {
-            Delivery delivery = demand.getDeliveries().getFirst();
-            Intersection warehouse = demand.getStore();
-            Long firstPickupId = delivery.getTakeoutIntersection().getId();
-            HashSet<Long> targets = new HashSet<>(Set.of(firstPickupId));
-            HashMap<Long, Path> solution = findShortestPaths(warehouse.getId(), targets);
-            Path pathToFirstPickup = solution.get(firstPickupId);
-            tourSolution = new TourSolution(new ArrayList<>(List.of(pathToFirstPickup)), pathToFirstPickup.getTotalLength());
+        boolean useTSP = true;
+
+        if (!useTSP){
+            if (tourSolution == null || !calculatedDemand.equals(demand)) {
+                Delivery delivery = demand.getDeliveries().getFirst();
+                long warehouseId = demand.getStore().getId();
+                long firstPickupId = delivery.getTakeoutIntersection().getId();
+                long firstDepositId = delivery.getDeliveryIntersection().getId();
+                HashSet<Long> targetPickup = new HashSet<>(Set.of(firstPickupId));
+                HashSet<Long> targetDeposit = new HashSet<>(Set.of(firstDepositId));
+                HashSet<Long> targetWarehouse = new HashSet<>(Set.of(warehouseId));
+
+                HashMap<Long, Path> solutionToPickup = findShortestPaths(warehouseId, targetPickup);
+                HashMap<Long, Path> solutionToDeposit = findShortestPaths(firstPickupId, targetDeposit);
+                HashMap<Long, Path> solutionToWarehouse = findShortestPaths(firstDepositId, targetWarehouse);
+                Path pathToFirstPickup = solutionToPickup.get(firstPickupId);
+                Path pathToFirstDeposit = solutionToDeposit.get(firstDepositId);
+                Path pathToFirstWarehouse = solutionToWarehouse.get(warehouseId);
+                tourSolution = new TourSolution(
+                        new ArrayList<>(List.of(pathToFirstPickup, pathToFirstDeposit, pathToFirstWarehouse)),
+                        pathToFirstPickup.getTotalLength()+pathToFirstDeposit.getTotalLength()+pathToFirstWarehouse.getTotalLength()
+                );
+        } else {
+                // todo: recalculate only the needed deliveries
+                throw new UnsupportedOperationException("Dijkstra-based tour recalculation is not implemented yet");
+
+            }
+
+        } else {
+            // TODO implement TSP-based tour calculation
+            TemplateTSP tspSolver = new TemplateTSP() {
+                @Override
+                protected int bound(Integer sommetCourant, Collection<Integer> nonVus) {
+                    return 0;
+                }
+
+                @Override
+                protected Iterator<Integer> iterator(Integer sommetCrt, Collection<Integer> nonVus, Graphe g) {
+                    return null;
+                }
+            };
+            System.out.println("Calculating TSP solution for " + graph.getNbSommets() + " nodes");
+            tspSolver.chercheSolution(1000, graph);
+            System.out.println("TSP solution cost: " + tspSolver.getCoutSolution());
+            for (int i = 0; i < graph.getNbSommets(); ++i) {
+                System.out.println("Step " + i + ": visit intersection " + tspSolver.getSolution(i));
+            }
         }
-        // todo: recalculate only the needed deliveries
+
     }
 
     @Override

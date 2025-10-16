@@ -61,11 +61,11 @@ public class MapCanvas extends StackPane {
         this.currentCityMap = cityMap;
         this.currentDeliveriesDemand = deliveriesDemand;
 
-        // Recalculate the tour only if the deliveries have changed (or if there was no previous calculation)
-        if (tourCalculator == null ){
-                CityGraph cityGraph = new CityGraph(cityMap);
-                tourCalculator = new TemplateTourCalculator(cityGraph);
-        }
+        // Recalculate the tour when this method is called since it means the data has changed
+        CityGraph cityGraph = new CityGraph(cityMap);
+        // TODO : use a more advanced TSP solver
+        tourCalculator = new TemplateTourCalculator(cityGraph);
+
         if (tourCalculator.doesCalculatedTourNeedsToBeChanged(deliveriesDemand)) {
             tourCalculator.findOptimalTour(deliveriesDemand);
         }
@@ -180,13 +180,12 @@ public class MapCanvas extends StackPane {
         }
         // Draw calculated tour if available
         if (tourCalculator != null && tourCalculator.getOptimalTour() != null) {
-            gc.setStroke(Color.ORANGE);
+            gc.setStroke(Color.LIMEGREEN);
             gc.setLineWidth(2 * road_width);
             TourSolution tourSolution = tourCalculator.getOptimalTour();
             for (Path path : tourSolution.getPaths()) {
                 List<Road> intersections = path.getIntersections();
                 for (Road road : intersections) {
-                    gc.setFill(Color.LIMEGREEN);
                     drawRoad(gc, scale, minX, minY, road);
                 }
             }
