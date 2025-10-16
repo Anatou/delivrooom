@@ -8,14 +8,18 @@ import java.util.*;
 
 public abstract class TemplateTSP implements TSP {
 
-    private Long[] meilleureSolution;
+    protected Long[] meilleureSolution;
     protected Graphe g;
-    private float bestCost;
-    private long tpsLimite;
-    private long tpsDebut;
-    private DeliveriesDemand demand;
-    private HashMap<Long, Long> pickupToDelivery;
+    protected float bestCost;
+    protected long tpsLimite;
+    protected long tpsDebut;
+    protected DeliveriesDemand demand;
+    protected HashMap<Long, Long> pickupToDelivery;
+    protected int calls;
 
+    public TemplateTSP() {
+        this.calls = 0;
+    }
 
     public void chercheSolution(int tpsLimite, Graphe g, DeliveriesDemand demand){
         if (tpsLimite <= 0) return;
@@ -44,13 +48,18 @@ public abstract class TemplateTSP implements TSP {
 
 
     private void branchAndBound(long currentNode, HashSet<Long> reachableNodes, HashSet<Long> visitedNodes, float visitedCost){
-        if (System.currentTimeMillis() - tpsDebut > tpsLimite) return;
-        if (reachableNodes.size() == 0){ // every delivery point has been visited
+
+        ++calls;
+        System.out.println("branchAndBound call " + calls + ": \n - currentNode : " + currentNode + "\n - reachableNodes : "+ reachableNodes);
+
+        if (System.currentTimeMillis() - tpsDebut > tpsLimite) return; //TODO: throw a timeout exception so we know whether or not we have a perfect solution
+        if (reachableNodes.isEmpty()){ // every delivery point has been visited
             long warehouseId = demand.getStore().getId();
             if (g.estArc(currentNode, warehouseId)){ // return to warehouse
                 if (visitedCost + g.getCout(currentNode, warehouseId) < bestCost){ // we found a solution better  than the best one
                     visitedNodes.toArray(meilleureSolution);
                     bestCost = (float) (visitedCost + g.getCout(currentNode, warehouseId));
+                    System.out.println("New best solution : " + Arrays.toString(meilleureSolution) + " cost " + bestCost);
                 }
             }
         } else if (visitedCost + bound(currentNode, reachableNodes) < bestCost){

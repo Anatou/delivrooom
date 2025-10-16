@@ -18,5 +18,13 @@ public class TourSolution {
     public float getTotalLength() {
         return totalLength;
     }
+
+    @Override
+    public String toString() {
+        return "TourSolution{" +
+                "paths=" + paths +
+                ", totalLength=" + totalLength +
+                '}';
+    }
 }
 

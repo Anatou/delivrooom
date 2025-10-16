@@ -104,13 +104,16 @@ public class TourCalculator {
             Long[] tspSolution = tspSolver.getSolution();
             float tspSolutionCost = tspSolver.getCoutSolution();
             System.out.println("TSP solution calculated");
+
             // Convert the TSP solution to a TourSolution by replacing each edge with the corresponding path in the original graph
             List<Path> tourPaths = new ArrayList<>();
+            System.out.println("Solution intersections order : ");
             for (int i = 0; i < tspSolution.length; i++) {
                 long fromId = tspSolution[i];
                 long toId = tspSolution[(i + 1) % tspSolution.length]; // wrap around to form a cycle
                 Path path = shortestPathsMatrix.get(fromId).get(toId);
                 tourPaths.add(path);
+                System.out.println(fromId);
             }
             tourSolution = new TourSolution(tourPaths, tspSolutionCost);
             calculatedDemand = demand;
