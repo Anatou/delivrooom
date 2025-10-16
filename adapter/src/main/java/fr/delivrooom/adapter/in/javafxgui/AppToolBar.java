@@ -5,14 +5,11 @@ import atlantafx.base.controls.Spacer;
 import atlantafx.base.controls.ToggleSwitch;
 import atlantafx.base.theme.PrimerDark;
 import atlantafx.base.theme.PrimerLight;
-import fr.delivrooom.adapter.in.javafxgui.command.AddDeliveryCommand;
-import fr.delivrooom.adapter.in.javafxgui.command.CommandManager;
-import fr.delivrooom.adapter.in.javafxgui.command.RemoveDeliveryCommand;
 import fr.delivrooom.adapter.in.javafxgui.controller.AppController;
-import fr.delivrooom.application.model.Delivery;
-import fr.delivrooom.application.model.Intersection;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ToolBar;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -32,27 +29,22 @@ public class AppToolBar extends ToolBar {
         super();
         this.controller = controller;
 
-        Button openMapBtn = new Button("Open Map");
+        MenuButton open = new MenuButton("Open");
+
+        MenuItem openMapBtn = new MenuItem("Open Map");
         openMapBtn.setOnAction(e -> handleOpenMapFile());
-
-        Button openDemandsBtn = new Button("Open Demands");
+        MenuItem openDemandsBtn = new MenuItem("Open Demands");
         openDemandsBtn.setOnAction(e -> handleOpenDeliveriesFile());
-
-        Button loadDefaultBtn = new Button("Load Default");
+        MenuItem loadDefaultBtn = new MenuItem("Open Default Map and Demands");
         loadDefaultBtn.setOnAction(e -> handleLoadDefault());
 
-        Button addDeliveryBtn = new Button("Add Delivery");
-        addDeliveryBtn.setOnAction(e -> handleAddDelivery());
+        open.getItems().addAll(openMapBtn, openDemandsBtn, loadDefaultBtn);
 
-        Button removeDeliveryBtn = new Button("Remove Delivery");
-        removeDeliveryBtn.setOnAction(e -> handleRemoveDelivery());
-
-        Button undoBtn = new Button("Undo");
+        Button undoBtn = new Button("", new FontIcon(FontAwesomeSolid.UNDO));
         undoBtn.setOnAction(e -> controller.getCommandManager().undo());
 
-        Button redoBtn = new Button("Redo");
+        Button redoBtn = new Button("", new FontIcon(FontAwesomeSolid.REDO));
         redoBtn.setOnAction(e -> controller.getCommandManager().redo());
-
 
 
         themeToggle = new ToggleSwitch("");
@@ -60,7 +52,7 @@ public class AppToolBar extends ToolBar {
         themeToggle.selectedProperty().addListener(o -> handleThemeSwitch());
         themeToggle.setTooltip(new javafx.scene.control.Tooltip("Switch Dark/Light Theme"));
 
-        this.getItems().addAll(openMapBtn, openDemandsBtn, loadDefaultBtn, new Spacer(), addDeliveryBtn, removeDeliveryBtn, undoBtn, redoBtn, new Spacer(), themeToggle);
+        this.getItems().addAll(open, new Spacer(20), undoBtn, redoBtn, new Spacer(), themeToggle, new Spacer(10));
 
     }
 
@@ -74,30 +66,6 @@ public class AppToolBar extends ToolBar {
         this.stage = stage;
         this.scene = scene;
     }
-
-
-    private void handleAddDelivery() {
-        //...
-        /*Inter
-        Delivery addedDelivery = new Delivery(takeoutIntersection,deliveryIntersection,
-        int takeoutDuration, int deliveryDuration);*/
-
-        Intersection takeoutIntersection = new Intersection(99, 45.550404, 4.8744674);
-        Intersection deliveryIntersection = new Intersection(100, 45.770404, 4.8744674);
-        Delivery addedDelivery = new Delivery(takeoutIntersection,deliveryIntersection,5,5);
-        AddDeliveryCommand addDeliveryCommand = new AddDeliveryCommand(controller, addedDelivery);
-        controller.getCommandManager().executeCommand(addDeliveryCommand);
-
-    }
-    private void handleRemoveDelivery() {
-
-        /*Intersection takeoutIntersection = new Intersection(99, 45.550404, 4.8744674);
-        Intersection deliveryIntersection = new Intersection(100, 45.770404, 4.8744674);
-        Delivery removedDelivery = new Delivery(takeoutIntersection,deliveryIntersection,5,5);*/
-        RemoveDeliveryCommand removeDeliveryCommand = new RemoveDeliveryCommand(controller, controller.getDeliveriesDemand().getDeliveryByIds(99,100));
-        controller.getCommandManager().executeCommand(removeDeliveryCommand);
-    }
-
 
     private void handleOpenMapFile() {
         FileChooser fileChooser = new FileChooser();

@@ -22,6 +22,5 @@ module fr.delivrooom.adapter {
 
     requires org.kordamp.ikonli.core;
     requires org.kordamp.ikonli.javafx;
-    // add icon pack modules
     requires org.kordamp.ikonli.fontawesome6;
 }

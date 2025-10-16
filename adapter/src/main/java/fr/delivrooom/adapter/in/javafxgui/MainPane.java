@@ -19,7 +19,7 @@ public class MainPane extends BorderPane {
 
         // Create UI components
         MapCanvas canvas = new MapCanvas();
-        Sidebar sidebar = new Sidebar();
+        Sidebar sidebar = new Sidebar(controller);
         toolBar = new AppToolBar(controller);
 
 
