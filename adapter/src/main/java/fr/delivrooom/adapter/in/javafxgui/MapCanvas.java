@@ -28,20 +28,18 @@ import java.util.HashMap;
 import java.util.List;
 
 public class MapCanvas extends StackPane {
+    private static final double TILE_SIZE_PX = 256.0;
+    private static final double ZOOM_STEP = 1.5;
     private final MapTileLoader tileLoader;
     private final Canvas tileCanvas = new Canvas();
     private final Canvas overlayCanvas = new Canvas();
     private final Pane interactiveLayer = new Pane();
     private final Pane controlsPane = new Pane();
-
+    // Zoom config
+    private final double ZOOM_SCALE_FACTOR; // tunable factor between canvas scale and tile zoom level
     private CityMap currentCityMap;
     private DeliveriesDemand currentDeliveriesDemand;
     private TourCalculator tourCalculator;
-
-    private static final double TILE_SIZE_PX = 256.0;
-    private static final double ZOOM_STEP = 1.5;
-    // Zoom config
-    private final double ZOOM_SCALE_FACTOR; // tunable factor between canvas scale and tile zoom level
     // View state
     private boolean autoFraming = true;
     private double manualScale = 1.0;      // pixels per normalized unit
@@ -216,10 +214,10 @@ public class MapCanvas extends StackPane {
 
     private AutoView computeAutoView(double width, double height, CityMap cityMap) {
         double padding = 30e-7; // Paddings depend on the map scale
-        double minX = cityMap.getIntersections().values().stream().mapToDouble(Intersection::getNormalizedX).min().orElse(0) - padding;
-        double maxX = cityMap.getIntersections().values().stream().mapToDouble(Intersection::getNormalizedX).max().orElse(1) + padding;
-        double minY = cityMap.getIntersections().values().stream().mapToDouble(Intersection::getNormalizedY).min().orElse(0) - padding;
-        double maxY = cityMap.getIntersections().values().stream().mapToDouble(Intersection::getNormalizedY).max().orElse(1) + padding;
+        double minX = cityMap.intersections().values().stream().mapToDouble(Intersection::getNormalizedX).min().orElse(0) - padding;
+        double maxX = cityMap.intersections().values().stream().mapToDouble(Intersection::getNormalizedX).max().orElse(1) + padding;
+        double minY = cityMap.intersections().values().stream().mapToDouble(Intersection::getNormalizedY).min().orElse(0) - padding;
+        double maxY = cityMap.intersections().values().stream().mapToDouble(Intersection::getNormalizedY).max().orElse(1) + padding;
 
         // Calculate scale factor between normalized coordinates and canvas coordinates
         double scale;
@@ -316,9 +314,7 @@ public class MapCanvas extends StackPane {
             for (int tileY = startY; tileY <= endY; tileY++) {
                 String key = tileLoader.getTileKey(zoomLevel, tileX, tileY);
                 requestedTiles.add(key);
-                Image image = tileLoader.getTile(key, () -> {
-                    drawTiles(gc, scale, minX, maxX, minY, maxY);
-                });
+                Image image = tileLoader.getTile(key, () -> drawTiles(gc, scale, minX, maxX, minY, maxY));
                 if (image != null) {
                     // Normalized tile coordinates
                     double tileLeft = (double) tileX / tilesPerSide;
@@ -344,7 +340,7 @@ public class MapCanvas extends StackPane {
         // Draw roads
         gc.setStroke(Color.rgb(220, 220, 220));
         gc.setLineWidth(road_width);
-        for (HashMap<Long, Road> subMap : currentCityMap.getRoads().values()) {
+        for (HashMap<Long, Road> subMap : currentCityMap.roads().values()) {
             for (Road road : subMap.values()) {
                 drawRoad(gc, scale, minX, minY, road);
             }
@@ -352,7 +348,7 @@ public class MapCanvas extends StackPane {
         // Draw intersections
         gc.setFill(Color.WHITE);
         gc.setStroke(Color.rgb(220, 220, 220));
-        for (Intersection intersection : currentCityMap.getIntersections().values()) {
+        for (Intersection intersection : currentCityMap.intersections().values()) {
             drawIntersection(gc, scale, minX, minY, intersection, 1.3 * road_width, true);
         }
 
@@ -361,14 +357,26 @@ public class MapCanvas extends StackPane {
 
             // Draw warehouse point in green
             gc.setFill(Color.GREEN);
-            drawIntersection(gc, scale, minX, minY, currentDeliveriesDemand.getStore(), 4 * road_width, true);
+            drawIntersection(gc, scale, minX, minY, currentDeliveriesDemand.store(), 4 * road_width, true);
 
-            // Takeout point is a red square, delivery point in blue circle
-            for (Delivery delivery : currentDeliveriesDemand.getDeliveries()) {
+            // Takeout point is a red square, delivery point in a blue circle
+            for (Delivery delivery : currentDeliveriesDemand.deliveries()) {
                 gc.setFill(Color.RED);
-                drawIntersection(gc, scale, minX, minY, delivery.getTakeoutIntersection(), 4 * road_width, false);
+                drawIntersection(gc, scale, minX, minY, delivery.takeoutIntersection(), 4 * road_width, false);
                 gc.setFill(Color.BLUE);
-                drawIntersection(gc, scale, minX, minY, delivery.getDeliveryIntersection(), 4 * road_width, true);
+                drawIntersection(gc, scale, minX, minY, delivery.deliveryIntersection(), 4 * road_width, true);
+            }
+        }
+        // Draw the calculated tour if available
+        if (tourCalculator != null && tourCalculator.getOptimalTour() != null) {
+            gc.setStroke(Color.LIMEGREEN);
+            gc.setLineWidth(2 * road_width);
+            TourSolution tourSolution = tourCalculator.getOptimalTour();
+            for (Path path : tourSolution.getPaths()) {
+                List<Road> intersections = path.getIntersections();
+                for (Road road : intersections) {
+                    drawRoad(gc, scale, minX, minY, road);
+                }
             }
         }
     }
@@ -377,9 +385,9 @@ public class MapCanvas extends StackPane {
         double road_width = 2e-7 * scale; // Road width depends on the map scale
         if (currentDeliveriesDemand == null) return;
 
-        for (Delivery delivery : currentDeliveriesDemand.getDeliveries()) {
+        for (Delivery delivery : currentDeliveriesDemand.deliveries()) {
             // Add interactive circle over delivery point
-            Intersection deliveryIntersection = delivery.getDeliveryIntersection();
+            Intersection deliveryIntersection = delivery.deliveryIntersection();
             double deliveryX = (deliveryIntersection.getNormalizedX() - minX) * scale;
             double deliveryY = (deliveryIntersection.getNormalizedY() - minY) * scale;
             double radius = 12 * road_width;
@@ -396,7 +404,7 @@ public class MapCanvas extends StackPane {
             });
             interactiveLayer.getChildren().add(deliveryCircle);
 
-            Intersection pickupIntersection = delivery.getTakeoutIntersection();
+            Intersection pickupIntersection = delivery.takeoutIntersection();
             double pickupX = (pickupIntersection.getNormalizedX() - minX) * scale;
             double pickupY = (pickupIntersection.getNormalizedY() - minY) * scale;
 

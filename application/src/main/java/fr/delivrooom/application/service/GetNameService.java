@@ -3,13 +3,7 @@ package fr.delivrooom.application.service;
 import fr.delivrooom.application.port.in.GetNameUseCase;
 import fr.delivrooom.application.port.out.NameRepository;
 
-public class GetNameService implements GetNameUseCase {
-
-    public GetNameService(NameRepository nameRepository) {
-        this.nameRepository = nameRepository;
-    }
-
-    private final NameRepository nameRepository;
+public record GetNameService(NameRepository nameRepository) implements GetNameUseCase {
 
     @Override
     public String getName() {

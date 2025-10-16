@@ -7,22 +7,21 @@ import java.util.Iterator;
 
 public class TSP1 extends TemplateTSP {
 
-	@Override
-	/*
-	Cette fonction d’évaluation calcule une borne inférieure de la longueur
-	du plus court chemin allant du dernier sommet visité jusqu’à 0 en passant par chaque sommet non visité exactement
-	une fois 1. Si la longueur du chemin correspondant aux sommets déjà visités ajoutée à cette borne est supérieure ou
-	égale à la longueur du plus court circuit trouvé jusqu’ici (i.e., best), alors nous pouvons en déduire qu’il n’existe pas
-	de solution améliorante commençant par ce chemin, et il n’est pas nécessaire d’appeler permut récursivement.
+    @Override
+    /*
+     This evaluation function computes a lower bound of the length of the shortest path
+     going from the last visited vertex to 0 while visiting each unvisited vertex exactly once.
+     If the length of the path corresponding to the already visited vertices plus this bound is
+     greater than or equal to the length of the best tour found so far, then we can deduce that
+     no improving solution starts with this path, and recursion is not necessary.
+     */
+    protected int bound(Integer currentVertex, Collection<Integer> unvisited) {
+        return 0;
+    }
 
-	 */
-	protected int bound(Integer sommetCourant, Collection<Integer> nonVus) {
-		return 0;
-	}
-
-	@Override
-	protected Iterator<Integer> iterator(Integer sommetCrt, Collection<Integer> nonVus, Graphe g) {
-		return new IteratorSeq(nonVus, sommetCrt, g);
-	}
+    @Override
+    protected Iterator<Integer> iterator(Integer currentVertex, Collection<Integer> unvisited, Graphe g) {
+        return new IteratorSeq(unvisited, currentVertex, g);
+    }
 
 }

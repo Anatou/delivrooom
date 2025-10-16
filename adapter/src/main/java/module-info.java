@@ -1,6 +1,4 @@
 module fr.delivrooom.adapter {
-    requires javafx.controls;
-    requires javafx.fxml;
 
     requires org.controlsfx.controls;
 
@@ -12,15 +10,14 @@ module fr.delivrooom.adapter {
     opens fr.delivrooom.adapter.in.javafxgui.controller to javafx.fxml;
 
     requires fr.delivrooom.application;
+    requires javafx.controls;
     requires java.xml;
     requires javafx.graphics;
     requires javafx.base;
-    requires javafx.web;
-    requires java.desktop;
     requires atlantafx.base;
 
 
-    requires org.kordamp.ikonli.core;
     requires org.kordamp.ikonli.javafx;
     requires org.kordamp.ikonli.fontawesome6;
+    requires jdk.jdi;
 }

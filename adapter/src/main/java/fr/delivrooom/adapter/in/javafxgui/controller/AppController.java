@@ -1,8 +1,8 @@
 package fr.delivrooom.adapter.in.javafxgui.controller;
 
-import fr.delivrooom.adapter.in.javafxgui.command.CommandManager;
 import fr.delivrooom.adapter.in.javafxgui.JavaFXApp;
 import fr.delivrooom.adapter.in.javafxgui.MapCanvas;
+import fr.delivrooom.adapter.in.javafxgui.command.CommandManager;
 import fr.delivrooom.adapter.out.XMLCityMapLoader;
 import fr.delivrooom.application.model.CityMap;
 import fr.delivrooom.application.model.DeliveriesDemand;
@@ -19,11 +19,11 @@ import java.net.URL;
  */
 public class AppController {
 
+    private final CommandManager commandManager;
     private State currentState;
     private MapCanvas mapCanvas;
     private CityMap cityMap;
     private DeliveriesDemand deliveriesDemand;
-    private CommandManager commandManager;
 
 
     public AppController() {
@@ -54,7 +54,7 @@ public class AppController {
         }
     }
     /**
-     * Handle opening a deliveries file through the current state.
+     * Handle opening a delivery file through the current state.
      *
      * @param file The deliveries file to open
      */
@@ -77,7 +77,7 @@ public class AppController {
     protected void loadMapFile(URL url) {
         try {
             this.cityMap = JavaFXApp.guiUseCase().getCityMap(url);
-            this.deliveriesDemand = null; // Clear deliveries when loading new map
+            this.deliveriesDemand = null; // Clear deliveries when loading a new map
             updateMapCanvas();
             System.out.println("Map loaded successfully: " + url);
         } catch (Exception e) {
@@ -87,7 +87,7 @@ public class AppController {
     }
 
     /**
-     * Load a deliveries file using the application service.
+     * Load a delivery file using the application service.
      * Called by state implementations.
      *
      * @param url The deliveries file to load
@@ -131,6 +131,7 @@ public class AppController {
     public State getCurrentState() {
         return currentState;
     }
+
     /**
      * Get the loaded city map.
      *
@@ -139,6 +140,7 @@ public class AppController {
     public CityMap getCityMap() {
         return cityMap;
     }
+
     /**
      * Get the loaded deliveries demand.
      *
@@ -168,24 +170,16 @@ public class AppController {
     }
 
     public void addDelivery(Delivery delivery) {
-        System.out.println("addDelivery");
-        if (delivery !=null) {
-            this.deliveriesDemand.getDeliveries().add(delivery);
-        }
-        System.out.println("liste deliveriesDemand = ");
-        for (Delivery d : this.deliveriesDemand.getDeliveries()) {
-            System.out.println(d.getTakeoutIntersection().getId());
-        }
-
+        System.out.println("Adding delivery " + delivery.takeoutIntersection().getId()
+                + " from intersection " + delivery.takeoutIntersection().getId()
+                + " to intersection " + delivery.deliveryIntersection().getId());
+        this.deliveriesDemand.deliveries().add(delivery);
     }
+
     public void removeDelivery(Delivery delivery) {
-        System.out.println("removeDelivery");
-        if (delivery != null && this.deliveriesDemand.getDeliveries().contains(delivery) ) {
-            this.deliveriesDemand.getDeliveries().remove(delivery);
-        }
-        System.out.println("liste deliveriesDemand = ");
-        for (Delivery d : this.deliveriesDemand.getDeliveries()) {
-            System.out.println(d.getTakeoutIntersection().getId());
-        }
+        System.out.println("Removing delivery " + delivery.takeoutIntersection().getId()
+                + " from intersection " + delivery.takeoutIntersection().getId()
+                + " to intersection " + delivery.deliveryIntersection().getId());
+        this.deliveriesDemand.deliveries().remove(delivery);
     }
 }
