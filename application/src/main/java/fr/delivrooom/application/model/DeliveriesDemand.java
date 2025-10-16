@@ -19,4 +19,13 @@ public class DeliveriesDemand {
     public Intersection getStore() {
         return store;
     }
+
+    public Delivery getDeliveryByIds (int idTakeOutIntersection, int idDeliveryIntersection){
+        for (Delivery d : this.deliveries){
+            if (d.getTakeoutIntersection().getId() == idTakeOutIntersection && d.getDeliveryIntersection().getId() == idDeliveryIntersection){
+                return d;
+            }
+        }
+        return null;
+    }
 }
