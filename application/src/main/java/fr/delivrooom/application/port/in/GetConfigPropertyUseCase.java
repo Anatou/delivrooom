@@ -26,4 +26,13 @@ public interface GetConfigPropertyUseCase {
      * @return the property value as integer
      */
     int getIntProperty(String key, int defaultValue);
+
+    /**
+     * Get a double property value
+     *
+     * @param key          the property key
+     * @param defaultValue the default value if key is not found or cannot be parsed
+     * @return the property value as double
+     */
+    double getDoubleProperty(String key, double defaultValue);
 }

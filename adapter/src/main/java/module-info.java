@@ -20,5 +20,10 @@ module fr.delivrooom.adapter {
     requires javafx.web;
     requires java.desktop;
     requires atlantafx.base;
-    //requires fr.delivrooom.adapter;
+
+
+    requires org.kordamp.ikonli.core;
+    requires org.kordamp.ikonli.javafx;
+    // add icon pack modules
+    requires org.kordamp.ikonli.fontawesome6;
 }

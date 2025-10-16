@@ -57,4 +57,18 @@ public class ConfigService implements GetConfigPropertyUseCase {
             return defaultValue;
         }
     }
+
+    @Override
+    public double getDoubleProperty(String key, double defaultValue) {
+        String value = configProperties.getProperty(key);
+        if (value == null) {
+            return defaultValue;
+        }
+        try {
+            return Double.parseDouble(value);
+        } catch (NumberFormatException e) {
+            System.err.println("Invalid double value for property " + key + ": " + value);
+            return defaultValue;
+        }
+    }
 }

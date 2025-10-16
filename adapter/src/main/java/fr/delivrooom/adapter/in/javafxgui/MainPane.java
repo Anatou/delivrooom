@@ -22,12 +22,15 @@ public class MainPane extends BorderPane {
         Sidebar sidebar = new Sidebar();
         toolBar = new AppToolBar(controller);
 
+
         // Wire the controller to the canvas
         controller.setMapCanvas(canvas);
 
         // Set up the layout
         setTop(toolBar);
-        setCenter(new SplitPane(sidebar, canvas));
+        SplitPane splitPane = new SplitPane(sidebar, canvas);
+        splitPane.setDividerPositions(0.25);
+        setCenter(splitPane);
     }
 
     /**
