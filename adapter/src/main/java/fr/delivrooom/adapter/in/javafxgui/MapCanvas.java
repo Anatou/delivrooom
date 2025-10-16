@@ -11,6 +11,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Pane;
@@ -268,9 +269,9 @@ public class MapCanvas extends StackPane {
         }
 
         // Update tiles and overlay
-        drawTiles(gcTiles, scale, minX, maxX, minY, maxY);
         drawOverlay(gcOverlay, scale, minX, minY);
         updateInteractiveLayer(scale, minX, minY);
+        drawTiles(gcTiles, scale, minX, maxX, minY, maxY);
     }
 
     private int computeZoomLevel(double scale) {
@@ -300,27 +301,25 @@ public class MapCanvas extends StackPane {
 
         for (int tileX = startX; tileX <= endX; tileX++) {
             for (int tileY = startY; tileY <= endY; tileY++) {
-                final int finalTileX = tileX;
-                final int finalTileY = tileY;
-
-                // Get tile with callback to draw it when loaded
-                String key = tileLoader.getTile(zoomLevel, tileX, tileY, loadedImage -> {
+                String key = tileLoader.getTileKey(zoomLevel, tileX, tileY);
+                requestedTiles.add(key);
+                Image image = tileLoader.getTile(key, () -> {
+                    drawTiles(gc, scale, minX, maxX, minY, maxY);
+                });
+                if (image != null) {
                     // Normalized tile coordinates
-                    double tileLeft = (double) finalTileX / tilesPerSide;
-                    double tileTop = (double) finalTileY / tilesPerSide;
-                    double tileRight = (double) (finalTileX + 1) / tilesPerSide;
-                    double tileBottom = (double) (finalTileY + 1) / tilesPerSide;
-
+                    double tileLeft = (double) tileX / tilesPerSide;
+                    double tileTop = (double) tileY / tilesPerSide;
+                    double tileRight = (double) (tileX + 1) / tilesPerSide;
+                    double tileBottom = (double) (tileY + 1) / tilesPerSide;
                     // Calculate tile origin and size on canvas
                     double x1 = (tileLeft - minX) * scale;
                     double y1 = (tileTop - minY) * scale;
                     double w = (tileRight - tileLeft) * scale;
                     double h = (tileBottom - tileTop) * scale;
-
                     // Draw the loaded tile
-                    gc.drawImage(loadedImage, x1, y1, w, h);
-                });
-                requestedTiles.add(key);
+                    gc.drawImage(image, x1, y1, w, h);
+                }
             }
         }
         tileLoader.cancelTilesRequestsNotIn(requestedTiles);
