@@ -72,11 +72,15 @@ public class TourCalculator {
             ShortestPathsGraph shortestPathsGraph;
             HashMap<Long, HashMap<Long, Path>> shortestPathsMatrix = new HashMap<>();
             // for each intersection in the graph, run dijkstra to find the shortest path to every other intersection
-            for (Long intersectionId : graph.getCityMap().getIntersections().keySet()){
-                HashSet<Long> targets = new HashSet<>(graph.getCityMap().getIntersections().keySet());
+
+            for (Long intersectionId : targets) {
                 // remove self from targets
-                targets.remove(intersectionId);
-                HashMap<Long, Path> pathsFromIntersection = findShortestPaths(intersectionId, targets);
+                HashSet<Long> targetWithoutIntersectionId = new HashSet<>(targets);
+                targetWithoutIntersectionId.remove(intersectionId);
+
+                System.out.println("Calculating shortest paths from intersection " + intersectionId);
+                System.out.println("Targets: " + targetWithoutIntersectionId);
+                HashMap<Long, Path> pathsFromIntersection = findShortestPaths(intersectionId, targetWithoutIntersectionId);
                 shortestPathsMatrix.put(intersectionId, pathsFromIntersection);
             }
             System.out.println("Shortest paths matrix calculated");
