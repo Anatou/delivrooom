@@ -2,11 +2,13 @@ package fr.delivrooom.adapter.in.javafxgui.controller;
 
 import fr.delivrooom.adapter.in.javafxgui.JavaFXApp;
 import fr.delivrooom.adapter.in.javafxgui.MapCanvas;
+import fr.delivrooom.adapter.in.javafxgui.Sidebar;
 import fr.delivrooom.adapter.in.javafxgui.command.CommandManager;
 import fr.delivrooom.adapter.out.XMLCityMapLoader;
 import fr.delivrooom.application.model.CityMap;
 import fr.delivrooom.application.model.DeliveriesDemand;
 import fr.delivrooom.application.model.Delivery;
+import fr.delivrooom.application.model.Intersection;
 import javafx.scene.control.Alert;
 
 import java.io.File;
@@ -19,12 +21,17 @@ import java.net.URL;
  */
 public class AppController {
 
+    // State management
     private final CommandManager commandManager;
     private State currentState;
+
+    // UI components
     private MapCanvas mapCanvas;
+    private Sidebar sidebar;
+
+    // Loaded data
     private CityMap cityMap;
     private DeliveriesDemand deliveriesDemand;
-
 
     public AppController() {
         this.currentState = new InitialState(this);
@@ -32,12 +39,11 @@ public class AppController {
     }
 
     /**
-     * Set the MapCanvas reference for rendering updates.
-     *
-     * @param mapCanvas The MapCanvas instance
+     * Must be called right after the UI components are initialized.
      */
-    public void setMapCanvas(MapCanvas mapCanvas) {
+    public void wireComponents(MapCanvas mapCanvas, Sidebar sidebar) {
         this.mapCanvas = mapCanvas;
+        this.sidebar = sidebar;
     }
 
     /**
@@ -66,6 +72,22 @@ public class AppController {
             showError("Invalid file URL", e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Handle selecting an intersection through the current state.
+     *
+     * @param intersection The intersection to select, set as null if no intersection is selected
+     */
+    public void handleSelectIntersection(Intersection intersection) {
+        currentState.selectIntersection(intersection);
+    }
+
+    /**
+     * Request to switch to intersection selection mode.
+     */
+    public void handleRequestIntersectionSelection() {
+        currentState.requestIntersectionSelection();
     }
 
 
@@ -162,14 +184,6 @@ public class AppController {
         currentState.openDeliveriesFile(deliveriesURL);
     }
 
-    public void showError(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
-
     public void addDelivery(Delivery delivery) {
         System.out.println("Adding delivery " + delivery.takeoutIntersection().getId()
                 + " from intersection " + delivery.takeoutIntersection().getId()
@@ -182,5 +196,22 @@ public class AppController {
                 + " from intersection " + delivery.takeoutIntersection().getId()
                 + " to intersection " + delivery.deliveryIntersection().getId());
         this.deliveriesDemand.deliveries().remove(delivery);
+    }
+
+
+    /**
+     * Called by the mapCanvas from the state when the user clicks on an intersection.
+     */
+    protected void selectIntersection(Intersection intersection) {
+        sidebar.selectIntersection(intersection);
+        setState(new DeliveriesLoadedState(this));
+    }
+
+    public void showError(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }

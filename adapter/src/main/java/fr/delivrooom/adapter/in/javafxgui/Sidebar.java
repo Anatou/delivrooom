@@ -52,4 +52,13 @@ public class Sidebar extends VBox {
         RemoveDeliveryCommand removeDeliveryCommand = new RemoveDeliveryCommand(controller, controller.getDeliveriesDemand().getDeliveryByIds(99, 100));
         controller.getCommandManager().executeCommand(removeDeliveryCommand);
     }
+
+    /**
+     * Should be called by the controller when an intersection is selected on the map.
+     *
+     * @param intersection If null, it means the operation has been aborted.
+     */
+    public void selectIntersection(Intersection intersection) {
+
+    }
 }
