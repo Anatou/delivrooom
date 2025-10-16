@@ -420,18 +420,6 @@ public class MapCanvas extends StackPane {
             });
             interactiveLayer.getChildren().add(pickupCircle);
         }
-        // Draw calculated tour if available
-        if (tourCalculator != null && tourCalculator.getOptimalTour() != null) {
-            gc.setStroke(Color.LIMEGREEN);
-            gc.setLineWidth(2 * road_width);
-            TourSolution tourSolution = tourCalculator.getOptimalTour();
-            for (Path path : tourSolution.getPaths()) {
-                List<Road> intersections = path.getIntersections();
-                for (Road road : intersections) {
-                    drawRoad(gc, scale, minX, minY, road);
-                }
-            }
-        }
     }
 
     private void drawIntersection(GraphicsContext gc, double scale, double minX, double minY, Intersection intersection, double radius, boolean circle) {
