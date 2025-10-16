@@ -94,9 +94,8 @@ public abstract class TemplateTSP implements TSP {
      */
     protected abstract Iterator<Long> iterator(Long sommetCrt, Collection<Long> nonVus, Graphe g);
 
-    public Long getSolution(long i){
-        if (meilleureSolution == null || i < 0 || i >= g.getNbSommets()) return -1L;
-        return meilleureSolution[(int)i];
+    public Long[] getSolution(){
+        return meilleureSolution;
     }
 
     public float getCoutSolution(){

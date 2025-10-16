@@ -2,6 +2,7 @@ package fr.delivrooom.application.model;
 
 import fr.delivrooom.application.tsp.example.IteratorSeq;
 import fr.delivrooom.application.tsp.custom.TemplateTSP;
+import fr.delivrooom.application.tsp.custom.TSP1;
 
 import java.util.*;
 
@@ -35,7 +36,7 @@ public class TourCalculator {
 
     public void findOptimalTour(DeliveriesDemand demand) {
         // first : find all shortest paths between any pair of nodes in the graph
-        boolean useTSP = false;
+        boolean useTSP = true;
 
         if (!useTSP){
             if (tourSolution == null || !calculatedDemand.equals(demand)) {
@@ -103,9 +104,9 @@ public class TourCalculator {
          */
 
         // as of now, only one target is acceptable
-        if (targets.size() > 1) {
-            throw new RuntimeException("Only single-target search is currently implemented");
-        }
+//        if (targets.size() > 1) {
+//            throw new RuntimeException("Only single-target search is currently implemented");
+//        }
         return targetedDijkstraSearch(startIntersectionId, targets);
     }
 
