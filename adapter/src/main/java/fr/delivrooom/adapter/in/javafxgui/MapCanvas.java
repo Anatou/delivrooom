@@ -30,8 +30,9 @@ public class MapCanvas extends StackPane {
     private final MapTileLoader tileLoader;
     private final Canvas tileCanvas = new Canvas();
     private final Canvas overlayCanvas = new Canvas();
-    private final Pane interactiveLayer = new Pane();
+    private final Pane removeLayer = new Pane();
     private final Pane controlsPane = new Pane();
+    private final Pane addLayer = new  Pane();
 
     private CityMap currentCityMap;
     private DeliveriesDemand currentDeliveriesDemand;
@@ -56,7 +57,7 @@ public class MapCanvas extends StackPane {
         setStyle("-fx-background-color: #8D8E7F;");
         setMinSize(0, 0);
 
-        getChildren().addAll(tileCanvas, overlayCanvas, interactiveLayer, controlsPane);
+        getChildren().addAll(tileCanvas, overlayCanvas, controlsPane);
         setupCanvas();
         setupControls();
     }
@@ -241,7 +242,8 @@ public class MapCanvas extends StackPane {
         // Clear canvases
         gcTiles.clearRect(0, 0, getWidth(), getHeight());
         gcOverlay.clearRect(0, 0, getWidth(), getHeight());
-        interactiveLayer.getChildren().clear();
+        removeLayer.getChildren().clear();
+        addLayer.getChildren().clear();
         controlsPane.setVisible(currentCityMap != null);
 
         // Return if no city map is loaded
@@ -270,7 +272,8 @@ public class MapCanvas extends StackPane {
 
         // Update tiles and overlay
         drawOverlay(gcOverlay, scale, minX, minY);
-        updateInteractiveLayer(scale, minX, minY);
+        updateRemoveLayer(scale, minX, minY);
+        updateAddLayer(scale, minX, minY);
         drawTiles(gcTiles, scale, minX, maxX, minY, maxY);
     }
 
@@ -360,7 +363,7 @@ public class MapCanvas extends StackPane {
         }
     }
 
-    private void updateInteractiveLayer(double scale, double minX, double minY) {
+    private void updateRemoveLayer(double scale, double minX, double minY) {
         double road_width = 2e-7 * scale; // Road width depends on the map scale
         if (currentDeliveriesDemand == null) return;
 
@@ -378,10 +381,10 @@ public class MapCanvas extends StackPane {
                 Label content = new Label("Delivery ID : " + deliveryIntersection.getId());
                 Popover popover = new Popover(content);
                 popover.setArrowLocation(Popover.ArrowLocation.TOP_CENTER);
-                Point2D screen = interactiveLayer.localToScreen(deliveryX, deliveryY);
+                Point2D screen = removeLayer.localToScreen(deliveryX, deliveryY);
                 popover.show(deliveryCircle, screen.getX() - 10, screen.getY());
             });
-            interactiveLayer.getChildren().add(deliveryCircle);
+            removeLayer.getChildren().add(deliveryCircle);
 
             Intersection pickupIntersection = delivery.getTakeoutIntersection();
             double pickupX = (pickupIntersection.getNormalizedX() - minX) * scale;
@@ -394,12 +397,33 @@ public class MapCanvas extends StackPane {
                 Label content = new Label("Pickup ID : " + pickupIntersection.getId());
                 PopOver popover = new PopOver(content);
                 popover.setArrowLocation(PopOver.ArrowLocation.TOP_CENTER);
-                Point2D screen = interactiveLayer.localToScreen(pickupX, pickupY);
+                Point2D screen = removeLayer.localToScreen(pickupX, pickupY);
                 popover.show(pickupCircle, screen.getX() - 10, screen.getY());
             });
-            interactiveLayer.getChildren().add(pickupCircle);
+            removeLayer.getChildren().add(pickupCircle);
         }
     }
+    private void updateAddLayer(double scale, double minX, double minY) {
+        double road_width = 2e-7 * scale; // Road width depends on the map scale
+        if (currentDeliveriesDemand == null) return;
+
+        for (Intersection intersection : currentCityMap.getIntersections().values()) {
+            double intersectionX = (intersection.getNormalizedX() - minX) * scale;
+            double intersectionY = (intersection.getNormalizedY() - minY) * scale;
+            double radius = 12 * road_width;
+
+            Circle intersectionCircle = new Circle(intersectionX, intersectionY, radius, Color.TRANSPARENT);
+            intersectionCircle.setCursor(Cursor.HAND);
+
+            intersectionCircle.setOnMouseClicked(event -> {
+                Label content = new Label("Intersection ID : " + intersection.getId());
+                Popover popover = new Popover(content);
+                popover.setArrowLocation(Popover.ArrowLocation.TOP_CENTER);
+                Point2D screen = addLayer.localToScreen(intersectionX, intersectionY);
+                popover.show(intersectionCircle, screen.getX() - 10, screen.getY());
+            });
+            addLayer.getChildren().add(intersectionCircle);        }
+        }
 
     private void drawIntersection(GraphicsContext gc, double scale, double minX, double minY, Intersection intersection, double radius, boolean circle) {
         double x = (intersection.getNormalizedX() - minX) * scale;
