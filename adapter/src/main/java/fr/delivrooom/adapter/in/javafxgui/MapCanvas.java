@@ -63,6 +63,7 @@ public class MapCanvas extends StackPane {
 
         // Recalculate the tour when this method is called since it means the data has changed
         CityGraph cityGraph = new CityGraph(cityMap);
+        // TODO : use a more advanced TSP solver
         tourCalculator = new TemplateTourCalculator(cityGraph);
 
         if (tourCalculator.doesCalculatedTourNeedsToBeChanged(deliveriesDemand)) {
