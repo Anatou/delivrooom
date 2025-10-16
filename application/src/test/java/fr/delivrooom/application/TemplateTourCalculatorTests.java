@@ -145,4 +145,9 @@ public class TemplateTourCalculatorTests {
         HashMap<Long, Path> out = templateTourCalculator.targetedDijkstraSearchTest(1, targets);
         Assertions.assertEquals(3.f, out.get(2L).getTotalLength());
     }
+
+    @Test
+    public void failing_test() {
+        Assertions.assertEquals(1,2);
+    }
 }
