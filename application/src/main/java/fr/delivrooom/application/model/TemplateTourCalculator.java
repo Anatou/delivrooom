@@ -1,34 +1,104 @@
 package fr.delivrooom.application.model;
 
+import fr.delivrooom.application.tsp.TemplateTSP;
+
 import java.util.*;
 
 public class TemplateTourCalculator implements TourCalculator{
 
-    protected CityGraph graph;
+    protected final CityGraph graph;
+    protected TourSolution tourSolution;
+    protected DeliveriesDemand calculatedDemand;
 
     public TemplateTourCalculator(CityGraph g) {
         // create a Tour calculator with a graph
         this.graph = g;
+        this.tourSolution = null;
     }
 
     public Graphe getGraph() { return graph; }
 
+    public boolean doesCalculatedTourNeedsToBeChanged(DeliveriesDemand demand) {
+        // checks if the demand is different from the last calculated one or if no tour has been calculated yet
+        if (calculatedDemand == null){
+            return demand != null;
+        } else {
+            return !calculatedDemand.equals(demand);
+        }
+    }
+
     @Override
     public void findOptimalTour(DeliveriesDemand demand) {
-        // first : find all shortest paths between any pair of nodes in the graph
+        // first: find all shortest paths between any pair of nodes in the graph
+        boolean useTSP = false;
+
+        if (!useTSP){
+            if (tourSolution == null || !calculatedDemand.equals(demand)) {
+                Delivery delivery = demand.deliveries().getFirst();
+                long warehouseId = demand.store().getId();
+                long firstPickupId = delivery.takeoutIntersection().getId();
+                long firstDepositId = delivery.deliveryIntersection().getId();
+                HashSet<Long> targetPickup = new HashSet<>(Set.of(firstPickupId));
+                HashSet<Long> targetDeposit = new HashSet<>(Set.of(firstDepositId));
+                HashSet<Long> targetWarehouse = new HashSet<>(Set.of(warehouseId));
+
+                HashMap<Long, Path> solutionToPickup = findShortestPaths(warehouseId, targetPickup);
+                HashMap<Long, Path> solutionToDeposit = findShortestPaths(firstPickupId, targetDeposit);
+                HashMap<Long, Path> solutionToWarehouse = findShortestPaths(firstDepositId, targetWarehouse);
+                Path pathToFirstPickup = solutionToPickup.get(firstPickupId);
+                Path pathToFirstDeposit = solutionToDeposit.get(firstDepositId);
+                Path pathToFirstWarehouse = solutionToWarehouse.get(warehouseId);
+                tourSolution = new TourSolution(
+                        new ArrayList<>(List.of(pathToFirstPickup, pathToFirstDeposit, pathToFirstWarehouse)),
+                        pathToFirstPickup.getTotalLength()+pathToFirstDeposit.getTotalLength()+pathToFirstWarehouse.getTotalLength()
+                );
+        } else {
+                // todo: recalculate only the needed deliveries
+                throw new UnsupportedOperationException("Dijkstra-based tour recalculation is not implemented yet");
+
+            }
+
+        } else {
+            // TODO implement TSP-based tour calculation
+            TemplateTSP tspSolver = new TemplateTSP() {
+                @Override
+                protected int bound(Integer sommetCourant, Collection<Integer> nonVus) {
+                    return 0;
+                }
+
+                @Override
+                protected Iterator<Integer> iterator(Integer sommetCrt, Collection<Integer> nonVus, Graphe g) {
+                    return null;
+                }
+            };
+            System.out.println("Calculating TSP solution for " + graph.getNbSommets() + " nodes");
+            tspSolver.searchSolution(1000, graph);
+            System.out.println("TSP solution cost: " + tspSolver.getSolutionCost());
+            for (int i = 0; i < graph.getNbSommets(); ++i) {
+                System.out.println("Step " + i + ": visit intersection " + tspSolver.getSolution(i));
+            }
+        }
+
     }
 
     @Override
     public TourSolution getOptimalTour() {
-        return null;
+        return tourSolution;
     }
 
     @Override
     public float getTourLength() {
-        return 0;
+        if (tourSolution != null) {
+            return tourSolution.getTotalLength();
+        } else {
+            return  -1f;
+        }
     }
 
     protected HashMap<Long, Path> findShortestPaths(long startIntersectionId , HashSet<Long> targets) {
+        /* find the shortest paths from startIntersectionId to all targets
+         * using Dijkstra's algorithm (for now)
+         */
 
         // as of now, only one target is acceptable
         if (targets.size() > 1) {
@@ -55,7 +125,7 @@ public class TemplateTourCalculator implements TourCalculator{
         predecessors.put(startIntersectionId, null);
         queue.add(startIntersectionId);
 
-        long selectedIntersectionId = startIntersectionId;
+        long selectedIntersectionId;
         while (!queue.isEmpty() && targetsRemaining > 0) {
             selectedIntersectionId = queue.poll();
             if (!settled.contains(selectedIntersectionId)) {
@@ -86,16 +156,16 @@ public class TemplateTourCalculator implements TourCalculator{
         for (long targetId : targets) {
             List<Road> roads = new ArrayList<>();
             long nodeId = targetId;
-            float pathLentgh = 0.f;
+            float pathLength = 0.f;
             while (nodeId != startIntersectionId) {
                 long parentId = predecessors.get(nodeId);
                 Road road = graph.getCityMap().getRoad(parentId, nodeId);
                 roads.add(road);
-                pathLentgh += road.getLength();
+                pathLength += road.getLength();
 
                 nodeId = parentId;
             }
-            pathToTarget.put(targetId, new Path(roads, pathLentgh));
+            pathToTarget.put(targetId, new Path(roads, pathLength));
         }
 
         return pathToTarget;

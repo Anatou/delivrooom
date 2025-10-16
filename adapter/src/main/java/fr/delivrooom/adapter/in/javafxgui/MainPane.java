@@ -13,18 +13,16 @@ public class MainPane extends BorderPane {
 
     public MainPane() {
         super();
-
         // Create the controller
         controller = new AppController();
 
         // Create UI components
         MapCanvas canvas = new MapCanvas();
-        Sidebar sidebar = new Sidebar();
+        Sidebar sidebar = new Sidebar(controller);
         toolBar = new AppToolBar(controller);
 
-
-        // Wire the controller to the canvas
-        controller.setMapCanvas(canvas);
+        // Wire the controller to the UI components
+        controller.wireComponents(canvas);
 
         // Set up the layout
         setTop(toolBar);

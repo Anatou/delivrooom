@@ -13,7 +13,7 @@ public interface GetConfigPropertyUseCase {
      * Get a property value by key with a default value
      *
      * @param key          the property key
-     * @param defaultValue the default value if key is not found
+     * @param defaultValue the default value if the key is not found
      * @return the property value, or defaultValue if not found
      */
     String getProperty(String key, String defaultValue);
@@ -22,7 +22,7 @@ public interface GetConfigPropertyUseCase {
      * Get an integer property value
      *
      * @param key          the property key
-     * @param defaultValue the default value if key is not found or cannot be parsed
+     * @param defaultValue the default value if the key is not found or cannot be parsed
      * @return the property value as integer
      */
     int getIntProperty(String key, int defaultValue);

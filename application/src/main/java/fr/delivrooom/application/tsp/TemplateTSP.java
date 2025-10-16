@@ -8,83 +8,90 @@ import java.util.Iterator;
 
 public abstract class TemplateTSP implements TSP {
 
-	private Integer[] meilleureSolution;
-	protected Graphe g;
-	private int coutMeilleureSolution;
-	private int tpsLimite;
-	private long tpsDebut;
-
-	public void chercheSolution(int tpsLimite, Graphe g){
-		if (tpsLimite <= 0) return;
-        tpsDebut = System.currentTimeMillis();
-		this.tpsLimite = tpsLimite;
-		this.g = g;
-		meilleureSolution = new Integer[g.getNbSommets()];
-		Collection<Integer> nonVus = new ArrayList<Integer>(g.getNbSommets()-1);
-		for (int i=1; i<g.getNbSommets(); i++) nonVus.add(i);
-		Collection<Integer> vus = new ArrayList<Integer>(g.getNbSommets());
-		vus.add(0); // le premier sommet visite est 0
-		coutMeilleureSolution = Integer.MAX_VALUE;
-		branchAndBound(0, nonVus, vus, 0);
-	}
-
-	public Integer getSolution(int i){
-		if (g != null && i>=0 && i<g.getNbSommets())
-			return meilleureSolution[i];
-		return -1;
-	}
-
-	public int getCoutSolution(){
-		if (g != null)
-			return coutMeilleureSolution;
-		return -1;
-	}
-
-	/**
-	 * Methode devant etre redefinie par les sous-classes de TemplateTSP
-	 * @param sommetCourant
-	 * @param nonVus
-     * @return une borne inferieure du cout des chemins de <code>g</code> partant de <code>sommetCourant</code>, visitant
-	 * tous les sommets de <code>nonVus</code> exactement une fois, puis retournant sur le sommet <code>0</code>.
-	 */
-	protected abstract int bound(Integer sommetCourant, Collection<Integer> nonVus);
+    protected Graphe g;
+    private Integer[] bestSolution;
+    private int bestSolutionCost;
+    private int timeLimit;
+    private long startTime;
 
     /**
-	 * Methode devant etre redefinie par les sous-classes de TemplateTSP
-	 * @param sommetCrt
-	 * @param nonVus
-	 * @param g
-	 * @return un iterateur permettant d'iterer sur tous les sommets de <code>nonVus</code> qui sont successeurs de <code>sommetCourant</code>
-	 */
-	protected abstract Iterator<Integer> iterator(Integer sommetCrt, Collection<Integer> nonVus, Graphe g);
-
-    /**
-	 * Methode definissant le patron (template) d'une resolution par separation et evaluation (branch and bound) du TSP pour le graphe <code>g</code>.
-	 * @param sommetCrt le dernier sommet visite
-	 * @param nonVus la liste des sommets qui n'ont pas encore ete visites
-	 * @param vus la liste des sommets deja visites (y compris sommetCrt)
-	 * @param coutVus la somme des couts des arcs du chemin passant par tous les sommets de vus dans l'ordre ou ils ont ete visites
+     * Search for a TSP solution for graph g within the given time limit in milliseconds.
+     * Note: the computed solution necessarily starts with vertex 0.
      */
-	private void branchAndBound(int sommetCrt, Collection<Integer> nonVus, Collection<Integer> vus, int coutVus){
-		if (System.currentTimeMillis() - tpsDebut > tpsLimite) return;
-	    if (nonVus.size() == 0){ // tous les sommets ont ete visites
-	    	if (g.estArc(sommetCrt,0)){ // on peut retourner au sommet de depart (0)
-	    		if (coutVus+g.getCout(sommetCrt,0) < coutMeilleureSolution){ // on a trouve une solution meilleure que meilleureSolution
-	    			vus.toArray(meilleureSolution);
-                    coutMeilleureSolution = (int) (coutVus + g.getCout(sommetCrt, 0));
-	    		}
-	    	}
-	    } else if (coutVus+bound(sommetCrt,nonVus) < coutMeilleureSolution){
-	        Iterator<Integer> it = iterator(sommetCrt, nonVus, g);
-	        while (it.hasNext()){
-	        	Integer prochainSommet = it.next();
-	        	vus.add(prochainSommet);
-	            nonVus.remove(prochainSommet);
-                branchAndBound((Integer) prochainSommet, nonVus, vus, coutVus + (int) g.getCout(sommetCrt, prochainSommet));
-	            vus.remove(prochainSommet);
-	            nonVus.add(prochainSommet);
-            }
-	    }
-	}
-}
+    @Override
+    public void searchSolution(int timeLimit, Graphe g) {
+        if (timeLimit <= 0) return;
+        startTime = System.currentTimeMillis();
+        this.timeLimit = timeLimit;
+        this.g = g;
+        bestSolution = new Integer[g.getNbSommets()];
+        Collection<Integer> unvisited = new ArrayList<>(g.getNbSommets() - 1);
+        for (int i = 1; i < g.getNbSommets(); i++) unvisited.add(i);
+        Collection<Integer> visited = new ArrayList<>(g.getNbSommets());
+        visited.add(0); // the first visited vertex is 0
+        bestSolutionCost = Integer.MAX_VALUE;
+        branchAndBound(0, unvisited, visited, 0);
+    }
 
+    @Override
+    public Integer getSolution(int i) {
+        if (g != null && i >= 0 && i < g.getNbSommets())
+            return bestSolution[i];
+        return -1;
+    }
+
+    @Override
+    public int getSolutionCost() {
+        if (g != null)
+            return bestSolutionCost;
+        return -1;
+    }
+
+    /**
+     * Must be implemented by subclasses.
+     *
+     * @return a lower bound of the cost of paths in g starting from currentVertex,
+     * visiting all vertices in unvisited exactly once, then returning to vertex 0.
+     */
+    protected abstract int bound(Integer currentVertex, Collection<Integer> unvisited);
+
+    /**
+     * Must be implemented by subclasses.
+     *
+     * @return an iterator over all vertices in unvisited that are successors of currentVertex
+     */
+    protected abstract Iterator<Integer> iterator(Integer currentVertex, Collection<Integer> unvisited, Graphe g);
+
+    /**
+     * Defines the template of a branch-and-bound resolution of the TSP for graph g.
+     * @param currentVertex the last visited vertex
+     * @param unvisited the list of vertices not yet visited
+     * @param visited the list of already visited vertices (including currentVertex)
+     * @param costVisited the sum of the costs of the arcs along the path visiting vertices in 'visited' in order
+     */
+    private void branchAndBound(int currentVertex,
+                                Collection<Integer> unvisited,
+                                Collection<Integer> visited,
+                                int costVisited) {
+        if (System.currentTimeMillis() - startTime > timeLimit) return;
+        if (unvisited.isEmpty()) { // all vertices have been visited
+            if (g.estArc(currentVertex, 0)) { // can return to start vertex (0)
+                if (costVisited + g.getCout(currentVertex, 0) < bestSolutionCost) { // found a better solution
+                    visited.toArray(bestSolution);
+                    bestSolutionCost = (int) (costVisited + g.getCout(currentVertex, 0));
+                }
+            }
+        } else if (costVisited + bound(currentVertex, unvisited) < bestSolutionCost) {
+            Iterator<Integer> it = iterator(currentVertex, unvisited, g);
+            while (it.hasNext()) {
+                Integer nextVertex = it.next();
+                visited.add(nextVertex);
+                unvisited.remove(nextVertex);
+                branchAndBound(nextVertex, unvisited, visited,
+                        costVisited + (int) g.getCout(currentVertex, nextVertex));
+                visited.remove(nextVertex);
+                unvisited.add(nextVertex);
+            }
+        }
+    }
+}

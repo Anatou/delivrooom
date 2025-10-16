@@ -4,6 +4,8 @@ import javafx.application.Platform;
 import javafx.scene.image.Image;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Map;
@@ -36,11 +38,11 @@ public class MapTileLoader {
     }
 
     /**
-     * Get or download a MapTiler tile with callback
+     * Get or download a MapTiler tile with a callback
      *
-     * @param tileKey the tile key got from getTileKey()
+     * @param tileKey       the tile key got from getTileKey()
      * @param onImageLoaded callback called when the tile is loaded
-     * @return the tile image if it is in cache. Otherwise null, and will call onImageLoaded upon completion.
+     * @return the tile image if it is in the cache. Otherwise null, and will call onImageLoaded upon completion.
      */
     public Image getTile(String tileKey, Runnable onImageLoaded) {
         // Return the cached tile if available
@@ -53,6 +55,7 @@ public class MapTileLoader {
         }
         return null;
     }
+
     /**
      * Load a tile asynchronously
      */
@@ -60,7 +63,7 @@ public class MapTileLoader {
         CompletableFuture<Image> future = CompletableFuture.supplyAsync(() -> {
             try {
                 String urlStr = MAPTILER_URL + tileKey + ".jpg?key=" + MAPTILER_API_KEY;
-                URL url = new URL(urlStr);
+                URL url = new URI(urlStr).toURL();
                 System.out.println("Downloading tile " + tileKey);
 
                 // Load image in a background thread
@@ -71,7 +74,7 @@ public class MapTileLoader {
                 }
 
                 return image;
-            } catch (IOException e) {
+            } catch (IOException | URISyntaxException e) {
                 System.err.println("Failed to load tile " + tileKey + ": " + e.getMessage());
                 return null;
             }

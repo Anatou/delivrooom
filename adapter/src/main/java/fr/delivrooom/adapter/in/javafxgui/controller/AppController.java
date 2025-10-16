@@ -1,12 +1,14 @@
 package fr.delivrooom.adapter.in.javafxgui.controller;
 
-import fr.delivrooom.adapter.in.javafxgui.command.CommandManager;
 import fr.delivrooom.adapter.in.javafxgui.JavaFXApp;
 import fr.delivrooom.adapter.in.javafxgui.MapCanvas;
+import fr.delivrooom.adapter.in.javafxgui.Sidebar;
+import fr.delivrooom.adapter.in.javafxgui.command.CommandManager;
 import fr.delivrooom.adapter.out.XMLCityMapLoader;
 import fr.delivrooom.application.model.CityMap;
 import fr.delivrooom.application.model.DeliveriesDemand;
 import fr.delivrooom.application.model.Delivery;
+import fr.delivrooom.application.model.Intersection;
 import javafx.scene.control.Alert;
 
 import java.io.File;
@@ -19,12 +21,17 @@ import java.net.URL;
  */
 public class AppController {
 
+    // State management
+    private final CommandManager commandManager;
     private State currentState;
+
+    // UI components
     private MapCanvas mapCanvas;
+    private Sidebar sidebar;
+
+    // Loaded data
     private CityMap cityMap;
     private DeliveriesDemand deliveriesDemand;
-    private CommandManager commandManager;
-
 
     public AppController() {
         this.currentState = new InitialState(this);
@@ -32,12 +39,11 @@ public class AppController {
     }
 
     /**
-     * Set the MapCanvas reference for rendering updates.
-     *
-     * @param mapCanvas The MapCanvas instance
+     * Must be called right after the UI components are initialized.
      */
-    public void setMapCanvas(MapCanvas mapCanvas) {
+    public void wireComponents(MapCanvas mapCanvas, Sidebar sidebar) {
         this.mapCanvas = mapCanvas;
+        this.sidebar = sidebar;
     }
 
     /**
@@ -53,8 +59,9 @@ public class AppController {
             e.printStackTrace();
         }
     }
+
     /**
-     * Handle opening a deliveries file through the current state.
+     * Handle opening a delivery file through the current state.
      *
      * @param file The deliveries file to open
      */
@@ -67,6 +74,22 @@ public class AppController {
         }
     }
 
+    /**
+     * Handle selecting an intersection through the current state.
+     *
+     * @param intersection The intersection to select, set as null if no intersection is selected
+     */
+    public void handleSelectIntersection(Intersection intersection) {
+        currentState.selectIntersection(intersection);
+    }
+
+    /**
+     * Request to switch to intersection selection mode.
+     */
+    public void handleRequestIntersectionSelection() {
+        currentState.requestIntersectionSelection();
+    }
+
 
     /**
      * Load a map file using the application service.
@@ -77,7 +100,7 @@ public class AppController {
     protected void loadMapFile(URL url) {
         try {
             this.cityMap = JavaFXApp.guiUseCase().getCityMap(url);
-            this.deliveriesDemand = null; // Clear deliveries when loading new map
+            this.deliveriesDemand = null; // Clear deliveries when loading a new map
             updateMapCanvas();
             System.out.println("Map loaded successfully: " + url);
         } catch (Exception e) {
@@ -87,7 +110,7 @@ public class AppController {
     }
 
     /**
-     * Load a deliveries file using the application service.
+     * Load a delivery file using the application service.
      * Called by state implementations.
      *
      * @param url The deliveries file to load
@@ -131,6 +154,7 @@ public class AppController {
     public State getCurrentState() {
         return currentState;
     }
+
     /**
      * Get the loaded city map.
      *
@@ -139,6 +163,7 @@ public class AppController {
     public CityMap getCityMap() {
         return cityMap;
     }
+
     /**
      * Get the loaded deliveries demand.
      *
@@ -153,10 +178,33 @@ public class AppController {
     }
 
     public void handleLoadDefaultFiles() {
-        URL cityMapURL = XMLCityMapLoader.class.getResource("/xml/grandPlan.xml");
-        URL deliveriesURL = XMLCityMapLoader.class.getResource("/xml/demandeGrand7.xml");
+        URL cityMapURL = XMLCityMapLoader.class.getResource("/xml/petitPlan.xml");
+        URL deliveriesURL = XMLCityMapLoader.class.getResource("/xml/demandePetit1.xml");
         currentState.openMapFile(cityMapURL);
         currentState.openDeliveriesFile(deliveriesURL);
+    }
+
+    public void addDelivery(Delivery delivery) {
+        System.out.println("Adding delivery " + delivery.takeoutIntersection().getId()
+                + " from intersection " + delivery.takeoutIntersection().getId()
+                + " to intersection " + delivery.deliveryIntersection().getId());
+        this.deliveriesDemand.deliveries().add(delivery);
+    }
+
+    public void removeDelivery(Delivery delivery) {
+        System.out.println("Removing delivery " + delivery.takeoutIntersection().getId()
+                + " from intersection " + delivery.takeoutIntersection().getId()
+                + " to intersection " + delivery.deliveryIntersection().getId());
+        this.deliveriesDemand.deliveries().remove(delivery);
+    }
+
+
+    /**
+     * Called by the mapCanvas from the state when the user clicks on an intersection.
+     */
+    protected void selectIntersection(Intersection intersection) {
+        sidebar.selectIntersection(intersection);
+        setState(new DeliveriesLoadedState(this));
     }
 
     public void showError(String title, String message) {
@@ -165,27 +213,5 @@ public class AppController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
-    }
-
-    public void addDelivery(Delivery delivery) {
-        System.out.println("addDelivery");
-        if (delivery !=null) {
-            this.deliveriesDemand.getDeliveries().add(delivery);
-        }
-        System.out.println("liste deliveriesDemand = ");
-        for (Delivery d : this.deliveriesDemand.getDeliveries()) {
-            System.out.println(d.getTakeoutIntersection().getId());
-        }
-
-    }
-    public void removeDelivery(Delivery delivery) {
-        System.out.println("removeDelivery");
-        if (delivery != null && this.deliveriesDemand.getDeliveries().contains(delivery) ) {
-            this.deliveriesDemand.getDeliveries().remove(delivery);
-        }
-        System.out.println("liste deliveriesDemand = ");
-        for (Delivery d : this.deliveriesDemand.getDeliveries()) {
-            System.out.println(d.getTakeoutIntersection().getId());
-        }
     }
 }

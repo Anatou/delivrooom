@@ -2,27 +2,11 @@ package fr.delivrooom.application.model;
 
 import java.util.List;
 
-public class DeliveriesDemand {
+public record DeliveriesDemand(List<Delivery> deliveries, Intersection store) {
 
-    private final List<Delivery> deliveries;
-    private final Intersection store;
-
-    public DeliveriesDemand(List<Delivery> deliveries, Intersection store) {
-        this.deliveries = deliveries;
-        this.store = store;
-    }
-
-    public List<Delivery> getDeliveries() {
-        return deliveries;
-    }
-
-    public Intersection getStore() {
-        return store;
-    }
-
-    public Delivery getDeliveryByIds (int idTakeOutIntersection, int idDeliveryIntersection){
-        for (Delivery d : this.deliveries){
-            if (d.getTakeoutIntersection().getId() == idTakeOutIntersection && d.getDeliveryIntersection().getId() == idDeliveryIntersection){
+    public Delivery getDeliveryByIds(int idTakeOutIntersection, int idDeliveryIntersection) {
+        for (Delivery d : this.deliveries) {
+            if (d.takeoutIntersection().getId() == idTakeOutIntersection && d.deliveryIntersection().getId() == idDeliveryIntersection) {
                 return d;
             }
         }

@@ -1,28 +1,35 @@
 package fr.delivrooom.adapter.in.javafxgui.controller;
 
+import fr.delivrooom.application.model.Intersection;
+
 import java.net.URL;
 
 /**
  * Map loaded state - a map has been loaded.
  * Allows opening a new map file or loading deliveries.
  */
-public class MapLoadedState implements State {
-
-    private final AppController controller;
-
-    public MapLoadedState(AppController controller) {
-        this.controller = controller;
-    }
+public record MapLoadedState(AppController controller) implements State {
 
     @Override
     public void openMapFile(URL url) {
         controller.loadMapFile(url);
+        controller.setState(new MapLoadedState(controller));
     }
 
     @Override
     public void openDeliveriesFile(URL url) {
         controller.loadDeliveriesFile(url);
         controller.setState(new DeliveriesLoadedState(controller));
+    }
+
+    @Override
+    public void selectIntersection(Intersection intersection) {
+        controller.showError("Can’t select intersection", "Unable to select intersection for now.");
+    }
+
+    @Override
+    public void requestIntersectionSelection() {
+        controller.showError("No deliveries loaded", "Please load deliveries first before selecting an intersection.");
     }
 
     @Override

@@ -1,8 +1,12 @@
 package fr.delivrooom.application.model;
 
 public interface TourCalculator {
-    public void findOptimalTour(DeliveriesDemand demand);
-    public TourSolution getOptimalTour();
-    public float getTourLength();
+    void findOptimalTour(DeliveriesDemand demand);
+
+    TourSolution getOptimalTour();
+
+    float getTourLength();
+
+    boolean doesCalculatedTourNeedsToBeChanged(DeliveriesDemand demand);
 
 }
