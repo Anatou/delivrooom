@@ -1,9 +1,6 @@
 package fr.delivrooom.adapter.in.javafxgui.controller;
 
-import javafx.scene.control.Alert;
-
-import java.io.File;
-import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * Deliveries loaded state - both map and deliveries have been loaded.
@@ -18,29 +15,13 @@ public class DeliveriesLoadedState implements State {
     }
 
     @Override
-    public void openMapFile(File file) {
-        if (file != null && file.exists()) {
-            try {
-                controller.loadMapFile(file.toURI().toURL());
-            } catch (MalformedURLException e) {
-                showError("Error loading map file", e.getMessage());
-            }
-        } else {
-            showError("Invalid map file", "Please select a valid map file.");
-        }
+    public void openMapFile(URL url) {
+        controller.loadMapFile(url);
     }
 
     @Override
-    public void openDeliveriesFile(File file) {
-        if (file != null && file.exists()) {
-            try {
-                controller.loadDeliveriesFile(file.toURI().toURL());
-            } catch (MalformedURLException e) {
-                showError("Error loading deliveries file", e.getMessage());
-            }
-        } else {
-            showError("Invalid deliveries file", "Please select a valid deliveries file.");
-        }
+    public void openDeliveriesFile(URL url) {
+        controller.loadDeliveriesFile(url);
     }
 
     @Override
@@ -48,11 +29,4 @@ public class DeliveriesLoadedState implements State {
         return "DeliveriesLoadedState";
     }
 
-    private void showError(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
 }

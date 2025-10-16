@@ -28,7 +28,9 @@ public class MainPane extends BorderPane {
 
         // Set up the layout
         setTop(toolBar);
-        setCenter(new SplitPane(sidebar, canvas));
+        SplitPane splitPane = new SplitPane(sidebar, canvas);
+        splitPane.setDividerPositions(0.25);
+        setCenter(splitPane);
     }
 
     /**
