@@ -130,7 +130,7 @@ public class TemplateTourCalculatorTests {
         CityGraph cityGraph = new CityGraph(cityMap);
         HashSet<Long> targets = new HashSet<>(Set.of(2L));
 
-        TemplateTourCalculator templateTourCalculator = new TemplateTourCalculator(cityGraph);
+        TourCalculator templateTourCalculator = new TourCalculator(cityGraph);
         HashMap<Long, Path> out = templateTourCalculator.targetedDijkstraSearchTest(1, targets);
         Assertions.assertEquals(1.f, out.get(2L).getTotalLength());
     }
@@ -141,7 +141,7 @@ public class TemplateTourCalculatorTests {
         CityGraph cityGraph = new CityGraph(cityMap);
         HashSet<Long> targets = new HashSet<>(Set.of(2L));
 
-        TemplateTourCalculator templateTourCalculator = new TemplateTourCalculator(cityGraph);
+        TourCalculator templateTourCalculator = new TourCalculator(cityGraph);
         HashMap<Long, Path> out = templateTourCalculator.targetedDijkstraSearchTest(1, targets);
         Assertions.assertEquals(3.f, out.get(2L).getTotalLength());
     }

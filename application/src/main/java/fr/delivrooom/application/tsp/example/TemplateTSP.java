@@ -1,4 +1,4 @@
-package fr.delivrooom.application.tsp;
+package fr.delivrooom.application.tsp.example;
 
 import fr.delivrooom.application.model.Graphe;
 
