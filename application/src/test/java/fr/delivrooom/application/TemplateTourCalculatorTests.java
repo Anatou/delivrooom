@@ -1,3 +1,5 @@
+package fr.delivrooom.application;
+
 import fr.delivrooom.application.model.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
