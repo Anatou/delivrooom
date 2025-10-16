@@ -34,12 +34,23 @@ public class TemplateTourCalculator implements TourCalculator{
         // first : find all shortest paths between any pair of nodes in the graph
         if (tourSolution == null || !calculatedDemand.equals(demand)) {
             Delivery delivery = demand.getDeliveries().getFirst();
-            Intersection warehouse = demand.getStore();
-            Long firstPickupId = delivery.getTakeoutIntersection().getId();
-            HashSet<Long> targets = new HashSet<>(Set.of(firstPickupId));
-            HashMap<Long, Path> solution = findShortestPaths(warehouse.getId(), targets);
-            Path pathToFirstPickup = solution.get(firstPickupId);
-            tourSolution = new TourSolution(new ArrayList<>(List.of(pathToFirstPickup)), pathToFirstPickup.getTotalLength());
+            long warehouseId = demand.getStore().getId();
+            long firstPickupId = delivery.getTakeoutIntersection().getId();
+            long firstDepositId = delivery.getDeliveryIntersection().getId();
+            HashSet<Long> targetPickup = new HashSet<>(Set.of(firstPickupId));
+            HashSet<Long> targetDeposit = new HashSet<>(Set.of(firstDepositId));
+            HashSet<Long> targetWarehouse = new HashSet<>(Set.of(warehouseId));
+
+            HashMap<Long, Path> solutionToPickup = findShortestPaths(warehouseId, targetPickup);
+            HashMap<Long, Path> solutionToDeposit = findShortestPaths(firstPickupId, targetDeposit);
+            HashMap<Long, Path> solutionToWarehouse = findShortestPaths(firstDepositId, targetWarehouse);
+            Path pathToFirstPickup = solutionToPickup.get(firstPickupId);
+            Path pathToFirstDeposit = solutionToDeposit.get(firstDepositId);
+            Path pathToFirstWarehouse = solutionToWarehouse.get(warehouseId);
+            tourSolution = new TourSolution(
+                    new ArrayList<>(List.of(pathToFirstPickup, pathToFirstDeposit, pathToFirstWarehouse)),
+                    pathToFirstPickup.getTotalLength()+pathToFirstDeposit.getTotalLength()+pathToFirstWarehouse.getTotalLength()
+            );
         }
         // todo: recalculate only the needed deliveries
     }
