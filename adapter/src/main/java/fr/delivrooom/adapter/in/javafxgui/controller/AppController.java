@@ -10,6 +10,7 @@ import fr.delivrooom.application.model.Delivery;
 import javafx.scene.control.Alert;
 
 import java.io.File;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
@@ -45,31 +46,27 @@ public class AppController {
      * @param file The map file to open
      */
     public void handleOpenMapFile(File file) {
-        currentState.openMapFile(file);
+        try {
+            currentState.openMapFile(file.toURI().toURL());
+        } catch (MalformedURLException e) {
+            showError("Invalid file URL", e.getMessage());
+            e.printStackTrace();
+        }
     }
-
     /**
      * Handle opening a deliveries file through the current state.
      *
      * @param file The deliveries file to open
      */
     public void handleOpenDeliveriesFile(File file) {
-        currentState.openDeliveriesFile(file);
+        try {
+            currentState.openDeliveriesFile(file.toURI().toURL());
+        } catch (MalformedURLException e) {
+            showError("Invalid file URL", e.getMessage());
+            e.printStackTrace();
+        }
     }
 
-    /**
-     * Display an error alert dialog.
-     *
-     * @param title The title of the error and @param message The error message
-     */
-    private void showError(String title, String message) {
-
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
 
     /**
      * Load a map file using the application service.
@@ -134,7 +131,6 @@ public class AppController {
     public State getCurrentState() {
         return currentState;
     }
-
     /**
      * Get the loaded city map.
      *
@@ -143,7 +139,6 @@ public class AppController {
     public CityMap getCityMap() {
         return cityMap;
     }
-
     /**
      * Get the loaded deliveries demand.
      *
@@ -160,8 +155,16 @@ public class AppController {
     public void handleLoadDefaultFiles() {
         URL cityMapURL = XMLCityMapLoader.class.getResource("/xml/grandPlan.xml");
         URL deliveriesURL = XMLCityMapLoader.class.getResource("/xml/demandeGrand7.xml");
-        loadMapFile(cityMapURL);
-        loadDeliveriesFile(deliveriesURL);
+        currentState.openMapFile(cityMapURL);
+        currentState.openDeliveriesFile(deliveriesURL);
+    }
+
+    public void showError(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     public void addDelivery(Delivery delivery) {

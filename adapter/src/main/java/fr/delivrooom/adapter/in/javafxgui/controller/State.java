@@ -1,6 +1,6 @@
 package fr.delivrooom.adapter.in.javafxgui.controller;
 
-import java.io.File;
+import java.net.URL;
 
 /**
  * State interface for the State design pattern.
@@ -11,16 +11,16 @@ public interface State {
     /**
      * Handle opening a map file.
      *
-     * @param file The map file to open
+     * @param url The map file url to open
      */
-    void openMapFile(File file);
+    void openMapFile(URL url);
 
     /**
      * Handle opening a deliveries demand file.
      *
-     * @param file The deliveries file to open
+     * @param url The deliveries file url to open
      */
-    void openDeliveriesFile(File file);
+    void openDeliveriesFile(URL url);
 
     /**
      * Get the name of the current state for debugging/logging purposes.
