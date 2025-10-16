@@ -3,25 +3,22 @@ package fr.delivrooom.application.tsp;
 import fr.delivrooom.application.model.Graphe;
 
 public interface TSP {
-	
-	/**
-	 * Cherche une solution au TSP pour le graphe <code>g</code> dans la limite de <code>tpsLimite</code> millisecondes
-	 * Attention : la solution calculee commence necessairement par le sommet 0
-	 * @param tpsLimite
-	 * @param g
-	 */
-	public void chercheSolution(int tpsLimite, Graphe g);
-	
-	/**
-	 * @param i
-	 * @return le ieme sommet visite dans la solution calculee par <code>chercheSolution</code>
-	 * (-1 si <code>chercheSolution</code> n'a pas encore ete appele, ou si i < 0 ou i >= g.getNbSommets())
-	 */
-	public Integer getSolution(int i);
-	
-	/** 
-	 * @return la somme des couts des arcs de la solution calculee par <code>chercheSolution</code> 
-	 * (-1 si <code>chercheSolution</code> n'a pas encore ete appele).
-	 */
-	public int getCoutSolution();
+
+    /**
+     * Search for a TSP solution for the graph g within timeLimit milliseconds.
+     * Note: the computed solution necessarily starts with vertex 0.
+     */
+    void searchSolution(int timeLimit, Graphe g);
+
+    /**
+     * @return the i-th vertex visited in the solution computed by searchSolution
+     * (-1 if searchSolution has not been called yet, or if i < 0 or i >= g.getNbSommets())
+     */
+    Integer getSolution(int i);
+
+    /**
+     * @return the sum of the costs of the arcs of the solution computed by searchSolution
+     * (-1 if searchSolution has not been called yet).
+     */
+    int getSolutionCost();
 }

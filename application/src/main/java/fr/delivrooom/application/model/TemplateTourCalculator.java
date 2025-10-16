@@ -6,7 +6,7 @@ import java.util.*;
 
 public class TemplateTourCalculator implements TourCalculator{
 
-    protected CityGraph graph;
+    protected final CityGraph graph;
     protected TourSolution tourSolution;
     protected DeliveriesDemand calculatedDemand;
 
@@ -21,11 +21,7 @@ public class TemplateTourCalculator implements TourCalculator{
     public boolean doesCalculatedTourNeedsToBeChanged(DeliveriesDemand demand) {
         // checks if the demand is different from the last calculated one or if no tour has been calculated yet
         if (calculatedDemand == null){
-            if (demand == null) {
-                return false;
-            } else {
-                return true;
-            }
+            return demand != null;
         } else {
             return !calculatedDemand.equals(demand);
         }
@@ -33,15 +29,15 @@ public class TemplateTourCalculator implements TourCalculator{
 
     @Override
     public void findOptimalTour(DeliveriesDemand demand) {
-        // first : find all shortest paths between any pair of nodes in the graph
-        boolean useTSP = true;
+        // first: find all shortest paths between any pair of nodes in the graph
+        boolean useTSP = false;
 
         if (!useTSP){
             if (tourSolution == null || !calculatedDemand.equals(demand)) {
-                Delivery delivery = demand.getDeliveries().getFirst();
-                long warehouseId = demand.getStore().getId();
-                long firstPickupId = delivery.getTakeoutIntersection().getId();
-                long firstDepositId = delivery.getDeliveryIntersection().getId();
+                Delivery delivery = demand.deliveries().getFirst();
+                long warehouseId = demand.store().getId();
+                long firstPickupId = delivery.takeoutIntersection().getId();
+                long firstDepositId = delivery.deliveryIntersection().getId();
                 HashSet<Long> targetPickup = new HashSet<>(Set.of(firstPickupId));
                 HashSet<Long> targetDeposit = new HashSet<>(Set.of(firstDepositId));
                 HashSet<Long> targetWarehouse = new HashSet<>(Set.of(warehouseId));
@@ -76,8 +72,8 @@ public class TemplateTourCalculator implements TourCalculator{
                 }
             };
             System.out.println("Calculating TSP solution for " + graph.getNbSommets() + " nodes");
-            tspSolver.chercheSolution(1000, graph);
-            System.out.println("TSP solution cost: " + tspSolver.getCoutSolution());
+            tspSolver.searchSolution(1000, graph);
+            System.out.println("TSP solution cost: " + tspSolver.getSolutionCost());
             for (int i = 0; i < graph.getNbSommets(); ++i) {
                 System.out.println("Step " + i + ": visit intersection " + tspSolver.getSolution(i));
             }
@@ -129,7 +125,7 @@ public class TemplateTourCalculator implements TourCalculator{
         predecessors.put(startIntersectionId, null);
         queue.add(startIntersectionId);
 
-        long selectedIntersectionId = startIntersectionId;
+        long selectedIntersectionId;
         while (!queue.isEmpty() && targetsRemaining > 0) {
             selectedIntersectionId = queue.poll();
             if (!settled.contains(selectedIntersectionId)) {
@@ -160,16 +156,16 @@ public class TemplateTourCalculator implements TourCalculator{
         for (long targetId : targets) {
             List<Road> roads = new ArrayList<>();
             long nodeId = targetId;
-            float pathLentgh = 0.f;
+            float pathLength = 0.f;
             while (nodeId != startIntersectionId) {
                 long parentId = predecessors.get(nodeId);
                 Road road = graph.getCityMap().getRoad(parentId, nodeId);
                 roads.add(road);
-                pathLentgh += road.getLength();
+                pathLength += road.getLength();
 
                 nodeId = parentId;
             }
-            pathToTarget.put(targetId, new Path(roads, pathLentgh));
+            pathToTarget.put(targetId, new Path(roads, pathLength));
         }
 
         return pathToTarget;

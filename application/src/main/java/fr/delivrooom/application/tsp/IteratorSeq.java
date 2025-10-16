@@ -7,37 +7,37 @@ import java.util.Iterator;
 
 public class IteratorSeq implements Iterator<Integer> {
 
-	private Integer[] candidats;
-	private int nbCandidats;
+    private final Integer[] candidates;
+    private int candidateCount;
 
-	/**
-	 * Cree un iterateur pour iterer sur l'ensemble des sommets de nonVus qui sont successeurs de sommetCrt dans le graphe g,
-	 * dans l'odre d'apparition dans <code>nonVus</code>
-	 * @param nonVus
-	 * @param sommetCrt
-	 * @param g
-	 */
-	public IteratorSeq(Collection<Integer> nonVus, int sommetCrt, Graphe g){
-		this.candidats = new Integer[nonVus.size()];
-		Iterator<Integer> it = nonVus.iterator();
-		while (it.hasNext()){
-			Integer s = it.next();
-			if (g.estArc(sommetCrt, s))
-				candidats[nbCandidats++] = s;
-		}
-	}
-	
-	@Override
-	public boolean hasNext() {
-		return nbCandidats > 0;
-	}
+    /**
+     * Creates an iterator over the vertices in 'unvisited' that are successors
+     * of currentVertex in graph g, in the same order as they appear in 'unvisited'.
+     */
+    public IteratorSeq(Collection<Integer> unvisited, int currentVertex, Graphe g) {
+        this.candidates = new Integer[unvisited.size()];
+        Iterator<Integer> it = unvisited.iterator();
+        while (it.hasNext()) {
+            Integer v = it.next();
+            if (g.estArc(currentVertex, v)) {
+                candidates[candidateCount++] = v;
+            }
+        }
+    }
 
-	@Override
-	public Integer next() {
-		nbCandidats--;
-		return candidats[nbCandidats];
-	}
+    @Override
+    public boolean hasNext() {
+        return candidateCount > 0;
+    }
 
-	@Override
-	public void remove() {}
+    @Override
+    public Integer next() {
+        candidateCount--;
+        return candidates[candidateCount];
+    }
+
+    @Override
+    public void remove() {
+        // no-op
+    }
 }

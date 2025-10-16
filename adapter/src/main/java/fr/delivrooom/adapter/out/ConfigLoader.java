@@ -7,15 +7,9 @@ import java.io.InputStream;
 import java.util.Properties;
 
 /**
- * Utility class to load configuration from properties file
+ * Utility class to load configuration from the properties file
  */
-public class ConfigLoader implements ConfigRepository {
-
-    private final InputStream configInputStream;
-
-    public ConfigLoader(InputStream configInputStream) {
-        this.configInputStream = configInputStream;
-    }
+public record ConfigLoader(InputStream configInputStream) implements ConfigRepository {
 
     public Properties loadConfigProperties() {
         Properties properties = new Properties();

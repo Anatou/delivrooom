@@ -4,18 +4,18 @@ import java.util.Stack;
 
 public class CommandManager {
 
-    private final Stack<Command> history = new Stack<>();
+    private final Stack<Command> undoStack = new Stack<>();
     private final Stack<Command> redoStack = new Stack<>();
 
     public void executeCommand(Command command) {
         command.execute();
-        history.push(command);
+        undoStack.push(command);
         redoStack.clear();
     }
 
     public void undo() {
-        if (!history.isEmpty()) {
-            Command command = history.pop();
+        if (!undoStack.isEmpty()) {
+            Command command = undoStack.pop();
             command.undo();
             redoStack.push(command);
         }
@@ -25,7 +25,7 @@ public class CommandManager {
         if (!redoStack.isEmpty()) {
             Command command = redoStack.pop();
             command.execute();
-            history.push(command);
+            undoStack.push(command);
         }
     }
 }

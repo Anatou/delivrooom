@@ -6,13 +6,7 @@ import java.net.URL;
  * Map loaded state - a map has been loaded.
  * Allows opening a new map file or loading deliveries.
  */
-public class MapLoadedState implements State {
-
-    private final AppController controller;
-
-    public MapLoadedState(AppController controller) {
-        this.controller = controller;
-    }
+public record MapLoadedState(AppController controller) implements State {
 
     @Override
     public void openMapFile(URL url) {

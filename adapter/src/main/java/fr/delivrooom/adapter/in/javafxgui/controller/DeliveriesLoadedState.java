@@ -6,13 +6,7 @@ import java.net.URL;
  * Deliveries loaded state - both map and deliveries have been loaded.
  * Allows opening new map or deliveries files.
  */
-public class DeliveriesLoadedState implements State {
-
-    private final AppController controller;
-
-    public DeliveriesLoadedState(AppController controller) {
-        this.controller = controller;
-    }
+public record DeliveriesLoadedState(AppController controller) implements State {
 
     @Override
     public void openMapFile(URL url) {

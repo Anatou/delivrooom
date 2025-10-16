@@ -3,8 +3,8 @@ package fr.delivrooom.application.model;
 import java.util.List;
 
 public class TourSolution {
-    protected List<Path> paths;
-    protected float totalLength;
+    protected final List<Path> paths;
+    protected final float totalLength;
 
     public TourSolution(List<Path> paths, float totalLength) {
         this.paths = paths;

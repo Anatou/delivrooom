@@ -19,6 +19,7 @@ public class Sidebar extends VBox {
 
         setAlignment(javafx.geometry.Pos.CENTER);
         setPadding(new javafx.geometry.Insets(10));
+        setSpacing(10);
 
         Label label = new Label("Name is: ");
         Button button = new Button("Get Name");

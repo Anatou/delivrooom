@@ -6,13 +6,7 @@ import java.net.URL;
  * Initial state - no map or deliveries loaded yet.
  * Only allows opening a map file.
  */
-public class InitialState implements State {
-
-    private final AppController controller;
-
-    public InitialState(AppController controller) {
-        this.controller = controller;
-    }
+public record InitialState(AppController controller) implements State {
 
     @Override
     public void openMapFile(URL url) {
