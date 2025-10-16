@@ -14,11 +14,10 @@ public interface TSP {
     public void chercheSolution(int tpsLimite, Graphe g, DeliveriesDemand demand);
 
     /**
-     * @param i
      * @return le ieme sommet visite dans la solution calculee par <code>chercheSolution</code>
      * (-1 si <code>chercheSolution</code> n'a pas encore ete appele, ou si i < 0 ou i >= g.getNbSommets())
      */
-    public Long getSolution(long i);
+    public Long[] getSolution();
 
     /**
      * @return la somme des couts des arcs de la solution calculee par <code>chercheSolution</code>
