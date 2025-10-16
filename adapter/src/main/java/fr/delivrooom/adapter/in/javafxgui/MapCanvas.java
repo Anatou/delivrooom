@@ -7,12 +7,9 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 
-import javafx.scene.control.Label;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
-import atlantafx.base.controls.Popover;
 
 public class MapCanvas extends StackPane {
 
@@ -21,11 +18,9 @@ public class MapCanvas extends StackPane {
     private final Canvas tileCanvas = new Canvas();
     private final Canvas overlayCanvas = new Canvas();
 
-    private final Pane interactiveLayer = new Pane();
-
-
     private CityMap currentCityMap;
     private DeliveriesDemand currentDeliveriesDemand;
+    private TourCalculator tourCalculator;
 
     public MapCanvas() {
         tileLoader = new MapTileLoader();
@@ -66,6 +61,16 @@ public class MapCanvas extends StackPane {
         this.currentCityMap = cityMap;
         this.currentDeliveriesDemand = deliveriesDemand;
 
+        // Recalculate the tour when this method is called since it means the data has changed
+        CityGraph cityGraph = new CityGraph(cityMap);
+        tourCalculator = new TemplateTourCalculator(cityGraph);
+
+        if (tourCalculator.doesCalculatedTourNeedsToBeChanged(deliveriesDemand)) {
+            tourCalculator.findOptimalTour(deliveriesDemand);
+        }
+
+
+
         if (getWidth() > 0 && getHeight() > 0) {
             drawMap(getWidth(), getHeight(), cityMap, deliveriesDemand);
         }
@@ -80,18 +85,14 @@ public class MapCanvas extends StackPane {
         double maxY = cityMap.getIntersections().values().stream().mapToDouble(Intersection::getNormalizedY).max().orElse(1) + padding;
 
         // Calculate scale factor between normalized coordinates and canvas coordinates
-        double scale;
-        double scaleByWidth = width / (maxX - minX);
-        double scaleByHeight = height / (maxY - minY);
+        double scale = Math.min(width / (maxX - minX), height / (maxY - minY));
 
         // Center the map on the canvas by editing the min/max coordinates on the non-restricting axis
-        if (scaleByHeight < scaleByWidth) {
-            scale = scaleByHeight;
+        if (width / scale > maxX - minX) {
             double extraX = (width / scale - (maxX - minX)) / 2;
             minX -= extraX;
             maxX += extraX;
-        } else {
-            scale = scaleByWidth;
+        } else if (height / scale > maxY - minY) {
             double extraY = (height / scale - (maxY - minY)) / 2;
             minY -= extraY;
             maxY += extraY;
@@ -171,42 +172,6 @@ public class MapCanvas extends StackPane {
                 drawIntersection(gc, scale, minX, minY, delivery.getTakeoutIntersection(), 3 * road_width, false); // Draw takeout point in red
                 gc.setFill(Color.BLUE);
                 drawIntersection(gc, scale, minX, minY, delivery.getDeliveryIntersection(), 3 * road_width, true); // Draw delivery point in blue
-
-                // Add interactive circle over delivery point
-                Intersection deliveryIntersection = delivery.getDeliveryIntersection();
-                double deliveryX = (deliveryIntersection.getNormalizedX() - minX) * scale;
-                double deliveryY = (deliveryIntersection.getNormalizedY() - minY) * scale;
-                double radius = 3;
-
-                Circle deliveryCircle = new Circle(deliveryX, deliveryY, radius, Color.TRANSPARENT);
-                deliveryCircle.setStroke(Color.TRANSPARENT);
-                deliveryCircle.setStrokeWidth(2);
-                deliveryCircle.setCursor(Cursor.HAND);
-
-                deliveryCircle.setOnMouseClicked(event -> {
-                    Label content = new Label("Delivery ID : " + deliveryIntersection.getId());
-                    Popover popover = new Popover(content);
-                    popover.setArrowLocation(Popover.ArrowLocation.TOP_CENTER);
-                    popover.show(deliveryCircle, event.getScreenX(), event.getScreenY());
-                });
-                interactiveLayer.getChildren().add(deliveryCircle);
-
-                Intersection pickupIntersection = delivery.getTakeoutIntersection();
-                double pickupX = (pickupIntersection.getNormalizedX() - minX) * scale;
-                double pickupY = (pickupIntersection.getNormalizedY() - minY) * scale;
-
-                Circle pickupCircle = new Circle(pickupX, pickupY, radius, Color.TRANSPARENT);
-                pickupCircle.setStroke(Color.TRANSPARENT);
-                pickupCircle.setStrokeWidth(2);
-                pickupCircle.setCursor(Cursor.HAND);
-
-                pickupCircle.setOnMouseClicked(event -> {
-                    Label content = new Label("Pickup ID : " + pickupIntersection.getId());
-                    Popover popover = new Popover(content);
-                    popover.setArrowLocation(Popover.ArrowLocation.TOP_CENTER);
-                    popover.show(pickupCircle, event.getScreenX(), event.getScreenY());
-                });
-                interactiveLayer.getChildren().add(pickupCircle);
             }
             // Draw warehouse point in green
             gc.setFill(Color.GREEN);
