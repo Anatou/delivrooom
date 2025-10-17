@@ -50,4 +50,12 @@ public record DeliveriesDemand(List<Delivery> deliveries, Intersection store) {
         }
         return null;
     }
+
+    public List<Delivery> getDeliveries() {
+        return deliveries;
+    }
+
+    public Intersection getStore() {
+        return store;
+    }
 }

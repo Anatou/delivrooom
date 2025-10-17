@@ -17,4 +17,21 @@ public record Delivery(Intersection takeoutIntersection, Intersection deliveryIn
         return Objects.hash(takeoutIntersection, deliveryIntersection);
     }
 
+    public Intersection getTakeoutIntersection() {
+        return takeoutIntersection;
+    }
+
+    public Intersection getDeliveryIntersection() {
+        return deliveryIntersection;
+    }
+
+    @Override
+    public int takeoutDuration() {
+        return takeoutDuration;
+    }
+
+    @Override
+    public int deliveryDuration() {
+        return deliveryDuration;
+    }
 }
