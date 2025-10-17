@@ -345,39 +345,118 @@ public class MapCanvas extends StackPane {
                 drawRoad(gc, scale, minX, minY, road);
             }
         }
-        // Draw intersections
+        // Draw intersections (base, light)
         gc.setFill(Color.WHITE);
         gc.setStroke(Color.rgb(220, 220, 220));
         for (Intersection intersection : currentCityMap.intersections().values()) {
             drawIntersection(gc, scale, minX, minY, intersection, 1.3 * road_width, true);
         }
 
-        // Draw deliveries demands
-        if (currentDeliveriesDemand != null) {
-
-            // Draw warehouse point in green
-            gc.setFill(Color.GREEN);
-            drawIntersection(gc, scale, minX, minY, currentDeliveriesDemand.store(), 4 * road_width, true);
-
-            // Takeout point is a red square, delivery point in a blue circle
-            for (Delivery delivery : currentDeliveriesDemand.deliveries()) {
-                gc.setFill(Color.RED);
-                drawIntersection(gc, scale, minX, minY, delivery.takeoutIntersection(), 4 * road_width, false);
-                gc.setFill(Color.BLUE);
-                drawIntersection(gc, scale, minX, minY, delivery.deliveryIntersection(), 4 * road_width, true);
-            }
-        }
-        // Draw the calculated tour if available
+        // Draw the calculated tour if available (numbers only on store/pickup/delivery in visit order)
         if (tourCalculator != null && tourCalculator.getOptimalTour() != null) {
             gc.setStroke(Color.LIMEGREEN);
             gc.setLineWidth(2 * road_width);
             TourSolution tourSolution = tourCalculator.getOptimalTour();
+            // Build map of target intersection ids -> type ("store","pickup","delivery")
+
+
+            HashMap<Long, String> targetTypes = new HashMap<>();
+            if (currentDeliveriesDemand != null) {
+                Intersection store = currentDeliveriesDemand.store();
+                if (store != null) targetTypes.put(store.getId(), "store");
+                for (Delivery d : currentDeliveriesDemand.deliveries()) {
+                    if (d.takeoutIntersection() != null) {
+                        targetTypes.putIfAbsent(d.takeoutIntersection().getId(), "pickup");
+                    }
+                    if (d.deliveryIntersection() != null) {
+                        targetTypes.putIfAbsent(d.deliveryIntersection().getId(), "delivery");
+                    }
+                }
+            }
+
+            // Build visit order position map (warehouse is 1, first pickup is 2, etc.)
+            List<Long> visitOrder = tourSolution.getDeliveryOrder();
+            HashMap<Long, Integer> visitPos = new HashMap<>();
+            int pos = 1;
+            for (Long id : visitOrder) {
+                visitPos.put(id, pos++);
+            }
+
+            // Build delivery to pickup map
+            HashMap<Long, Long> deliveryToPickup = new HashMap<>();
+            if (currentDeliveriesDemand != null) {
+                for (Delivery d : currentDeliveriesDemand.deliveries()) {
+                    if (d.deliveryIntersection() != null && d.takeoutIntersection() != null) {
+                        deliveryToPickup.put(d.deliveryIntersection().getId(), d.takeoutIntersection().getId());
+                    }
+                }
+            }
+
+            // Build labels for each visited target (for deliveries, show pickup and delivery positions)
+            HashMap<Long, String> labels = new HashMap<>();
+            for (Long id : visitOrder) {
+                String type = targetTypes.get(id);
+                Integer myPos = visitPos.get(id);
+                if ("delivery".equals(type)) {
+                    Long pickupId = deliveryToPickup.get(id);
+                    Integer pickupPos = pickupId != null ? visitPos.get(pickupId) : null;
+                    String suffix = (pickupPos != null) ? String.valueOf(pickupPos) : "?";
+                    labels.put(id, (myPos != null ? myPos : -1) + "." + suffix);
+                } else {
+                    labels.put(id, myPos != null ? String.valueOf(myPos) : "?");
+                }
+            }
+
             for (Path path : tourSolution.getPaths()) {
-                List<Road> intersections = path.getIntersections();
-                for (Road road : intersections) {
+                List<Road> roads = path.getIntersections();
+                for (Road road : roads) {
                     drawRoad(gc, scale, minX, minY, road);
                 }
             }
+
+            gc.setTextAlign(javafx.scene.text.TextAlignment.CENTER);
+            gc.setTextBaseline(javafx.geometry.VPos.CENTER);
+
+            for (Long id : visitOrder) {
+                String label = labels.get(id);
+                if (label == null) continue;
+                Intersection inter = currentCityMap.intersections().get(id);
+                if (inter == null) continue;
+                double x = (inter.getNormalizedX() - minX) * scale;
+                double y = (inter.getNormalizedY() - minY) * scale;
+
+                double fontSize = Math.max(10.0, 6.0 * road_width);
+                double numBgRadius = fontSize;
+
+                String type = targetTypes.get(id);
+                Color bgColor = Color.WHITE;
+                Color strokeColor = Color.DARKGREEN;
+                Color textColor = Color.DARKGREEN;
+                if ("store".equals(type)) {
+                    bgColor = Color.GREEN;
+                    strokeColor = Color.DARKGREEN;
+                    textColor = Color.WHITE;
+                } else if ("pickup".equals(type)) {
+                    bgColor = Color.BLUE;
+                    strokeColor = Color.DARKBLUE;
+                    textColor = Color.WHITE;
+                } else if ("delivery".equals(type)) {
+                    bgColor = Color.RED;
+                    strokeColor = Color.DARKRED;
+                    textColor = Color.WHITE;
+                }
+
+                gc.setFill(bgColor);
+                gc.fillOval(x - numBgRadius, y - numBgRadius, numBgRadius * 2.0, numBgRadius * 2.0);
+                gc.setStroke(strokeColor);
+                gc.setLineWidth(1.0);
+                gc.strokeOval(x - numBgRadius, y - numBgRadius, numBgRadius * 2.0, numBgRadius * 2.0);
+
+                gc.setFill(textColor);
+                gc.setFont(javafx.scene.text.Font.font(fontSize));
+                gc.fillText(label, x, y);
+            }
+
         }
     }
 

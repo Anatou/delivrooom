@@ -155,8 +155,8 @@ public class AppController {
     }
 
     public void handleLoadDefaultFiles() {
-        URL cityMapURL = XMLCityMapLoader.class.getResource("/xml/grandPlan.xml");
-        URL deliveriesURL = XMLCityMapLoader.class.getResource("/xml/demandeGrand7.xml");
+        URL cityMapURL = XMLCityMapLoader.class.getResource("/xml/moyenPlan.xml");
+        URL deliveriesURL = XMLCityMapLoader.class.getResource("/xml/demandeMoyen5.xml");
         currentState.openMapFile(cityMapURL);
         currentState.openDeliveriesFile(deliveriesURL);
     }
