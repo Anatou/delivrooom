@@ -392,7 +392,7 @@ public class MapCanvas extends StackPane {
                 }
             }
 
-            // Build labels for each visited target (for deliveries, show pickup and delivery positions)
+            // Build labels for each visited target (for deliveries, show pickup and delivery positions with a dot)
             HashMap<Long, String> labels = new HashMap<>();
             for (Long id : visitOrder) {
                 String type = targetTypes.get(id);
