@@ -1,8 +1,7 @@
 package fr.delivrooom.application.model;
 
-import fr.delivrooom.application.tsp.custom.IteratorSeq;
-import fr.delivrooom.application.tsp.custom.TemplateTSP;
-import fr.delivrooom.application.tsp.custom.TSP1;
+import fr.delivrooom.application.model.tsp.TemplateTSP;
+import fr.delivrooom.application.model.tsp.TSP1;
 
 import java.util.*;
 

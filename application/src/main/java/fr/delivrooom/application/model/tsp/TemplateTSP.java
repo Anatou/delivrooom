@@ -1,4 +1,4 @@
-package fr.delivrooom.application.tsp.custom;
+package fr.delivrooom.application.model.tsp;
 
 import fr.delivrooom.application.model.DeliveriesDemand;
 import fr.delivrooom.application.model.Delivery;
