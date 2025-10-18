@@ -206,7 +206,6 @@ public class MapCanvas extends StackPane {
             tourCalculator.findOptimalTour(deliveriesDemand);
         }
 
-
         autoFraming = true;
 
         if (getWidth() > 0 && getHeight() > 0) {
