@@ -1,7 +1,7 @@
 package fr.delivrooom.application.model;
 
-import fr.delivrooom.application.model.tsp.TemplateTSP;
 import fr.delivrooom.application.model.tsp.TSP1;
+import fr.delivrooom.application.model.tsp.TemplateTSP;
 
 import java.util.*;
 
@@ -39,10 +39,10 @@ public class TourCalculator {
 
         if (!useTSP){
             if (tourSolution == null || !calculatedDemand.equals(demand)) {
-                Delivery delivery = demand.getDeliveries().getFirst();
-                long warehouseId = demand.getStore().getId();
-                long firstPickupId = delivery.getTakeoutIntersection().getId();
-                long firstDepositId = delivery.getDeliveryIntersection().getId();
+                Delivery delivery = demand.deliveries().getFirst();
+                long warehouseId = demand.store().getId();
+                long firstPickupId = delivery.takeoutIntersection().getId();
+                long firstDepositId = delivery.deliveryIntersection().getId();
                 HashSet<Long> targetPickup = new HashSet<>(Set.of(firstPickupId));
                 HashSet<Long> targetDeposit = new HashSet<>(Set.of(firstDepositId));
                 HashSet<Long> targetWarehouse = new HashSet<>(Set.of(warehouseId));
@@ -73,11 +73,11 @@ public class TourCalculator {
 
             // initialize targets;
             HashSet<Long> targets = new HashSet<>();
-            for (Delivery d : demand.getDeliveries()) {
-                targets.add(d.getTakeoutIntersection().getId());
-                targets.add(d.getDeliveryIntersection().getId());
+            for (Delivery d : demand.deliveries()) {
+                targets.add(d.takeoutIntersection().getId());
+                targets.add(d.deliveryIntersection().getId());
             }
-            targets.add(demand.getStore().getId());
+            targets.add(demand.store().getId());
 
             // for each intersection in the graph, run dijkstra to find the shortest path to every other intersection
 

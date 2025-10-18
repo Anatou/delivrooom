@@ -12,8 +12,13 @@ public record InitialState(AppController controller) implements State {
 
     @Override
     public void openMapFile(URL url) {
-        controller.loadMapFile(url);
-        controller.setState(new MapLoadedState(controller));
+        try {
+            controller.loadMapFile(url);
+            controller.setState(new MapLoadedState(controller));
+        } catch (Exception e) {
+            controller.showError("Error loading map", e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     @Override

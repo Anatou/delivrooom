@@ -1,14 +1,13 @@
 package fr.delivrooom.adapter.in.javafxgui.controller;
 
 import fr.delivrooom.adapter.in.javafxgui.JavaFXApp;
-import fr.delivrooom.adapter.in.javafxgui.MapCanvas;
-import fr.delivrooom.adapter.in.javafxgui.Sidebar;
 import fr.delivrooom.adapter.in.javafxgui.command.CommandManager;
+import fr.delivrooom.adapter.in.javafxgui.map.MapCanvas;
+import fr.delivrooom.adapter.in.javafxgui.panes.Sidebar;
 import fr.delivrooom.adapter.out.XMLCityMapLoader;
-import fr.delivrooom.application.model.CityMap;
-import fr.delivrooom.application.model.DeliveriesDemand;
-import fr.delivrooom.application.model.Delivery;
-import fr.delivrooom.application.model.Intersection;
+import fr.delivrooom.application.model.*;
+import javafx.application.Platform;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.Alert;
 
 import java.io.File;
@@ -23,7 +22,7 @@ public class AppController {
 
     // State management
     private final CommandManager commandManager;
-    private State currentState;
+    private SimpleObjectProperty<State> currentState;
 
     // UI components
     private MapCanvas mapCanvas;
@@ -32,9 +31,10 @@ public class AppController {
     // Loaded data
     private CityMap cityMap;
     private DeliveriesDemand deliveriesDemand;
+    private TourCalculator tourCalculator;
 
     public AppController() {
-        this.currentState = new InitialState(this);
+        this.currentState = new SimpleObjectProperty<>(new InitialState(this));
         this.commandManager = new CommandManager();
     }
 
@@ -53,7 +53,7 @@ public class AppController {
      */
     public void handleOpenMapFile(File file) {
         try {
-            currentState.openMapFile(file.toURI().toURL());
+            getState().openMapFile(file.toURI().toURL());
         } catch (MalformedURLException e) {
             showError("Invalid file URL", e.getMessage());
             e.printStackTrace();
@@ -67,7 +67,7 @@ public class AppController {
      */
     public void handleOpenDeliveriesFile(File file) {
         try {
-            currentState.openDeliveriesFile(file.toURI().toURL());
+            getState().openDeliveriesFile(file.toURI().toURL());
         } catch (MalformedURLException e) {
             showError("Invalid file URL", e.getMessage());
             e.printStackTrace();
@@ -80,14 +80,14 @@ public class AppController {
      * @param intersection The intersection to select, set as null if no intersection is selected
      */
     public void handleSelectIntersection(Intersection intersection) {
-        currentState.selectIntersection(intersection);
+        getState().selectIntersection(intersection);
     }
 
     /**
      * Request to switch to intersection selection mode.
      */
     public void handleRequestIntersectionSelection() {
-        currentState.requestIntersectionSelection();
+        getState().requestIntersectionSelection();
     }
 
 
@@ -97,16 +97,9 @@ public class AppController {
      *
      * @param url The map url to load
      */
-    protected void loadMapFile(URL url) {
-        try {
-            this.cityMap = JavaFXApp.guiUseCase().getCityMap(url);
-            this.deliveriesDemand = null; // Clear deliveries when loading a new map
-            updateMapCanvas();
-            System.out.println("Map loaded successfully: " + url);
-        } catch (Exception e) {
-            System.err.println("Error loading map file: " + e.getMessage());
-            showError("An error occurred", e.getMessage());
-        }
+    protected void loadMapFile(URL url) throws Exception {
+        this.cityMap = JavaFXApp.guiUseCase().getCityMap(url);
+        updateMapCanvas();
     }
 
     /**
@@ -115,44 +108,32 @@ public class AppController {
      *
      * @param url The deliveries file to load
      */
-    protected void loadDeliveriesFile(URL url) {
-        try {
-            this.deliveriesDemand = JavaFXApp.guiUseCase().getDeliveriesDemand(cityMap, url);
-            updateMapCanvas();
-            System.out.println("Deliveries loaded successfully: " + url);
-        } catch (Exception e) {
-            System.err.println("Error loading deliveries file: " + e.getMessage());
-            showError("An error occurred", e.getMessage());
-        }
+    protected void loadDeliveriesFile(URL url) throws Exception {
+        this.deliveriesDemand = JavaFXApp.guiUseCase().getDeliveriesDemand(cityMap, url);
+        updateMapCanvas();
     }
 
     /**
      * Update the MapCanvas with current data.
      */
-    private void updateMapCanvas() {
+    protected void updateMapCanvas() {
         if (mapCanvas != null) {
-            mapCanvas.updateMap(cityMap, deliveriesDemand);
+            CityGraph cityGraph = new CityGraph(cityMap);
+            tourCalculator = new TourCalculator(cityGraph);
+
+            new Thread(() -> {
+                if (tourCalculator.doesCalculatedTourNeedsToBeChanged(deliveriesDemand)) {
+                    tourCalculator.findOptimalTour(deliveriesDemand);
+
+                    Platform.runLater(() -> {
+                        mapCanvas.drawMap();
+                    });
+                }
+            }).start();
+
+            mapCanvas.setAutoFraming(true);
+            mapCanvas.drawMap();
         }
-    }
-
-    /**
-     * Set the current state.
-     * Called by state implementations to transition between states.
-     *
-     * @param state The new state
-     */
-    protected void setState(State state) {
-        this.currentState = state;
-        System.out.println("State changed to: " + state.getStateName());
-    }
-
-    /**
-     * Get the current state (for debugging/testing).
-     *
-     * @return The current state
-     */
-    public State getCurrentState() {
-        return currentState;
     }
 
     /**
@@ -177,11 +158,18 @@ public class AppController {
         return commandManager;
     }
 
-    public void handleLoadDefaultFiles() {
-        URL cityMapURL = XMLCityMapLoader.class.getResource("/xml/petitPlan.xml");
-        URL deliveriesURL = XMLCityMapLoader.class.getResource("/xml/demandePetit1.xml");
-        currentState.openMapFile(cityMapURL);
-        currentState.openDeliveriesFile(deliveriesURL);
+    public void handleLoadDefaultFiles(DefaultMapFilesType type) {
+        URL cityMapURL = XMLCityMapLoader.class.getResource("/xml/" + type.map + ".xml");
+        URL deliveriesURL = XMLCityMapLoader.class.getResource("/xml/" + type.deliveries + ".xml");
+        getState().openMapFile(cityMapURL);
+        getState().openDeliveriesFile(deliveriesURL);
+    }
+
+    /**
+     * Update the selected intersection in the sidebar.
+     */
+    protected void selectIntersection(Intersection intersection) {
+        sidebar.selectIntersection(intersection);
     }
 
     public void addDelivery(Delivery delivery) {
@@ -198,13 +186,8 @@ public class AppController {
         this.deliveriesDemand.deliveries().remove(delivery);
     }
 
-
-    /**
-     * Called by the mapCanvas from the state when the user clicks on an intersection.
-     */
-    protected void selectIntersection(Intersection intersection) {
-        sidebar.selectIntersection(intersection);
-        setState(new DeliveriesLoadedState(this));
+    public State getState() {
+        return currentState.get();
     }
 
     public void showError(String title, String message) {
@@ -213,5 +196,36 @@ public class AppController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    protected void setState(State newState) {
+        currentState.set(newState);
+    }
+
+    public SimpleObjectProperty<State> stateProperty() {
+        return currentState;
+    }
+
+    public TourCalculator getTourCalculator() {
+        return tourCalculator;
+    }
+
+    public enum DefaultMapFilesType {
+        SMALL_1("Small 1", "petitPlan", "demandePetit1"),
+        SMALL_2("Small 2", "petitPlan", "demandePetit2"),
+        MEDIUM_1("Medium 1", "moyenPlan", "demandeMoyen3"),
+        MEDIUM_2("Medium 2", "moyenPlan", "demandeMoyen5"),
+        LARGE_1("Large 1", "grandPlan", "demandeGrand7"),
+        LARGE_2("Large 2", "grandPlan", "demandeGrand9");
+
+        public final String name;
+        public final String map;
+        public final String deliveries;
+
+        DefaultMapFilesType(String name, String map, String deliveries) {
+            this.name = name;
+            this.map = map;
+            this.deliveries = deliveries;
+        }
     }
 }

@@ -1,6 +1,9 @@
-package fr.delivrooom.adapter.in.javafxgui;
+package fr.delivrooom.adapter.in.javafxgui.map;
 
+import fr.delivrooom.adapter.in.javafxgui.JavaFXApp;
 import javafx.application.Platform;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 
 import java.io.IOException;
@@ -12,7 +15,10 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class MapTileLoader {
+public class MapTiles extends Canvas {
+
+    private static final double TILE_SIZE_PX = 256.0;
+    private final double ZOOM_SCALE_FACTOR; // tunable factor between canvas scale and tile zoom level
 
     private static final String MAPTILER_API_KEY = JavaFXApp.getConfigPropertyUseCase().getProperty("maptiler.api.key");
     private static final String MAPTILER_URL = JavaFXApp.getConfigPropertyUseCase().getProperty("maptiler.url", "https://api.maptiler.com/tiles/satellite-v2/");
@@ -20,8 +26,8 @@ public class MapTileLoader {
     private final Map<String, Image> tileCache = new ConcurrentHashMap<>();
     private final Map<String, CompletableFuture<Image>> pendingTiles = new ConcurrentHashMap<>();
 
-    public MapTileLoader() {
-        System.out.println("Loaded MapTileLoader with maptiler url: " + MAPTILER_URL);
+    public MapTiles() {
+        ZOOM_SCALE_FACTOR = JavaFXApp.getConfigPropertyUseCase().getDoubleProperty("map.zoom.scaleFactor", 1.0);
     }
 
 
@@ -102,5 +108,58 @@ public class MapTileLoader {
                 pendingTiles.remove(tileKey);
             }
         }
+    }
+
+
+    private int computeZoomLevel(double scale) {
+        double z = Math.log(scale / (TILE_SIZE_PX * ZOOM_SCALE_FACTOR)) / Math.log(2);
+        int zi = (int) Math.round(z);
+        if (zi < 0) zi = 0;
+        if (zi > 22) zi = 22;
+        return zi;
+    }
+
+    public void drawTiles(double scale, double minX, double maxX, double minY, double maxY) {
+        GraphicsContext gc = getGraphicsContext2D();
+        gc.clearRect(0, 0, getWidth(), getHeight());
+
+        int zoomLevel = computeZoomLevel(scale);
+        int tilesPerSide = (int) Math.pow(2, zoomLevel);
+
+        int minTileX = (int) Math.floor(minX * tilesPerSide);
+        int maxTileX = (int) Math.floor(maxX * tilesPerSide);
+        int minTileY = (int) Math.floor(minY * tilesPerSide);
+        int maxTileY = (int) Math.floor(maxY * tilesPerSide);
+
+        // Clamp to valid tile index range
+        int startX = Math.max(0, minTileX);
+        int endX = Math.min(tilesPerSide - 1, maxTileX);
+        int startY = Math.max(0, minTileY);
+        int endY = Math.min(tilesPerSide - 1, maxTileY);
+
+        ArrayList<String> requestedTiles = new ArrayList<>();
+
+        for (int tileX = startX; tileX <= endX; tileX++) {
+            for (int tileY = startY; tileY <= endY; tileY++) {
+                String key = getTileKey(zoomLevel, tileX, tileY);
+                requestedTiles.add(key);
+                Image image = getTile(key, () -> drawTiles(scale, minX, maxX, minY, maxY));
+                if (image != null) {
+                    // Normalized tile coordinates
+                    double tileLeft = (double) tileX / tilesPerSide;
+                    double tileTop = (double) tileY / tilesPerSide;
+                    double tileRight = (double) (tileX + 1) / tilesPerSide;
+                    double tileBottom = (double) (tileY + 1) / tilesPerSide;
+                    // Calculate tile origin and size on canvas
+                    double x1 = (tileLeft - minX) * scale;
+                    double y1 = (tileTop - minY) * scale;
+                    double w = (tileRight - tileLeft) * scale;
+                    double h = (tileBottom - tileTop) * scale;
+                    // Draw the loaded tile
+                    gc.drawImage(image, x1, y1, w, h);
+                }
+            }
+        }
+        cancelTilesRequestsNotIn(requestedTiles);
     }
 }

@@ -1,5 +1,6 @@
-package fr.delivrooom.adapter.in.javafxgui;
+package fr.delivrooom.adapter.in.javafxgui.panes;
 
+import fr.delivrooom.adapter.in.javafxgui.JavaFXApp;
 import fr.delivrooom.adapter.in.javafxgui.command.AddDeliveryCommand;
 import fr.delivrooom.adapter.in.javafxgui.command.RemoveDeliveryCommand;
 import fr.delivrooom.adapter.in.javafxgui.controller.AppController;
@@ -12,6 +13,7 @@ import javafx.scene.layout.VBox;
 public class Sidebar extends VBox {
 
     private final AppController controller;
+    Label selectedIntersectionLabel;
 
     public Sidebar(AppController controller) {
         super();
@@ -20,6 +22,13 @@ public class Sidebar extends VBox {
         setAlignment(javafx.geometry.Pos.CENTER);
         setPadding(new javafx.geometry.Insets(10));
         setSpacing(10);
+
+        Label stateLabel = new Label("State is: " + controller.getState().getClass().getSimpleName());
+        controller.stateProperty().addListener((obs, oldState, newState) -> {
+            stateLabel.setText("State is: " + newState.getClass().getSimpleName());
+        });
+        getChildren().add(stateLabel);
+
 
         Label label = new Label("Name is: ");
         Button button = new Button("Get Name");
@@ -36,7 +45,14 @@ public class Sidebar extends VBox {
         Button removeDeliveryBtn = new Button("Remove Delivery");
         removeDeliveryBtn.setOnAction(e -> handleRemoveDelivery());
 
-        getChildren().addAll(label, button, addDeliveryBtn, removeDeliveryBtn);
+
+        Button selectIntersection = new Button("Select Intersection");
+        selectIntersection.setOnAction(e -> controller.handleRequestIntersectionSelection());
+
+        selectedIntersectionLabel = new Label("No intersection selected");
+
+
+        getChildren().addAll(label, button, addDeliveryBtn, removeDeliveryBtn, selectIntersection, selectedIntersectionLabel);
     }
 
     private void handleAddDelivery() {
@@ -59,6 +75,7 @@ public class Sidebar extends VBox {
      * @param intersection If null, it means the operation has been aborted.
      */
     public void selectIntersection(Intersection intersection) {
-
+        ;
+        selectedIntersectionLabel.setText(intersection == null ? "No intersection selected" : "Selected intersection ID :" + intersection.getId());
     }
 }

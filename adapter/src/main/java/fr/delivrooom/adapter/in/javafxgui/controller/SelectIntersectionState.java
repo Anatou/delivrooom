@@ -12,19 +12,30 @@ public record SelectIntersectionState(AppController controller) implements State
 
     @Override
     public void openMapFile(URL url) {
-        controller.loadMapFile(url);
-        controller.setState(new MapLoadedState(controller));
+        try {
+            controller.loadMapFile(url);
+            controller.setState(new MapLoadedState(controller));
+        } catch (Exception e) {
+            controller.showError("Error loading map", e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void openDeliveriesFile(URL url) {
-        controller.loadDeliveriesFile(url);
-        controller.setState(new DeliveriesLoadedState(controller));
+        try {
+            controller.loadDeliveriesFile(url);
+            controller.setState(new DeliveriesLoadedState(controller));
+        } catch (Exception e) {
+            controller.showError("Error loading deliveries", e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void selectIntersection(Intersection intersection) {
         controller.selectIntersection(intersection);
+        controller.setState(new DeliveriesLoadedState(controller));
     }
 
     @Override

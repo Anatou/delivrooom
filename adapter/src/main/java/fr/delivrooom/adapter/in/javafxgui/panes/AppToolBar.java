@@ -1,10 +1,11 @@
-package fr.delivrooom.adapter.in.javafxgui;
+package fr.delivrooom.adapter.in.javafxgui.panes;
 
 
 import atlantafx.base.controls.Spacer;
 import atlantafx.base.controls.ToggleSwitch;
 import atlantafx.base.theme.PrimerDark;
 import atlantafx.base.theme.PrimerLight;
+import fr.delivrooom.adapter.in.javafxgui.JavaFXApp;
 import fr.delivrooom.adapter.in.javafxgui.controller.AppController;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -35,10 +36,14 @@ public class AppToolBar extends ToolBar {
         openMapBtn.setOnAction(e -> handleOpenMapFile());
         MenuItem openDemandsBtn = new MenuItem("Open Demands");
         openDemandsBtn.setOnAction(e -> handleOpenDeliveriesFile());
-        MenuItem loadDefaultBtn = new MenuItem("Open Default Map and Demands");
-        loadDefaultBtn.setOnAction(e -> handleLoadDefault());
+        open.getItems().addAll(openMapBtn, openDemandsBtn);
 
-        open.getItems().addAll(openMapBtn, openDemandsBtn, loadDefaultBtn);
+        for (AppController.DefaultMapFilesType type : AppController.DefaultMapFilesType.values()) {
+            MenuItem defaultBtn = new MenuItem("Open files \"" + type.name + "\"");
+            defaultBtn.setOnAction(e -> handleLoadDefault(type));
+            open.getItems().add(defaultBtn);
+        }
+
 
         Button undoBtn = new Button("", new FontIcon(FontAwesomeSolid.UNDO));
         undoBtn.setOnAction(e -> controller.getCommandManager().undo());
@@ -91,8 +96,8 @@ public class AppToolBar extends ToolBar {
         }
     }
 
-    private void handleLoadDefault() {
-        controller.handleLoadDefaultFiles();
+    private void handleLoadDefault(AppController.DefaultMapFilesType type) {
+        controller.handleLoadDefaultFiles(type);
     }
 
     private void handleThemeSwitch() {

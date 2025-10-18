@@ -1,6 +1,7 @@
 package fr.delivrooom.adapter.in.javafxgui;
 
 import atlantafx.base.theme.PrimerLight;
+import fr.delivrooom.adapter.in.javafxgui.panes.MainPane;
 import fr.delivrooom.application.port.in.GetConfigPropertyUseCase;
 import fr.delivrooom.application.port.in.GetNameUseCase;
 import fr.delivrooom.application.port.in.GuiUseCase;
@@ -21,7 +22,7 @@ public class JavaFXApp extends javafx.application.Application {
         javafx.application.Application.launch(JavaFXApp.class);
     }
 
-    protected static GetNameUseCase getNameUseCase() {
+    public static GetNameUseCase getNameUseCase() {
         return getNameUseCase;
     }
 
@@ -29,7 +30,7 @@ public class JavaFXApp extends javafx.application.Application {
         return guiUseCase;
     }
 
-    protected static GetConfigPropertyUseCase getConfigPropertyUseCase() {
+    public static GetConfigPropertyUseCase getConfigPropertyUseCase() {
         return getConfigPropertyUseCase;
     }
 
