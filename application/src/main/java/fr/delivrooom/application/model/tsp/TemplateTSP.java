@@ -11,6 +11,7 @@ public abstract class TemplateTSP implements TSP {
     protected Long[] meilleureSolution;
     protected Graphe g;
     protected float bestCost;
+    protected float bestCostTime;
     protected long tpsLimite;
     protected long tpsDebut;
     protected DeliveriesDemand demand;
@@ -56,6 +57,7 @@ public abstract class TemplateTSP implements TSP {
         if (reachableNodes.isEmpty()){ // every delivery point has been visited
             long warehouseId = demand.store().getId();
             if (g.estArc(currentNode, warehouseId)){ // return to warehouse
+                // TODO : implement bestCostTime
                 if (visitedCost + g.getCout(currentNode, warehouseId) < bestCost){ // we found a solution better  than the best one
                     visitedNodes.toArray(meilleureSolution);
                     bestCost = (float) (visitedCost + g.getCout(currentNode, warehouseId));
@@ -110,6 +112,10 @@ public abstract class TemplateTSP implements TSP {
     public float getCoutSolution(){
         if (meilleureSolution == null) return -1;
         return bestCost;
+    }
+
+    public float getBestCostTime() {
+        return bestCostTime;
     }
 
 }

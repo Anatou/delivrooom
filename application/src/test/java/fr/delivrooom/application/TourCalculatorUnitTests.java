@@ -105,7 +105,6 @@ public class TourCalculatorUnitTests {
         Delivery delivery = new Delivery(inter_pickup, inter_deposit, 1,1);
         List<Delivery> deliveries = new ArrayList<>(List.of(delivery));
         DeliveriesDemand deliveriesDemand = new DeliveriesDemand(deliveries, inter_warehouse);
-
         TourCalculator tourCalculator = new TourCalculator(cityGraph);
         tourCalculator.findOptimalTour(deliveriesDemand);
         TourSolution tourSolution = tourCalculator.getOptimalTour();

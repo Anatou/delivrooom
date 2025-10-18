@@ -36,20 +36,21 @@ public class TourCalculator {
     public void findOptimalTour(DeliveriesDemand demand) {
         // first : find all shortest paths between any pair of nodes in the graph
         boolean useTSP = true;
+        boolean useTimeAsCost = true;
 
         if (!useTSP){
             if (tourSolution == null || !calculatedDemand.equals(demand)) {
-                Delivery delivery = demand.deliveries().getFirst();
-                long warehouseId = demand.store().getId();
-                long firstPickupId = delivery.takeoutIntersection().getId();
-                long firstDepositId = delivery.deliveryIntersection().getId();
+                Delivery delivery = demand.getDeliveries().getFirst();
+                long warehouseId = demand.getStore().getId();
+                long firstPickupId = delivery.getTakeoutIntersection().getId();
+                long firstDepositId = delivery.getDeliveryIntersection().getId();
                 HashSet<Long> targetPickup = new HashSet<>(Set.of(firstPickupId));
                 HashSet<Long> targetDeposit = new HashSet<>(Set.of(firstDepositId));
                 HashSet<Long> targetWarehouse = new HashSet<>(Set.of(warehouseId));
 
-                HashMap<Long, Path> solutionToPickup = findShortestPaths(warehouseId, targetPickup);
-                HashMap<Long, Path> solutionToDeposit = findShortestPaths(firstPickupId, targetDeposit);
-                HashMap<Long, Path> solutionToWarehouse = findShortestPaths(firstDepositId, targetWarehouse);
+                HashMap<Long, Path> solutionToPickup = findShortestPaths(warehouseId, targetPickup, useTimeAsCost);
+                HashMap<Long, Path> solutionToDeposit = findShortestPaths(firstPickupId, targetDeposit, useTimeAsCost);
+                HashMap<Long, Path> solutionToWarehouse = findShortestPaths(firstDepositId, targetWarehouse, useTimeAsCost);
                 Path pathToFirstPickup = solutionToPickup.get(firstPickupId);
                 Path pathToFirstDeposit = solutionToDeposit.get(firstDepositId);
                 Path pathToFirstWarehouse = solutionToWarehouse.get(warehouseId);
@@ -65,7 +66,8 @@ public class TourCalculator {
 
         }
         else {
-            // TODO implement TSP-based tour calculation
+
+            calculatedDemand = demand;
 
             // Create a complete graph of g by running djikstra from each node to get the shortest path to every other node
             ShortestPathsGraph shortestPathsGraph;
@@ -73,11 +75,11 @@ public class TourCalculator {
 
             // initialize targets;
             HashSet<Long> targets = new HashSet<>();
-            for (Delivery d : demand.deliveries()) {
-                targets.add(d.takeoutIntersection().getId());
-                targets.add(d.deliveryIntersection().getId());
+            for (Delivery d : demand.getDeliveries()) {
+                targets.add(d.getTakeoutIntersection().getId());
+                targets.add(d.getDeliveryIntersection().getId());
             }
-            targets.add(demand.store().getId());
+            targets.add(demand.getStore().getId());
 
             // for each intersection in the graph, run dijkstra to find the shortest path to every other intersection
 
@@ -88,7 +90,7 @@ public class TourCalculator {
 
                 System.out.println("Calculating shortest paths from intersection " + intersectionId);
                 System.out.println("Targets: " + targetWithoutIntersectionId);
-                HashMap<Long, Path> pathsFromIntersection = findShortestPaths(intersectionId, targetWithoutIntersectionId);
+                HashMap<Long, Path> pathsFromIntersection = findShortestPaths(intersectionId, targetWithoutIntersectionId, useTimeAsCost);
                 shortestPathsMatrix.put(intersectionId, pathsFromIntersection);
                 System.out.println("Shortest paths from intersection " + intersectionId + " calculated");
             }
@@ -108,17 +110,27 @@ public class TourCalculator {
             List<Path> tourPaths = new ArrayList<>();
             System.out.println("Solution intersections order : ");
             List<Long> solutionList = Arrays.asList(tspSolution);
+            // TODO : replace bestTime with actual time calculation (has to be done in TSP solver)
+            float bestTime = 0.f;
             for (int i = 0; i < tspSolution.length; i++) {
                 long fromId = tspSolution[i];
                 long toId = tspSolution[(i + 1) % tspSolution.length]; // wrap around to form a cycle
                 Path path = shortestPathsMatrix.get(fromId).get(toId);
+                bestTime += path.getTotalTime();
                 tourPaths.add(path);
-                System.out.println(fromId);
+                if (useTimeAsCost){
+                    System.out.print(fromId + " -> " + toId + " (time cost: " + path.getTotalTime() + " seconds) |  length : " + path.getTotalLength() + " meters\n");
+                }else {
+
+                    System.out.println(fromId + " -> " + toId + " (path length: " + path.getTotalLength() + ")" + " | " + path.getTotalTime() + " seconds\n");
+                }
             }
             System.out.println("tour paths constructed :" + tourPaths.size() + " paths");
+            System.out.println("Total tour cost (distance): " + tspSolutionCost);
+            System.out.println("Total tour cost (time): " + bestTime + " seconds | distance "+ tspSolutionCost/4.17 + " + waiting " + (bestTime - tspSolutionCost/4.17) + " seconds");
+
             tourSolution = new TourSolution(tourPaths, tspSolutionCost, solutionList);
 
-            calculatedDemand = demand;
 
 
         }
@@ -137,7 +149,7 @@ public class TourCalculator {
         }
     }
 
-    protected HashMap<Long, Path> findShortestPaths(long startIntersectionId , HashSet<Long> targets) {
+    protected HashMap<Long, Path> findShortestPaths(long startIntersectionId , HashSet<Long> targets, boolean useTimeAsCost) throws RuntimeException {
         /* find the shortest paths from startIntersectionId to all targets
          * using Dijkstra's algorithm (for now)
          */
@@ -146,6 +158,9 @@ public class TourCalculator {
 //        if (targets.size() > 1) {
 //            throw new RuntimeException("Only single-target search is currently implemented");
 //        }
+        if (useTimeAsCost) {
+            return targetedDijkstraSearchTime(startIntersectionId, targets);
+        }
         return targetedDijkstraSearch(startIntersectionId, targets);
     }
 
@@ -153,16 +168,20 @@ public class TourCalculator {
         return this.targetedDijkstraSearch(startIntersectionId, targets);
     }
 
+
     protected HashMap<Long, Path> targetedDijkstraSearch(long startIntersectionId, HashSet<Long> targets) throws RuntimeException {
         //
         int n = graph.getNbSommets();
         HashMap<Long, Float> distances = new HashMap<Long, Float>();
+        HashMap<Long, Float> time = new HashMap<Long, Float>();
+
         HashMap<Long, Long> predecessors = new HashMap<Long, Long>();
         PriorityQueue<Long> queue = new PriorityQueue<Long>(Comparator.comparing(distances::get)); // might be unsafe, TODO: test
         HashSet<Long> settled = new HashSet<Long>();
         int targetsRemaining = targets.size();
 
         // init
+        time.put(startIntersectionId, 0.f);
         distances.put(startIntersectionId, 0.f);
         predecessors.put(startIntersectionId, null);
         queue.add(startIntersectionId);
@@ -177,11 +196,27 @@ public class TourCalculator {
                 }
                 for (Long newIntersectionId : graph.arcs(selectedIntersectionId)) {
                     if (!settled.contains(newIntersectionId)) {
+                        // if this new intersection is a pickup point -> retrieve its takeoutDuration
                         float newDistance = distances.get(selectedIntersectionId) + graph.getCout(selectedIntersectionId, newIntersectionId);
+                        float newTime = time.get(selectedIntersectionId) + graph.getCout(selectedIntersectionId, newIntersectionId)/4.17F; // assuming average speed of 15 km/h = 4.17 m/s
+
+                        for(Delivery d : calculatedDemand.getDeliveries()) {
+                            if (d.getTakeoutIntersection().getId() == newIntersectionId) {
+                                float takeoutDuration = d.takeoutDuration();
+                                newTime += takeoutDuration;
+                            }
+                            // if this new intersection is a delivery point -> retrieve its deliveryDuration
+                            if (d.getDeliveryIntersection().getId() == newIntersectionId) {
+                                float deliveryDuration = d.deliveryDuration();
+                                newTime += deliveryDuration;
+                            }
+                        }
                         if (!distances.containsKey(newIntersectionId) || newDistance < distances.get(newIntersectionId)) {
                             predecessors.put(newIntersectionId, selectedIntersectionId);
                             distances.put(newIntersectionId, newDistance);
                             queue.add(newIntersectionId);
+                            time.put(newIntersectionId, newTime);
+
                         }
                     }
                 }
@@ -200,17 +235,128 @@ public class TourCalculator {
             List<Road> roads = new ArrayList<>();
             long nodeId = targetId;
             float pathLentgh = 0.f;
+            float totalTime = 0.f;
             while (nodeId != startIntersectionId) {
                 long parentId = predecessors.get(nodeId);
                 Road road = graph.getCityMap().getRoad(parentId, nodeId);
                 roads.add(road);
                 pathLentgh += road.getLength();
 
+
+                for(Delivery d : calculatedDemand.getDeliveries()) {
+                    if (d.getTakeoutIntersection().getId() == nodeId) {
+                        float takeoutDuration = d.takeoutDuration();
+                        totalTime += takeoutDuration;
+                    }
+                    // if this new intersection is a delivery point -> retrieve its deliveryDuration
+                    if (d.getDeliveryIntersection().getId() == nodeId) {
+                        float deliveryDuration = d.deliveryDuration();
+                        totalTime += deliveryDuration;
+                    }
+                }
+                totalTime += road.getLength()/4.17F ;
+
                 nodeId = parentId;
             }
-            pathToTarget.put(targetId, new Path(roads, pathLentgh));
+            pathToTarget.put(targetId, new Path(roads, pathLentgh, totalTime)); // assuming average speed of 15 km/h = 4.17 m/s
+        }
+
+        return pathToTarget;
+    }
+
+    protected HashMap<Long, Path> targetedDijkstraSearchTime(long startIntersectionId, HashSet<Long> targets) throws RuntimeException {
+        //
+        int n = graph.getNbSommets();
+        HashMap<Long, Float> distances = new HashMap<Long, Float>();
+        HashMap<Long, Float> time = new HashMap<Long, Float>();
+
+        HashMap<Long, Long> predecessors = new HashMap<Long, Long>();
+        PriorityQueue<Long> queue = new PriorityQueue<Long>(Comparator.comparing(distances::get)); // might be unsafe, TODO: test
+        HashSet<Long> settled = new HashSet<Long>();
+        int targetsRemaining = targets.size();
+
+        // init
+        time.put(startIntersectionId, 0.f);
+        distances.put(startIntersectionId, 0.f);
+        predecessors.put(startIntersectionId, null);
+        queue.add(startIntersectionId);
+
+        long selectedIntersectionId = startIntersectionId;
+        while (!queue.isEmpty() && targetsRemaining > 0) {
+            selectedIntersectionId = queue.poll();
+            if (!settled.contains(selectedIntersectionId)) {
+                settled.add(selectedIntersectionId);
+                if (targets.contains(selectedIntersectionId)) {
+                    --targetsRemaining;
+                }
+                for (Long newIntersectionId : graph.arcs(selectedIntersectionId)) {
+                    if (!settled.contains(newIntersectionId)) {
+                        // if this new intersection is a pickup point -> retrieve its takeoutDuration
+                        float newDistance = distances.get(selectedIntersectionId) + graph.getCout(selectedIntersectionId, newIntersectionId);
+                        float newTime = time.get(selectedIntersectionId) + graph.getCout(selectedIntersectionId, newIntersectionId)/4.17F; // assuming average speed of 15 km/h = 4.17 m/s
+
+                        for(Delivery d : calculatedDemand.getDeliveries()) {
+                            if (d.getTakeoutIntersection().getId() == newIntersectionId) {
+                                float takeoutDuration = d.takeoutDuration();
+                                newTime += takeoutDuration;
+                            }
+                            // if this new intersection is a delivery point -> retrieve its deliveryDuration
+                            if (d.getDeliveryIntersection().getId() == newIntersectionId) {
+                                float deliveryDuration = d.deliveryDuration();
+                                newTime += deliveryDuration;
+                            }
+                        }
+                        if (!time.containsKey(newIntersectionId) || newTime < time.get(newIntersectionId)) {
+                            predecessors.put(newIntersectionId, selectedIntersectionId);
+                            distances.put(newIntersectionId, newDistance);
+                            queue.add(newIntersectionId);
+                            time.put(newIntersectionId, newTime);
+
+                        }
+                    }
+                }
+            }
+        }
+
+        if (targetsRemaining > 0) {
+            throw new RuntimeException("Input graph is not connex, no path could be found for at least a target");
+        }
+
+        // TODO : since the predecessors are stored in a hashmap, they are not ordered which then leads to paths being constructed in wrong order
+        // build Path objects to each target from predecessors
+        HashMap<Long, Path> pathToTarget = new HashMap<>();
+
+        for (long targetId : targets) {
+            List<Road> roads = new ArrayList<>();
+            long nodeId = targetId;
+            float pathLentgh = 0.f;
+            float totalTime = 0.f;
+            while (nodeId != startIntersectionId) {
+                long parentId = predecessors.get(nodeId);
+                Road road = graph.getCityMap().getRoad(parentId, nodeId);
+                roads.add(road);
+                pathLentgh += road.getLength();
+
+
+                for(Delivery d : calculatedDemand.getDeliveries()) {
+                    if (d.getTakeoutIntersection().getId() == nodeId) {
+                        float takeoutDuration = d.takeoutDuration();
+                        totalTime += takeoutDuration;
+                    }
+                    // if this new intersection is a delivery point -> retrieve its deliveryDuration
+                    if (d.getDeliveryIntersection().getId() == nodeId) {
+                        float deliveryDuration = d.deliveryDuration();
+                        totalTime += deliveryDuration;
+                    }
+                }
+                totalTime += road.getLength()/4.17F ;
+
+                nodeId = parentId;
+            }
+            pathToTarget.put(targetId, new Path(roads, pathLentgh, totalTime)); // assuming average speed of 15 km/h = 4.17 m/s
         }
 
         return pathToTarget;
     }
 }
+

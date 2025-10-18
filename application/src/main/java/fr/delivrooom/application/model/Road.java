@@ -7,7 +7,7 @@ public class Road {
     protected final float length;
     protected final String name;
 
-    public Road(Intersection origin, Intersection destination, float length, String name) {
+    public Road(Intersection origin, Intersection destination, float length,  String name) {
         this.origin = origin;
         this.destination = destination;
         this.length = length;
