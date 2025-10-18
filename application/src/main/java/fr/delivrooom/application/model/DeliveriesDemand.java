@@ -12,12 +12,4 @@ public record DeliveriesDemand(List<Delivery> deliveries, Intersection store) {
         }
         return null;
     }
-
-    public List<Delivery> getDeliveries(){
-        return this.deliveries;
-    }
-
-    public Intersection getStore(){
-        return this.store;
-    }
 }

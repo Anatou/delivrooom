@@ -123,7 +123,7 @@ public class AppController {
 
             new Thread(() -> {
                 if (tourCalculator.doesCalculatedTourNeedsToBeChanged(deliveriesDemand)) {
-                    tourCalculator.findOptimalTour(deliveriesDemand);
+                    tourCalculator.findOptimalTour(deliveriesDemand, false);
 
                     Platform.runLater(() -> {
                         mapCanvas.drawMap();

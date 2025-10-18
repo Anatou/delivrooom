@@ -106,7 +106,7 @@ public class TourCalculatorUnitTests {
         List<Delivery> deliveries = new ArrayList<>(List.of(delivery));
         DeliveriesDemand deliveriesDemand = new DeliveriesDemand(deliveries, inter_warehouse);
         TourCalculator tourCalculator = new TourCalculator(cityGraph);
-        tourCalculator.findOptimalTour(deliveriesDemand);
+        tourCalculator.findOptimalTour(deliveriesDemand, false);
         TourSolution tourSolution = tourCalculator.getOptimalTour();
         Assertions.assertEquals(4.f, tourSolution.getTotalLength());
     }
@@ -123,7 +123,7 @@ public class TourCalculatorUnitTests {
         DeliveriesDemand deliveriesDemand = new DeliveriesDemand(deliveries, inter_warehouse);
 
         TourCalculator tourCalculator = new TourCalculator(cityGraph);
-        tourCalculator.findOptimalTour(deliveriesDemand);
+        tourCalculator.findOptimalTour(deliveriesDemand, false);
         TourSolution tourSolution = tourCalculator.getOptimalTour();
         Assertions.assertEquals(6.f, tourSolution.getTotalLength());
     }
