@@ -113,30 +113,121 @@ public class MapOverlay extends StackPane {
         // Draw deliveries demands
         if (deliveriesDemand != null) {
 
-            // Draw warehouse point in green
-            gc.setFill(Color.GREEN);
-            drawIntersection(gc, scale, minX, minY, deliveriesDemand.store(), 4 * unit_scalable, true);
+            if (tourCalculator == null || tourCalculator.getOptimalTour() == null) {
+                // Draw warehouse point in green
+                gc.setFill(Color.GREEN);
+                drawIntersection(gc, scale, minX, minY, deliveriesDemand.store(), 4 * unit_scalable, true);
 
-            // Takeout point is a red square, delivery point in a blue circle
-            for (Delivery delivery : deliveriesDemand.deliveries()) {
-                gc.setFill(Color.RED);
-                drawIntersection(gc, scale, minX, minY, delivery.takeoutIntersection(), 4 * unit_scalable, false);
-                gc.setFill(Color.BLUE);
-                drawIntersection(gc, scale, minX, minY, delivery.deliveryIntersection(), 4 * unit_scalable, true);
-            }
-        }
-        // Draw the calculated tour if available
-        if (tourCalculator != null && tourCalculator.getOptimalTour() != null) {
-            gc.setStroke(Color.LIMEGREEN);
-            gc.setLineWidth(2 * unit_scalable);
-            TourSolution tourSolution = tourCalculator.getOptimalTour();
-            for (Path path : tourSolution.getPaths()) {
-                List<Road> intersections = path.getIntersections();
-                for (Road road : intersections) {
-                    drawRoad(gc, scale, minX, minY, road);
+                // Takeout point is a red square, delivery point in a blue circle
+                for (Delivery delivery : deliveriesDemand.deliveries()) {
+                    gc.setFill(Color.RED);
+                    drawIntersection(gc, scale, minX, minY, delivery.takeoutIntersection(), 4 * unit_scalable, false);
+                    gc.setFill(Color.BLUE);
+                    drawIntersection(gc, scale, minX, minY, delivery.deliveryIntersection(), 4 * unit_scalable, true);
+                }
+            } else {
+                // Draw the calculated tour if available (numbers only on store/pickup/delivery in visit order)
+                gc.setStroke(Color.LIMEGREEN);
+                gc.setLineWidth(2 * unit_scalable);
+                TourSolution tourSolution = tourCalculator.getOptimalTour();
+                // Build map of target intersection ids -> type ("store","pickup","delivery")
+
+
+                HashMap<Long, String> targetTypes = new HashMap<>();
+                Intersection store = deliveriesDemand.store();
+                if (store != null) targetTypes.put(store.getId(), "store");
+                for (Delivery d : deliveriesDemand.deliveries()) {
+                    if (d.takeoutIntersection() != null) {
+                        targetTypes.putIfAbsent(d.takeoutIntersection().getId(), "pickup");
+                    }
+                    if (d.deliveryIntersection() != null) {
+                        targetTypes.putIfAbsent(d.deliveryIntersection().getId(), "delivery");
+                    }
+                }
+
+                // Build visit order position map (warehouse is 1, first pickup is 2, etc.)
+                List<Long> visitOrder = tourSolution.getDeliveryOrder();
+                HashMap<Long, Integer> visitPos = new HashMap<>();
+                int pos = 1;
+                for (Long id : visitOrder) {
+                    visitPos.put(id, pos++);
+                }
+
+                // Build delivery to pickup map
+                HashMap<Long, Long> deliveryToPickup = new HashMap<>();
+                for (Delivery d : deliveriesDemand.deliveries()) {
+                    if (d.deliveryIntersection() != null && d.takeoutIntersection() != null) {
+                        deliveryToPickup.put(d.deliveryIntersection().getId(), d.takeoutIntersection().getId());
+                    }
+                }
+
+                // Build labels for each visited target (for deliveries, show pickup and delivery positions with a dot)
+                HashMap<Long, String> labels = new HashMap<>();
+                for (Long id : visitOrder) {
+                    String type = targetTypes.get(id);
+                    Integer myPos = visitPos.get(id);
+                    if ("delivery".equals(type)) {
+                        Long pickupId = deliveryToPickup.get(id);
+                        Integer pickupPos = pickupId != null ? visitPos.get(pickupId) : null;
+                        String suffix = (pickupPos != null) ? String.valueOf(pickupPos) : "?";
+                        labels.put(id, (myPos != null ? myPos : -1) + "." + suffix);
+                    } else {
+                        labels.put(id, myPos != null ? String.valueOf(myPos) : "?");
+                    }
+                }
+
+                for (Path path : tourSolution.getPaths()) {
+                    List<Road> roads = path.getIntersections();
+                    for (Road road : roads) {
+                        drawRoad(gc, scale, minX, minY, road);
+                    }
+                }
+
+                gc.setTextAlign(javafx.scene.text.TextAlignment.CENTER);
+                gc.setTextBaseline(javafx.geometry.VPos.CENTER);
+
+                for (Long id : visitOrder) {
+                    String label = labels.get(id);
+                    if (label == null) continue;
+                    Intersection inter = cityMap.intersections().get(id);
+                    if (inter == null) continue;
+                    double x = (inter.getNormalizedX() - minX) * scale;
+                    double y = (inter.getNormalizedY() - minY) * scale;
+
+                    double fontSize = Math.max(10.0, 6.0 * unit_scalable);
+                    double numBgRadius = fontSize;
+
+                    String type = targetTypes.get(id);
+                    Color bgColor = Color.WHITE;
+                    Color strokeColor = Color.DARKGREEN;
+                    Color textColor = Color.DARKGREEN;
+                    if ("store".equals(type)) {
+                        bgColor = Color.GREEN;
+                        strokeColor = Color.DARKGREEN;
+                        textColor = Color.WHITE;
+                    } else if ("pickup".equals(type)) {
+                        bgColor = Color.BLUE;
+                        strokeColor = Color.DARKBLUE;
+                        textColor = Color.WHITE;
+                    } else if ("delivery".equals(type)) {
+                        bgColor = Color.RED;
+                        strokeColor = Color.DARKRED;
+                        textColor = Color.WHITE;
+                    }
+
+                    gc.setFill(bgColor);
+                    gc.fillOval(x - numBgRadius, y - numBgRadius, numBgRadius * 2.0, numBgRadius * 2.0);
+                    gc.setStroke(strokeColor);
+                    gc.setLineWidth(1.0);
+                    gc.strokeOval(x - numBgRadius, y - numBgRadius, numBgRadius * 2.0, numBgRadius * 2.0);
+
+                    gc.setFill(textColor);
+                    gc.setFont(javafx.scene.text.Font.font(fontSize));
+                    gc.fillText(label, x, y);
                 }
             }
         }
+
     }
 
     public void updateDeliveryLayer() {
@@ -149,7 +240,7 @@ public class MapOverlay extends StackPane {
             double deliveryY = (deliveryIntersection.getNormalizedY() - minY) * scale;
             double radius = 12 * unit_scalable;
 
-            Circle deliveryCircle = new Circle(deliveryX, deliveryY, radius, Color.ORANGE);
+            Circle deliveryCircle = new Circle(deliveryX, deliveryY, radius, Color.TRANSPARENT);
             deliveryCircle.setCursor(Cursor.HAND);
 
             deliveryCircle.setOnMouseClicked(event -> {
@@ -165,7 +256,7 @@ public class MapOverlay extends StackPane {
             double pickupX = (pickupIntersection.getNormalizedX() - minX) * scale;
             double pickupY = (pickupIntersection.getNormalizedY() - minY) * scale;
 
-            Circle pickupCircle = new Circle(pickupX, pickupY, radius, Color.PINK);
+            Circle pickupCircle = new Circle(pickupX, pickupY, radius, Color.TRANSPARENT);
             pickupCircle.setCursor(Cursor.HAND);
 
             pickupCircle.setOnMouseClicked(event -> {
@@ -187,7 +278,7 @@ public class MapOverlay extends StackPane {
             double intersectionY = (intersection.getNormalizedY() - minY) * scale;
             double radius = 6 * unit_scalable;
 
-            Circle intersectionCircle = new Circle(intersectionX, intersectionY, radius, Color.PURPLE);
+            Circle intersectionCircle = new Circle(intersectionX, intersectionY, radius, Color.TRANSPARENT);
             intersectionCircle.setUserData("selectIntersection");
             intersectionCircle.setCursor(Cursor.HAND);
 
