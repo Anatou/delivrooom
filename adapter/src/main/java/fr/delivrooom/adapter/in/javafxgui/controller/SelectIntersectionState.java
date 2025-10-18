@@ -5,10 +5,10 @@ import fr.delivrooom.application.model.Intersection;
 import java.net.URL;
 
 /**
- * Deliveries loaded state - both map and deliveries have been loaded.
- * Allows opening new map or deliveries files.
+ * Select intersection state - map and deliveries have been loaded, the use now wants to select an intersection.
+ * Allows the user to select an intersection on the map canvas.
  */
-public record DeliveriesLoadedState(AppController controller) implements State {
+public record SelectIntersectionState(AppController controller) implements State {
 
     @Override
     public void openMapFile(URL url) {
@@ -34,17 +34,17 @@ public record DeliveriesLoadedState(AppController controller) implements State {
 
     @Override
     public void selectIntersection(Intersection intersection) {
-        controller.showError("Can’t select intersection", "Unable to select intersection for now.");
+        controller.selectIntersection(intersection);
+        controller.setState(new DeliveriesLoadedState(controller));
     }
 
     @Override
     public void requestIntersectionSelection() {
-        controller.setState(new SelectIntersectionState(controller));
+        // Nothing to do here, already in this state.
     }
 
     @Override
     public String getStateName() {
-        return "DeliveriesLoadedState";
+        return "SelectIntersectionState";
     }
-
 }

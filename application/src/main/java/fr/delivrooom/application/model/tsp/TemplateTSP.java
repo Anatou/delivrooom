@@ -35,14 +35,14 @@ public abstract class TemplateTSP implements TSP {
         bestCost = Float.MAX_VALUE;
 
         // hashset of all reachable nodes (pickup points)
-        for (Delivery d : demand.getDeliveries()) {
-            reachableNodes.add(d.getTakeoutIntersection().getId());
-            pickupToDelivery.put(d.getTakeoutIntersection().getId(), d.getDeliveryIntersection().getId());
+        for (Delivery d : demand.deliveries()) {
+            reachableNodes.add(d.takeoutIntersection().getId());
+            pickupToDelivery.put(d.takeoutIntersection().getId(), d.deliveryIntersection().getId());
         }
 
         // add the warehouse as a visited node
-        visitedNodes.add(demand.getStore().getId());
-        branchAndBound(demand.getStore().getId(), reachableNodes, visitedNodes, 0.f);
+        visitedNodes.add(demand.store().getId());
+        branchAndBound(demand.store().getId(), reachableNodes, visitedNodes, 0.f);
 
     }
 
@@ -54,7 +54,7 @@ public abstract class TemplateTSP implements TSP {
 
         if (System.currentTimeMillis() - tpsDebut > tpsLimite) return; //TODO: throw a timeout exception so we know whether or not we have a perfect solution
         if (reachableNodes.isEmpty()){ // every delivery point has been visited
-            long warehouseId = demand.getStore().getId();
+            long warehouseId = demand.store().getId();
             if (g.estArc(currentNode, warehouseId)){ // return to warehouse
                 if (visitedCost + g.getCout(currentNode, warehouseId) < bestCost){ // we found a solution better  than the best one
                     visitedNodes.toArray(meilleureSolution);

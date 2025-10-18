@@ -1,22 +1,26 @@
-package fr.delivrooom.adapter.in.javafxgui;
+package fr.delivrooom.adapter.in.javafxgui.panes;
 
 
 import atlantafx.base.controls.Spacer;
 import atlantafx.base.controls.ToggleSwitch;
 import atlantafx.base.theme.PrimerDark;
 import atlantafx.base.theme.PrimerLight;
+import fr.delivrooom.adapter.in.javafxgui.JavaFXApp;
 import fr.delivrooom.adapter.in.javafxgui.controller.AppController;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ToolBar;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.kordamp.ikonli.fontawesome6.FontAwesomeSolid;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.File;
+import java.util.Objects;
 
 public class AppToolBar extends ToolBar {
 
@@ -24,6 +28,10 @@ public class AppToolBar extends ToolBar {
     private final ToggleSwitch themeToggle;
     private Stage stage;
     private Scene scene;
+
+    private Image logoImgLight;
+    private Image logoImgDark;
+    private ImageView logo;
 
     public AppToolBar(AppController controller) {
         super();
@@ -35,10 +43,14 @@ public class AppToolBar extends ToolBar {
         openMapBtn.setOnAction(e -> handleOpenMapFile());
         MenuItem openDemandsBtn = new MenuItem("Open Demands");
         openDemandsBtn.setOnAction(e -> handleOpenDeliveriesFile());
-        MenuItem loadDefaultBtn = new MenuItem("Open Default Map and Demands");
-        loadDefaultBtn.setOnAction(e -> handleLoadDefault());
+        open.getItems().addAll(openMapBtn, openDemandsBtn);
 
-        open.getItems().addAll(openMapBtn, openDemandsBtn, loadDefaultBtn);
+        for (AppController.DefaultMapFilesType type : AppController.DefaultMapFilesType.values()) {
+            MenuItem defaultBtn = new MenuItem("Open files \"" + type.name + "\"");
+            defaultBtn.setOnAction(e -> handleLoadDefault(type));
+            open.getItems().add(defaultBtn);
+        }
+
 
         Button undoBtn = new Button("", new FontIcon(FontAwesomeSolid.UNDO));
         undoBtn.setOnAction(e -> controller.getCommandManager().undo());
@@ -52,8 +64,14 @@ public class AppToolBar extends ToolBar {
         themeToggle.selectedProperty().addListener(o -> handleThemeSwitch());
         themeToggle.setTooltip(new javafx.scene.control.Tooltip("Switch Dark/Light Theme"));
 
-        this.getItems().addAll(open, new Spacer(20), undoBtn, redoBtn, new Spacer(), themeToggle, new Spacer(10));
+        logoImgLight = new Image(Objects.requireNonNull(JavaFXApp.class.getResourceAsStream("/assets/logo_full.png")));
+        logoImgDark = new Image(Objects.requireNonNull(JavaFXApp.class.getResourceAsStream("/assets/logo_full_white.png")));
+        logo = new ImageView(logoImgLight);
+        logo.setFitHeight(25);
+        logo.setSmooth(true);
+        logo.setPreserveRatio(true);
 
+        this.getItems().addAll(open, new Spacer(20), undoBtn, redoBtn, new Spacer(10), themeToggle, new Spacer(), logo, new Spacer(5));
     }
 
     /**
@@ -91,8 +109,8 @@ public class AppToolBar extends ToolBar {
         }
     }
 
-    private void handleLoadDefault() {
-        controller.handleLoadDefaultFiles();
+    private void handleLoadDefault(AppController.DefaultMapFilesType type) {
+        controller.handleLoadDefaultFiles(type);
     }
 
     private void handleThemeSwitch() {
@@ -101,10 +119,12 @@ public class AppToolBar extends ToolBar {
             // Dark theme
             JavaFXApp.setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
             themeToggle.setGraphic(new FontIcon(FontAwesomeSolid.SUN));
+            logo.setImage(logoImgDark);
         } else {
             // Light theme
             JavaFXApp.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
             themeToggle.setGraphic(new FontIcon(FontAwesomeSolid.MOON));
+            logo.setImage(logoImgLight);
         }
     }
 }

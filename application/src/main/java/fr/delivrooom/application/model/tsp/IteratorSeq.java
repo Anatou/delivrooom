@@ -10,13 +10,10 @@ public class IteratorSeq implements Iterator<Long> {
 	private Long[] candidats;
 	private int nbCandidats;
 
-	/**
-	 * Cree un iterateur pour iterer sur l'ensemble des sommets de nonVus qui sont successeurs de sommetCrt dans le graphe g,
-	 * dans l'odre d'apparition dans <code>nonVus</code>
-	 * @param nonVus
-	 * @param sommetCrt
-	 * @param g
-	 */
+    /**
+     * Creates an iterator over the vertices in 'unvisited' that are successors
+     * of currentVertex in graph g, in the same order as they appear in 'unvisited'.
+     */
 	public IteratorSeq(Collection<Long> nonVus, long sommetCrt, Graphe g){
 		this.candidats = new Long[nonVus.size()];
 		Iterator<Long> it = nonVus.iterator();
@@ -26,7 +23,7 @@ public class IteratorSeq implements Iterator<Long> {
 				candidats[nbCandidats++] = s;
 		}
 	}
-	
+
 	@Override
 	public boolean hasNext() {
 		return nbCandidats > 0;

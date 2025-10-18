@@ -1,7 +1,7 @@
 package fr.delivrooom.application.model;
 
-import fr.delivrooom.application.model.tsp.TemplateTSP;
 import fr.delivrooom.application.model.tsp.TSP1;
+import fr.delivrooom.application.model.tsp.TemplateTSP;
 
 import java.util.*;
 
@@ -39,10 +39,10 @@ public class TourCalculator {
 
         if (!useTSP){
             if (tourSolution == null || !calculatedDemand.equals(demand)) {
-                Delivery delivery = demand.getDeliveries().getFirst();
-                long warehouseId = demand.getStore().getId();
-                long firstPickupId = delivery.getTakeoutIntersection().getId();
-                long firstDepositId = delivery.getDeliveryIntersection().getId();
+                Delivery delivery = demand.deliveries().getFirst();
+                long warehouseId = demand.store().getId();
+                long firstPickupId = delivery.takeoutIntersection().getId();
+                long firstDepositId = delivery.deliveryIntersection().getId();
                 HashSet<Long> targetPickup = new HashSet<>(Set.of(firstPickupId));
                 HashSet<Long> targetDeposit = new HashSet<>(Set.of(firstDepositId));
                 HashSet<Long> targetWarehouse = new HashSet<>(Set.of(warehouseId));
@@ -53,11 +53,11 @@ public class TourCalculator {
                 Path pathToFirstPickup = solutionToPickup.get(firstPickupId);
                 Path pathToFirstDeposit = solutionToDeposit.get(firstDepositId);
                 Path pathToFirstWarehouse = solutionToWarehouse.get(warehouseId);
-                tourSolution = new TourSolution(
-                        new ArrayList<>(List.of(pathToFirstPickup, pathToFirstDeposit, pathToFirstWarehouse)),
-                        pathToFirstPickup.getTotalLength()+pathToFirstDeposit.getTotalLength()+pathToFirstWarehouse.getTotalLength()
-                );
-            }
+//                tourSolution = new TourSolution(
+//                        new ArrayList<>(List.of(pathToFirstPickup, pathToFirstDeposit, pathToFirstWarehouse)),
+//                        pathToFirstPickup.getTotalLength()+pathToFirstDeposit.getTotalLength()+pathToFirstWarehouse.getTotalLength()
+//                );
+           }
             else {
                 // todo: recalculate only the needed deliveries
                 throw new UnsupportedOperationException("Dijkstra-based tour recalculation is not implemented yet");
@@ -73,11 +73,11 @@ public class TourCalculator {
 
             // initialize targets;
             HashSet<Long> targets = new HashSet<>();
-            for (Delivery d : demand.getDeliveries()) {
-                targets.add(d.getTakeoutIntersection().getId());
-                targets.add(d.getDeliveryIntersection().getId());
+            for (Delivery d : demand.deliveries()) {
+                targets.add(d.takeoutIntersection().getId());
+                targets.add(d.deliveryIntersection().getId());
             }
-            targets.add(demand.getStore().getId());
+            targets.add(demand.store().getId());
 
             // for each intersection in the graph, run dijkstra to find the shortest path to every other intersection
 
@@ -107,6 +107,7 @@ public class TourCalculator {
             // Convert the TSP solution to a TourSolution by replacing each edge with the corresponding path in the original graph
             List<Path> tourPaths = new ArrayList<>();
             System.out.println("Solution intersections order : ");
+            List<Long> solutionList = Arrays.asList(tspSolution);
             for (int i = 0; i < tspSolution.length; i++) {
                 long fromId = tspSolution[i];
                 long toId = tspSolution[(i + 1) % tspSolution.length]; // wrap around to form a cycle
@@ -114,7 +115,9 @@ public class TourCalculator {
                 tourPaths.add(path);
                 System.out.println(fromId);
             }
-            tourSolution = new TourSolution(tourPaths, tspSolutionCost);
+            System.out.println("tour paths constructed :" + tourPaths.size() + " paths");
+            tourSolution = new TourSolution(tourPaths, tspSolutionCost, solutionList);
+
             calculatedDemand = demand;
 
 
@@ -189,6 +192,7 @@ public class TourCalculator {
             throw new RuntimeException("Input graph is not connex, no path could be found for at least a target");
         }
 
+        // TODO : since the predecessors are stored in a hashmap, they are not ordered which then leads to paths being constructed in wrong order
         // build Path objects to each target from predecessors
         HashMap<Long, Path> pathToTarget = new HashMap<>();
 

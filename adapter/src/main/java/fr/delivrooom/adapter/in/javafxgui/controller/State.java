@@ -1,5 +1,7 @@
 package fr.delivrooom.adapter.in.javafxgui.controller;
 
+import fr.delivrooom.application.model.Intersection;
+
 import java.net.URL;
 
 /**
@@ -21,6 +23,10 @@ public interface State {
      * @param url The deliveries file url to open
      */
     void openDeliveriesFile(URL url);
+
+    void selectIntersection(Intersection intersection);
+
+    void requestIntersectionSelection();
 
     /**
      * Get the name of the current state for debugging/logging purposes.
