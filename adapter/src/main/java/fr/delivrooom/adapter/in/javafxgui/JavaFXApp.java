@@ -43,6 +43,7 @@ public class JavaFXApp extends javafx.application.Application {
         stage.setTitle("Delivrooom");
         stage.setScene(new Scene(mainPane, 800, 500));
         mainPane.setStageAndScene(stage, stage.getScene());
+        //stage.getIcons().add(new Image(Objects.requireNonNull(JavaFXApp.class.getResourceAsStream("/assets/logo_mini.png"))));
         stage.show();
     }
 }
