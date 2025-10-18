@@ -51,7 +51,6 @@ public abstract class TemplateTSP implements TSP {
     private void branchAndBound(long currentNode, HashSet<Long> reachableNodes, List<Long> visitedNodes, float visitedCost){
 
         ++calls;
-        System.out.println("branchAndBound call " + calls + ": \n - currentNode : " + currentNode + "\n - reachableNodes : "+ reachableNodes + "\n - visitedNodes : " + visitedNodes + "\n - visitedCost : " + visitedCost + "\n - bestCost : " + bestCost);
 
         if (System.currentTimeMillis() - tpsDebut > tpsLimite) return; //TODO: throw a timeout exception so we know whether or not we have a perfect solution
         if (reachableNodes.isEmpty()){ // every delivery point has been visited
@@ -61,7 +60,6 @@ public abstract class TemplateTSP implements TSP {
                 if (visitedCost + g.getCout(currentNode, warehouseId) < bestCost){ // we found a solution better  than the best one
                     visitedNodes.toArray(meilleureSolution);
                     bestCost = (float) (visitedCost + g.getCout(currentNode, warehouseId));
-                    System.out.println("New best solution : " + Arrays.toString(meilleureSolution) + " cost " + bestCost);
                 }
             }
         } else if (visitedCost + bound(currentNode, reachableNodes) < bestCost){

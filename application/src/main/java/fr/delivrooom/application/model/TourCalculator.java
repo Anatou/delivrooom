@@ -57,11 +57,8 @@ public class TourCalculator {
             HashSet<Long> targetWithoutIntersectionId = new HashSet<>(targets);
             targetWithoutIntersectionId.remove(intersectionId);
 
-            System.out.println("Calculating shortest paths from intersection " + intersectionId);
-            System.out.println("Targets: " + targetWithoutIntersectionId);
             HashMap<Long, Path> pathsFromIntersection = findShortestPaths(intersectionId, targetWithoutIntersectionId, useTimeAsCost);
             shortestPathsMatrix.put(intersectionId, pathsFromIntersection);
-            System.out.println("Shortest paths from intersection " + intersectionId + " calculated");
         }
         System.out.println("Shortest paths matrix calculated");
 
@@ -85,13 +82,13 @@ public class TourCalculator {
             long fromId = tspSolution[i];
             long toId = tspSolution[(i + 1) % tspSolution.length]; // wrap around to form a cycle
             Path path = shortestPathsMatrix.get(fromId).get(toId);
-            bestTime += path.getTotalTime();
+            bestTime += path.totalTime();
             tourPaths.add(path);
             if (useTimeAsCost){
-                System.out.print(fromId + " -> " + toId + " (time cost: " + path.getTotalTime() + " seconds) |  length : " + path.getTotalLength() + " meters\n");
+                System.out.print(fromId + " -> " + toId + " (time cost: " + path.totalTime() + " seconds) |  length : " + path.totalLength() + " meters\n");
             }else {
 
-                System.out.println(fromId + " -> " + toId + " (path length: " + path.getTotalLength() + ")" + " | " + path.getTotalTime() + " seconds\n");
+                System.out.println(fromId + " -> " + toId + " (path length: " + path.totalLength() + ")" + " | " + path.totalTime() + " seconds\n");
             }
         }
         System.out.println("tour paths constructed :" + tourPaths.size() + " paths");
@@ -112,7 +109,7 @@ public class TourCalculator {
 
     public float getTourLength() {
         if (tourSolution != null) {
-            return tourSolution.getTotalLength();
+            return tourSolution.totalLength();
         } else {
             return  -1f;
         }

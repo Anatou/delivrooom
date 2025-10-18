@@ -108,7 +108,7 @@ public class TourCalculatorUnitTests {
         TourCalculator tourCalculator = new TourCalculator(cityGraph);
         tourCalculator.findOptimalTour(deliveriesDemand, false);
         TourSolution tourSolution = tourCalculator.getOptimalTour();
-        Assertions.assertEquals(4.f, tourSolution.getTotalLength());
+        Assertions.assertEquals(4.f, tourSolution.totalLength());
     }
 
     @Test
@@ -125,6 +125,6 @@ public class TourCalculatorUnitTests {
         TourCalculator tourCalculator = new TourCalculator(cityGraph);
         tourCalculator.findOptimalTour(deliveriesDemand, false);
         TourSolution tourSolution = tourCalculator.getOptimalTour();
-        Assertions.assertEquals(6.f, tourSolution.getTotalLength());
+        Assertions.assertEquals(6.f, tourSolution.totalLength());
     }
 }

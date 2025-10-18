@@ -146,7 +146,7 @@ public class MapOverlay extends StackPane {
                 }
 
                 // Build visit order position map (warehouse is 1, first pickup is 2, etc.)
-                List<Long> visitOrder = tourSolution.getDeliveryOrder();
+                List<Long> visitOrder = tourSolution.deliveryOrder();
                 HashMap<Long, Integer> visitPos = new HashMap<>();
                 int pos = 1;
                 for (Long id : visitOrder) {
@@ -176,8 +176,8 @@ public class MapOverlay extends StackPane {
                     }
                 }
 
-                for (Path path : tourSolution.getPaths()) {
-                    List<Road> roads = path.getIntersections();
+                for (Path path : tourSolution.paths()) {
+                    List<Road> roads = path.intersections();
                     for (Road road : roads) {
                         drawRoad(gc, scale, minX, minY, road);
                     }

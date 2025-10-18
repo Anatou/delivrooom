@@ -123,6 +123,7 @@ public class AppController {
 
             new Thread(() -> {
                 if (tourCalculator.doesCalculatedTourNeedsToBeChanged(deliveriesDemand)) {
+                    tourCalculator.findOptimalTour(deliveriesDemand, true);
                     tourCalculator.findOptimalTour(deliveriesDemand, false);
 
                     Platform.runLater(() -> {
