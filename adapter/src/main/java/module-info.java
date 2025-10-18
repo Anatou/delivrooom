@@ -8,6 +8,12 @@ module fr.delivrooom.adapter {
     opens fr.delivrooom.adapter.out to javafx.fxml;
     exports fr.delivrooom.adapter.in.javafxgui.controller;
     opens fr.delivrooom.adapter.in.javafxgui.controller to javafx.fxml;
+    exports fr.delivrooom.adapter.in.javafxgui.command;
+    opens fr.delivrooom.adapter.in.javafxgui.command to javafx.fxml;
+    exports fr.delivrooom.adapter.in.javafxgui.map;
+    opens fr.delivrooom.adapter.in.javafxgui.map to javafx.fxml;
+    exports fr.delivrooom.adapter.in.javafxgui.panes;
+    opens fr.delivrooom.adapter.in.javafxgui.panes to javafx.fxml;
 
     requires fr.delivrooom.application;
     requires javafx.controls;
