@@ -1,6 +1,7 @@
 package fr.delivrooom.application.service;
 
 import fr.delivrooom.application.model.*;
+import fr.delivrooom.application.model.tsp.TSP1;
 import fr.delivrooom.application.model.tsp.TSP3;
 import fr.delivrooom.application.model.tsp.TemplateTSP;
 import fr.delivrooom.application.port.in.CalculateTourUseCase;
@@ -105,7 +106,7 @@ public class TourCalculatorService implements CalculateTourUseCase {
         // Create a TSP solver and run it on the complete graph
         TemplateTSP tspSolver = new TSP3();
         int timeLimitMs = 10000; // 10 seconds time limit for TSP solving
-        tspSolver.chercheSolution(timeLimitMs, shortestPathsGraph, demand, notifyTSPProgressToGui);
+        tspSolver.chercheSolution(timeLimitMs, shortestPathsGraph, demand, this.notifyTSPProgressToGui);
         Long[] tspSolution = tspSolver.getSolution();
         float tspSolutionCost = tspSolver.getCoutSolution();
 

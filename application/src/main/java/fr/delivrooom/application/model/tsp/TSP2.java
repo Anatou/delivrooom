@@ -49,8 +49,4 @@ public class TSP2 extends TemplateTSP {
         return new IteratorSeq(unseen, currentVertex, g);
     }
 
-    @Override
-    public void chercheSolution(int tpsLimite, Graphe g, DeliveriesDemand demand, NotifyTSPProgressToGui notifyTSPProgressToGui) {
-
-    }
 }

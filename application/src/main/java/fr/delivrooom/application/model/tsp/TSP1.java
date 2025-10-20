@@ -19,9 +19,4 @@ public class TSP1 extends TemplateTSP {
         return new IteratorSeq(nonVus, sommetCrt, g);
     }
 
-
-    @Override
-    public void chercheSolution(int tpsLimite, Graphe g, DeliveriesDemand demand, NotifyTSPProgressToGui notifyTSPProgressToGui) {
-
-    }
 }

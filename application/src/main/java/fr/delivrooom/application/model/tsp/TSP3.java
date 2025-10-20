@@ -123,9 +123,4 @@ public class TSP3 extends TemplateTSP {
     protected Iterator<Long> iterator(Long currentVertex, Collection<Long> unseen, Graphe g) {
         return new IteratorSeq(unseen, currentVertex, g);
     }
-
-    @Override
-    public void chercheSolution(int tpsLimite, Graphe g, DeliveriesDemand demand, NotifyTSPProgressToGui notifyTSPProgressToGui) {
-
-    }
 }
