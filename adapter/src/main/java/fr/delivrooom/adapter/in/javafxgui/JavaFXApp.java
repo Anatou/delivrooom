@@ -2,6 +2,7 @@ package fr.delivrooom.adapter.in.javafxgui;
 
 import atlantafx.base.theme.PrimerLight;
 import fr.delivrooom.adapter.in.javafxgui.panes.MainPane;
+import fr.delivrooom.application.port.in.CalculateTourUseCase;
 import fr.delivrooom.application.port.in.GetConfigPropertyUseCase;
 import fr.delivrooom.application.port.in.GetNameUseCase;
 import fr.delivrooom.application.port.in.GuiUseCase;
@@ -13,12 +14,13 @@ public class JavaFXApp extends javafx.application.Application {
     private static GetNameUseCase getNameUseCase;
     private static GuiUseCase guiUseCase;
     private static GetConfigPropertyUseCase getConfigPropertyUseCase;
+    private static CalculateTourUseCase calculateTourUseCase;
 
-
-    public static void launchGUI(GetNameUseCase getNameUseCase, GuiUseCase guiUseCase, GetConfigPropertyUseCase getConfigPropertyUseCase) {
+    public static void launchGUI(GetNameUseCase getNameUseCase, GuiUseCase guiUseCase, GetConfigPropertyUseCase getConfigPropertyUseCase, CalculateTourUseCase calculateTourUseCase) {
         JavaFXApp.getNameUseCase = getNameUseCase;
         JavaFXApp.guiUseCase = guiUseCase;
         JavaFXApp.getConfigPropertyUseCase = getConfigPropertyUseCase;
+        JavaFXApp.calculateTourUseCase = calculateTourUseCase;
         javafx.application.Application.launch(JavaFXApp.class);
     }
 
@@ -33,6 +35,11 @@ public class JavaFXApp extends javafx.application.Application {
     public static GetConfigPropertyUseCase getConfigPropertyUseCase() {
         return getConfigPropertyUseCase;
     }
+
+    public static CalculateTourUseCase getCalculateTourUseCase() {
+        return calculateTourUseCase;
+    }
+
 
     @Override
     public void start(Stage stage) {

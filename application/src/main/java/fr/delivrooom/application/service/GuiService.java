@@ -18,16 +18,4 @@ public record GuiService(CityMapRepository cityMapRepository, DeliveriesReposito
     public DeliveriesDemand getDeliveriesDemand(CityMap cityMap, URL deliveriesURL) throws Exception {
         return deliveriesRepository.getDeliveriesDemand(cityMap, deliveriesURL);
     }
-
-    @Override
-    public TourSolution getTourSolution(CityMap cityMap, DeliveriesDemand deliveriesDemand) {
-        CityGraph cityGraph = new CityGraph(cityMap);
-        TourCalculator tourCalculator = new TourCalculator(cityGraph);
-
-        if (tourCalculator.doesCalculatedTourNeedsToBeChanged(deliveriesDemand)) {
-            tourCalculator.findOptimalTour(deliveriesDemand, false);
-        }
-
-        return tourCalculator.getOptimalTour();
-    }
 }

@@ -10,6 +10,4 @@ public interface GuiUseCase {
     CityMap getCityMap(URL mapURL) throws Exception;
 
     DeliveriesDemand getDeliveriesDemand(CityMap cityMapURL, URL deliveriesURL) throws Exception;
-
-    TourSolution getTourSolution(CityMap cityMap, DeliveriesDemand deliveriesDemand);
 }

@@ -99,6 +99,7 @@ public class AppController {
      */
     protected void loadMapFile(URL url) throws Exception {
         this.cityMap = JavaFXApp.guiUseCase().getCityMap(url);
+        JavaFXApp.getCalculateTourUseCase().provideCityMap(cityMap);
         updateMapCanvas();
     }
 
@@ -119,7 +120,10 @@ public class AppController {
     protected void updateMapCanvas() {
         if (mapCanvas != null) {
             new Thread(() -> {
-                tourSolution = JavaFXApp.guiUseCase().getTourSolution(cityMap, deliveriesDemand);
+                if (JavaFXApp.getCalculateTourUseCase().doesCalculatedTourNeedsToBeChanged(deliveriesDemand)) {
+                    JavaFXApp.getCalculateTourUseCase().findOptimalTour(deliveriesDemand, false);
+                }
+                tourSolution = JavaFXApp.getCalculateTourUseCase().getOptimalTour();
                 Platform.runLater(() -> {
                     mapCanvas.drawMap();
                 });
