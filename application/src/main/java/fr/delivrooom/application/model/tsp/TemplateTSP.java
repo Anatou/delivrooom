@@ -18,8 +18,10 @@ public abstract class TemplateTSP implements TSP {
     protected HashMap<Long, Long> pickupToDelivery;
     protected int calls;
 
+    // progress-bar related
     protected double maxPossibilities;
     protected double consideredPossibilities;
+    protected NotifyTSPProgressToGui notifyTSPProgressToGui;
 
 
     public TemplateTSP() {
@@ -31,6 +33,7 @@ public abstract class TemplateTSP implements TSP {
     public void chercheSolution(int tpsLimite, Graphe g, DeliveriesDemand demand, NotifyTSPProgressToGui notifyTSPProgressToGui){
         if (tpsLimite <= 0) return;
         tpsDebut = System.currentTimeMillis();
+        this.notifyTSPProgressToGui = notifyTSPProgressToGui;
         this.tpsLimite = tpsLimite;
         this.demand = demand;
         this.g = g;
