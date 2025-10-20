@@ -51,6 +51,7 @@ public class Sidebar extends VBox {
 
         Button calculateTourBtn = new Button("Calculate Tour");
         calculateTourBtn.setOnAction(e -> controller.handleCalculateTour());
+        calculateTourBtn.disableProperty().bind(controller.isTourBeingCalculatedProperty());
 
         selectedIntersectionLabel = new Label("No intersection selected");
 

@@ -7,6 +7,8 @@ import fr.delivrooom.adapter.in.javafxgui.panes.Sidebar;
 import fr.delivrooom.adapter.out.XMLCityMapLoader;
 import fr.delivrooom.application.model.*;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.Alert;
 
@@ -32,8 +34,7 @@ public class AppController {
     private CityMap cityMap;
     private DeliveriesDemand deliveriesDemand;
     private TourSolution tourSolution;
-    private boolean isTourBeingCalculated = false;
-
+    private BooleanProperty isTourBeingCalculated = new SimpleBooleanProperty(false);
     public AppController() {
         this.currentState = new SimpleObjectProperty<>(new InitialState(this));
         this.commandManager = new CommandManager();
@@ -200,6 +201,12 @@ public class AppController {
         return tourSolution;
     }
 
+    public BooleanProperty isTourBeingCalculatedProperty() {
+        return isTourBeingCalculated;
+    }
+
+
+
     /**
      * Calculate the tour on demand (background thread). Requires a loaded city map and deliveries.
      */
@@ -208,9 +215,8 @@ public class AppController {
     }
 
     public void calculateTour() {
-        if (isTourBeingCalculated) {
+        if (isTourBeingCalculated.get()) {
             showError("Cannot calculate tour", "Already running");
-
             return;
         }
 
@@ -218,9 +224,9 @@ public class AppController {
 
             try {
                 // Delegate to use case to compute the tour
-                this.isTourBeingCalculated = true;
+                this.isTourBeingCalculated.set(true);
                 tourSolution = JavaFXApp.guiUseCase().getTourSolution(cityMap, deliveriesDemand);
-                this.isTourBeingCalculated = false;
+                this.isTourBeingCalculated.set(false);
                 Platform.runLater(() -> {
                     // redraw map to show the new tour
                     mapCanvas.drawMap();
