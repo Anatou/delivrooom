@@ -1,6 +1,8 @@
 package fr.delivrooom.application.model.tsp;
 
+import fr.delivrooom.application.model.DeliveriesDemand;
 import fr.delivrooom.application.model.Graphe;
+import fr.delivrooom.application.port.out.NotifyTSPProgressToGui;
 
 import java.util.*;
 
@@ -88,7 +90,9 @@ public class TSP3 extends TemplateTSP {
         float mstCost = 0f;
 
         while (!pq.isEmpty()) {
+            // get the vertex with the smallest edge weight to the MST
             AbstractMap.SimpleEntry<Long, Float> entry = pq.poll();
+
             Long v = entry.getKey();
             float weight = entry.getValue();
 
@@ -100,12 +104,14 @@ public class TSP3 extends TemplateTSP {
             // add the accepted edge weight (0 for the root)
             mstCost += weight;
 
+            // update the best known edge weights for neighbors
             HashMap<Long, Float> neighbors = edgesFromUnseenVertices.getOrDefault(v, new HashMap<>());
             for (Map.Entry<Long, Float> neigh : neighbors.entrySet()) {
                 Long u = neigh.getKey();
                 float w = neigh.getValue();
                 if (!visited.contains(u) && w < best.get(u)) {
                     best.put(u, w);
+                    // reinsert the neighbors with updated weight
                     pq.add(new AbstractMap.SimpleEntry<>(u, w));
                 }
             }
@@ -118,4 +124,8 @@ public class TSP3 extends TemplateTSP {
         return new IteratorSeq(unseen, currentVertex, g);
     }
 
+    @Override
+    public void chercheSolution(int tpsLimite, Graphe g, DeliveriesDemand demand, NotifyTSPProgressToGui notifyTSPProgressToGui) {
+
+    }
 }

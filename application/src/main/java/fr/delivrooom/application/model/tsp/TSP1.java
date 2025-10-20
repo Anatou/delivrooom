@@ -1,6 +1,8 @@
 package fr.delivrooom.application.model.tsp;
 
+import fr.delivrooom.application.model.DeliveriesDemand;
 import fr.delivrooom.application.model.Graphe;
+import fr.delivrooom.application.port.out.NotifyTSPProgressToGui;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -18,8 +20,8 @@ public class TSP1 extends TemplateTSP {
     }
 
 
+    @Override
+    public void chercheSolution(int tpsLimite, Graphe g, DeliveriesDemand demand, NotifyTSPProgressToGui notifyTSPProgressToGui) {
 
-
-
-
+    }
 }
