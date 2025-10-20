@@ -123,16 +123,6 @@ public class AppController {
      */
     protected void updateMapCanvas() {
         if (mapCanvas != null) {
-            new Thread(() -> {
-                if (JavaFXApp.getCalculateTourUseCase().doesCalculatedTourNeedsToBeChanged(deliveriesDemand)) {
-                    JavaFXApp.getCalculateTourUseCase().findOptimalTour(deliveriesDemand, false);
-                }
-                tourSolution = JavaFXApp.getCalculateTourUseCase().getOptimalTour();
-                Platform.runLater(() -> {
-                    mapCanvas.drawMap();
-                });
-            }).start();
-
             mapCanvas.setAutoFraming(true);
             mapCanvas.drawMap();
         }
@@ -234,14 +224,16 @@ public class AppController {
         new Thread(() -> {
 
             try {
-                // Delegate to use case to compute the tour
                 this.isTourBeingCalculated.set(true);
-                tourSolution = JavaFXApp.guiUseCase().getTourSolution(cityMap, deliveriesDemand);
+                if (JavaFXApp.getCalculateTourUseCase().doesCalculatedTourNeedsToBeChanged(deliveriesDemand)) {
+                    JavaFXApp.getCalculateTourUseCase().findOptimalTour(deliveriesDemand, false);
+                }
+                tourSolution = JavaFXApp.getCalculateTourUseCase().getOptimalTour();
                 this.isTourBeingCalculated.set(false);
                 Platform.runLater(() -> {
-                    // redraw map to show the new tour
                     mapCanvas.drawMap();
                 });
+
             } catch (Exception e) {
                 Platform.runLater(() -> showError("Error while calculating tour", e.getMessage() == null ? e.toString() : e.getMessage()));
                 e.printStackTrace();
