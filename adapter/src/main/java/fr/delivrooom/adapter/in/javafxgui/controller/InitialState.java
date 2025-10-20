@@ -41,4 +41,9 @@ public record InitialState(AppController controller) implements State {
         return "InitialState";
     }
 
+    @Override
+    public void requestCalculateTour() {
+        controller.showError("Cannot calculate tour", "No map or deliveries loaded.");
+    }
+
 }

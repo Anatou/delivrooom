@@ -49,10 +49,13 @@ public class Sidebar extends VBox {
         Button selectIntersection = new Button("Select Intersection");
         selectIntersection.setOnAction(e -> controller.handleRequestIntersectionSelection());
 
+        Button calculateTourBtn = new Button("Calculate Tour");
+        calculateTourBtn.setOnAction(e -> controller.handleCalculateTour());
+
         selectedIntersectionLabel = new Label("No intersection selected");
 
 
-        getChildren().addAll(label, button, addDeliveryBtn, removeDeliveryBtn, selectIntersection, selectedIntersectionLabel);
+        getChildren().addAll(label, button, addDeliveryBtn, removeDeliveryBtn, selectIntersection, calculateTourBtn, selectedIntersectionLabel);
     }
 
     private void handleAddDelivery() {

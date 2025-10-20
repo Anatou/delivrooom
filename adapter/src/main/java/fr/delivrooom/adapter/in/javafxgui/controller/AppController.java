@@ -32,6 +32,7 @@ public class AppController {
     private CityMap cityMap;
     private DeliveriesDemand deliveriesDemand;
     private TourSolution tourSolution;
+    private boolean isTourBeingCalculated = false;
 
     public AppController() {
         this.currentState = new SimpleObjectProperty<>(new InitialState(this));
@@ -99,6 +100,7 @@ public class AppController {
      */
     protected void loadMapFile(URL url) throws Exception {
         this.cityMap = JavaFXApp.guiUseCase().getCityMap(url);
+        tourSolution = null;
         updateMapCanvas();
     }
 
@@ -110,6 +112,7 @@ public class AppController {
      */
     protected void loadDeliveriesFile(URL url) throws Exception {
         this.deliveriesDemand = JavaFXApp.guiUseCase().getDeliveriesDemand(cityMap, url);
+        tourSolution = null;
         updateMapCanvas();
     }
 
@@ -118,13 +121,6 @@ public class AppController {
      */
     protected void updateMapCanvas() {
         if (mapCanvas != null) {
-            new Thread(() -> {
-                tourSolution = JavaFXApp.guiUseCase().getTourSolution(cityMap, deliveriesDemand);
-                Platform.runLater(() -> {
-                    mapCanvas.drawMap();
-                });
-            }).start();
-
             mapCanvas.setAutoFraming(true);
             mapCanvas.drawMap();
         }
@@ -202,6 +198,38 @@ public class AppController {
 
     public TourSolution getTourSolution() {
         return tourSolution;
+    }
+
+    /**
+     * Calculate the tour on demand (background thread). Requires a loaded city map and deliveries.
+     */
+    public void handleCalculateTour() {
+        getState().requestCalculateTour();
+    }
+
+    public void calculateTour() {
+        if (isTourBeingCalculated) {
+            showError("Cannot calculate tour", "Already running");
+
+            return;
+        }
+
+        new Thread(() -> {
+
+            try {
+                // Delegate to use case to compute the tour
+                this.isTourBeingCalculated = true;
+                tourSolution = JavaFXApp.guiUseCase().getTourSolution(cityMap, deliveriesDemand);
+                this.isTourBeingCalculated = false;
+                Platform.runLater(() -> {
+                    // redraw map to show the new tour
+                    mapCanvas.drawMap();
+                });
+            } catch (Exception e) {
+                Platform.runLater(() -> showError("Error while calculating tour", e.getMessage() == null ? e.toString() : e.getMessage()));
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     public enum DefaultMapFilesType {
