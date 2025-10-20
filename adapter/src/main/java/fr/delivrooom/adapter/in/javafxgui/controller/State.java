@@ -28,6 +28,8 @@ public interface State {
 
     void requestIntersectionSelection();
 
+    void requestCalculateTour();
+
     /**
      * Get the name of the current state for debugging/logging purposes.
      *

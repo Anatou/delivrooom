@@ -120,9 +120,9 @@ public class MapOverlay extends StackPane {
 
                 // Takeout point is a red square, delivery point in a blue circle
                 for (Delivery delivery : deliveriesDemand.deliveries()) {
-                    gc.setFill(Color.RED);
-                    drawIntersection(gc, scale, minX, minY, delivery.takeoutIntersection(), 4 * unit_scalable, false);
                     gc.setFill(Color.BLUE);
+                    drawIntersection(gc, scale, minX, minY, delivery.takeoutIntersection(), 4 * unit_scalable, false);
+                    gc.setFill(Color.RED);
                     drawIntersection(gc, scale, minX, minY, delivery.deliveryIntersection(), 4 * unit_scalable, true);
                 }
             } else {
