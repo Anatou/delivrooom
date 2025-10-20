@@ -8,24 +8,35 @@ public class CommandManager {
     private final Stack<Command> redoStack = new Stack<>();
 
     public void executeCommand(Command command) {
-        command.execute();
-        undoStack.push(command);
-        redoStack.clear();
+        if(command.execute()){
+            undoStack.push(command);
+            redoStack.clear();
+        }
     }
 
     public void undo() {
         if (!undoStack.isEmpty()) {
             Command command = undoStack.pop();
-            command.undo();
-            redoStack.push(command);
+            if(command.undo()) {
+                //System.out.println("command.undo");
+                redoStack.push(command);
+            }else{
+                //System.out.println("no undo");
+                undoStack.push(command);
+            }
         }
     }
 
     public void redo() {
         if (!redoStack.isEmpty()) {
             Command command = redoStack.pop();
-            command.execute();
-            undoStack.push(command);
+            if(command.execute()) {
+                //System.out.println("command.redo");
+                undoStack.push(command);
+            }else{
+                //System.out.println("no redo");
+                redoStack.push(command);
+            }
         }
     }
 }

@@ -2,7 +2,7 @@ package fr.delivrooom.adapter.in.javafxgui.command;
 
 
 public interface Command {
-    void execute();
+    boolean execute();
 
-    void undo();
+    boolean undo();
 }

@@ -169,17 +169,29 @@ public class AppController {
         alert.showAndWait();
     }
 
-    public void addDelivery(Delivery delivery) {
-        System.out.println("Adding delivery " + delivery.takeoutIntersection().getId()
-                + " from intersection " + delivery.takeoutIntersection().getId()
-                + " to intersection " + delivery.deliveryIntersection().getId());
-        this.deliveriesDemand.deliveries().add(delivery);
+    public boolean addDelivery(Delivery delivery) {
+        if (delivery!=null ) {
+            System.out.println("Adding delivery " + delivery.takeoutIntersection().getId()
+                    + " from intersection " + delivery.takeoutIntersection().getId()
+                    + " to intersection " + delivery.deliveryIntersection().getId());
+            this.deliveriesDemand.deliveries().add(delivery);
+            //updateMapCanvas();
+            return true;
+        }
+        return false;
     }
 
-    public void removeDelivery(Delivery delivery) {
-        System.out.println("Removing delivery " + delivery.takeoutIntersection().getId()
-                + " from intersection " + delivery.takeoutIntersection().getId()
-                + " to intersection " + delivery.deliveryIntersection().getId());
-        this.deliveriesDemand.deliveries().remove(delivery);
+    public boolean removeDelivery(Delivery delivery) {
+        if (delivery!=null ) {
+            System.out.println("Removing delivery " + delivery.takeoutIntersection().getId()
+                    + " from intersection " + delivery.takeoutIntersection().getId()
+                    + " to intersection " + delivery.deliveryIntersection().getId());
+
+            this.deliveriesDemand.deliveries().remove(delivery);
+
+            //updateMapCanvas();
+            return true;
+        }
+        return false;
     }
 }

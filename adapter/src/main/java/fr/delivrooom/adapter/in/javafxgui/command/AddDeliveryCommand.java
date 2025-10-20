@@ -6,13 +6,13 @@ import fr.delivrooom.application.model.Delivery;
 public record AddDeliveryCommand(AppController controller, Delivery delivery) implements Command {
 
     @Override
-    public void execute() {
-        controller.addDelivery(delivery);
+    public boolean execute() {
+        return controller.addDelivery(delivery);
     }
 
     @Override
-    public void undo() {
-        controller.removeDelivery(delivery);
+    public boolean undo() {
+        return controller.removeDelivery(delivery);
 
     }
 
