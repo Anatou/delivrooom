@@ -25,8 +25,6 @@ import java.util.Objects;
  */
 public class Sidebar extends VBox {
 
-    private final AppController controller;
-
     // Sections
     private final DeliveryCreationSection deliveryCreationSection;
     private final CouriersSection couriersSection;
@@ -34,9 +32,8 @@ public class Sidebar extends VBox {
     private final TestSection testSection;
     private final BottomSection bottomSection;
 
-    public Sidebar(AppController controller) {
+    public Sidebar() {
         super(0);
-        this.controller = controller;
 
         setMinWidth(350);
         setMaxWidth(450);
@@ -46,11 +43,11 @@ public class Sidebar extends VBox {
         getStylesheets().add(Objects.requireNonNull(getClass().getResource("/styles/sidebar.css")).toExternalForm());
 
         // Create all sections
-        deliveryCreationSection = new DeliveryCreationSection(controller);
-        couriersSection = new CouriersSection(controller);
-        deliveriesSection = new DeliveriesSection(controller);
-        testSection = new TestSection(controller);
-        bottomSection = new BottomSection(controller);
+        deliveryCreationSection = new DeliveryCreationSection();
+        couriersSection = new CouriersSection();
+        deliveriesSection = new DeliveriesSection();
+        testSection = new TestSection();
+        bottomSection = new BottomSection();
 
         // Create scrollable content area
         VBox scrollableContent = new VBox(0);
@@ -73,7 +70,7 @@ public class Sidebar extends VBox {
         getChildren().addAll(scrollPane, getNoPaddingSeparator(), bottomSection);
 
         // Listen to deliveries changes to refresh the list
-        controller.stateProperty().addListener((obs, oldState, newState) -> {
+        AppController.getController().stateProperty().addListener((obs, oldState, newState) -> {
             deliveriesSection.refreshDeliveries();
         });
     }

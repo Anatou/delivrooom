@@ -19,7 +19,6 @@ public class MapCanvas extends StackPane {
 
     // Zoom config
     private static final double ZOOM_STEP = 1.5;
-    private final AppController controller;
     private final MapTiles tilesLayer;
     private final MapOverlay overlayLayer;
     private final Pane controlsLayer;
@@ -33,11 +32,10 @@ public class MapCanvas extends StackPane {
     private boolean dragging = false;
 
 
-    public MapCanvas(AppController controller) {
-        this.controller = controller;
+    public MapCanvas() {
 
         this.tilesLayer = new MapTiles();
-        this.overlayLayer = new MapOverlay(controller);
+        this.overlayLayer = new MapOverlay();
         this.controlsLayer = new Pane();
 
         setStyle("-fx-background-color: #8D8E7F;");
@@ -64,6 +62,7 @@ public class MapCanvas extends StackPane {
     }
 
     private void setupControls() {
+        AppController controller = AppController.getController();
         // Controls not visible by default
         controlsLayer.setVisible(false);
 
@@ -133,6 +132,8 @@ public class MapCanvas extends StackPane {
     }
 
     private void ensureManualFromAuto() {
+        AppController controller = AppController.getController();
+
         if (!autoFraming) return;
         if (controller.getCityMap() == null || getWidth() == 0 || getHeight() == 0) return;
         AutoView v = computeAutoView(getWidth(), getHeight(), controller.getCityMap());
@@ -209,7 +210,7 @@ public class MapCanvas extends StackPane {
     }
 
     public void drawMap() {
-        CityMap cityMap = controller.getCityMap();
+        CityMap cityMap = AppController.getController().getCityMap();
         controlsLayer.setVisible(cityMap != null);
         overlayLayer.setVisible(cityMap != null);
         tilesLayer.setVisible(cityMap != null);

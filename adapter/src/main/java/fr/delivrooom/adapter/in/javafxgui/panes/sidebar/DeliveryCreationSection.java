@@ -14,15 +14,13 @@ import org.kordamp.ikonli.javafx.FontIcon;
  */
 public class DeliveryCreationSection extends VBox {
 
-    private final AppController controller;
     private final Label selectedIntersectionLabel;
 
-    public DeliveryCreationSection(AppController controller) {
+    public DeliveryCreationSection() {
         super(10);
-        this.controller = controller;
         setPadding(new Insets(10));
-
         setAlignment(Pos.TOP_LEFT);
+        AppController controller = AppController.getController();
 
         // Section title
         Label titleLabel = new Label("New Delivery");

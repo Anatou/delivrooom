@@ -21,12 +21,10 @@ import org.kordamp.ikonli.javafx.FontIcon;
  */
 public class TestSection extends VBox {
 
-    private final AppController controller;
     private final TitledPane titledPane;
 
-    public TestSection(AppController controller) {
+    public TestSection() {
         super(0);
-        this.controller = controller;
 
         getStyleClass().add("test-section");
 
@@ -59,6 +57,8 @@ public class TestSection extends VBox {
     }
 
     private VBox createTestContent() {
+        AppController controller = AppController.getController();
+
         VBox container = new VBox(10);
         container.setPadding(new Insets(10, 0, 0, 0));
 
@@ -107,6 +107,8 @@ public class TestSection extends VBox {
     }
 
     private void handleAddTestDelivery() {
+        AppController controller = AppController.getController();
+
         Intersection takeoutIntersection = new Intersection(99, 45.550404, 4.8744674);
         Intersection deliveryIntersection = new Intersection(100, 45.770404, 4.8744674);
         Delivery addedDelivery = new Delivery(takeoutIntersection, deliveryIntersection, 5, 5);
@@ -115,6 +117,8 @@ public class TestSection extends VBox {
     }
 
     private void handleRemoveTestDelivery() {
+        AppController controller = AppController.getController();
+
         if (controller.getDeliveriesDemand() != null) {
             Delivery delivery = controller.getDeliveriesDemand().getDeliveryByIds(99, 100);
             if (delivery != null) {
