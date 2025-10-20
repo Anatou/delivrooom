@@ -1,9 +1,7 @@
 package fr.delivrooom.application.service;
 
 import fr.delivrooom.application.model.*;
-import fr.delivrooom.application.model.tsp.TSP1;
-import fr.delivrooom.application.model.tsp.TSP3;
-import fr.delivrooom.application.model.tsp.TemplateTSP;
+import fr.delivrooom.application.model.tsp.DynamicProgrammingTSP;
 import fr.delivrooom.application.port.in.CalculateTourUseCase;
 import fr.delivrooom.application.port.out.NotifyTSPProgressToGui;
 
@@ -104,11 +102,11 @@ public class TourCalculatorService implements CalculateTourUseCase {
 
         long tpsDebut = System.currentTimeMillis();
         // Create a TSP solver and run it on the complete graph
-        TemplateTSP tspSolver = new TSP3();
+        DynamicProgrammingTSP tspSolver = new DynamicProgrammingTSP();
         int timeLimitMs = 10000; // 10 seconds time limit for TSP solving
-        tspSolver.chercheSolution(timeLimitMs, shortestPathsGraph, demand, this.notifyTSPProgressToGui);
-        Long[] tspSolution = tspSolver.getSolution();
-        float tspSolutionCost = tspSolver.getCoutSolution();
+        tspSolver.searchSolution(shortestPathsGraph, demand, this.notifyTSPProgressToGui);
+        Long[] tspSolution = tspSolver.getBestSolution();
+        float tspSolutionCost = tspSolver.getBestCost();
 
         // Convert the TSP solution to a TourSolution by replacing each edge with the corresponding path in the original graph
         List<Path> tourPaths = new ArrayList<>();
@@ -119,6 +117,7 @@ public class TourCalculatorService implements CalculateTourUseCase {
         for (int i = 0; i < tspSolution.length; i++) {
             long fromId = tspSolution[i];
             long toId = tspSolution[(i + 1) % tspSolution.length]; // wrap around to form a cycle
+            System.out.println(fromId + " -> " + toId);
             Path path = shortestPathsMatrix.get(fromId).get(toId);
             bestTime += path.totalTime();
             tourPaths.add(path);
