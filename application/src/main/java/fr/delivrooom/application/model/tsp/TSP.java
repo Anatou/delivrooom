@@ -2,6 +2,7 @@ package fr.delivrooom.application.model.tsp;
 
 import fr.delivrooom.application.model.DeliveriesDemand;
 import fr.delivrooom.application.model.Graphe;
+import fr.delivrooom.application.port.out.NotifyTSPProgressToGui;
 
 public interface TSP {
 
@@ -11,7 +12,7 @@ public interface TSP {
      * @param tpsLimite
      * @param g
      */
-    public void chercheSolution(int tpsLimite, Graphe g, DeliveriesDemand demand);
+    public void chercheSolution(int tpsLimite, Graphe g, DeliveriesDemand demand, NotifyTSPProgressToGui notifyTSPProgressToGui);
 
     /**
      * @return le ieme sommet visite dans la solution calculee par <code>chercheSolution</code>

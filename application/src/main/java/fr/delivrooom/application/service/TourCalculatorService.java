@@ -81,11 +81,9 @@ public class TourCalculatorService implements CalculateTourUseCase {
             HashMap<Long, Path> pathsFromIntersection;
             if (useTimeAsCost) {
                 pathsFromIntersection = targetedDijkstraSearchTime(intersectionId, targetWithoutIntersectionId);
-
             }
             else {
                 pathsFromIntersection = findShortestPaths(intersectionId, targetWithoutIntersectionId, useTimeAsCost);
-
             }
 
             shortestPathsMatrix.put(intersectionId, pathsFromIntersection);
@@ -97,7 +95,7 @@ public class TourCalculatorService implements CalculateTourUseCase {
         // Create a TSP solver and run it on the complete graph
         TemplateTSP tspSolver = new TSP1();
         int timeLimitMs = 10000; // 10 seconds time limit for TSP solving
-        tspSolver.chercheSolution(timeLimitMs, shortestPathsGraph, demand);
+        tspSolver.chercheSolution(timeLimitMs, shortestPathsGraph, demand, notifyTSPProgressToGui);
         Long[] tspSolution = tspSolver.getSolution();
         float tspSolutionCost = tspSolver.getCoutSolution();
         System.out.println("TSP solution calculated");
@@ -126,11 +124,6 @@ public class TourCalculatorService implements CalculateTourUseCase {
         System.out.println("Total tour cost (time): " + bestTime + " seconds | distance "+ tspSolutionCost/4.17 + " + waiting " + (bestTime - tspSolutionCost/4.17) + " seconds");
 
         tourSolution = new TourSolution(tourPaths, tspSolutionCost, solutionList);
-
-
-
-
-
     }
 
     protected HashMap<Long, Path> findShortestPaths(long startIntersectionId , HashSet<Long> targets, boolean useTimeAsCost) throws RuntimeException {
