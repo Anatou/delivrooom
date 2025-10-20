@@ -104,8 +104,8 @@ public class TourCalculatorService implements CalculateTourUseCase {
         long tpsDebut = System.currentTimeMillis();
         // Create a TSP solver and run it on the complete graph
         TemplateTSP tspSolver = new TSP3();
-        int timeLimitMs = 20000; // 10 seconds time limit for TSP solving
-        tspSolver.chercheSolution(timeLimitMs, shortestPathsGraph, demand);
+        int timeLimitMs = 10000; // 10 seconds time limit for TSP solving
+        tspSolver.chercheSolution(timeLimitMs, shortestPathsGraph, demand, notifyTSPProgressToGui);
         Long[] tspSolution = tspSolver.getSolution();
         float tspSolutionCost = tspSolver.getCoutSolution();
 
@@ -136,11 +136,6 @@ public class TourCalculatorService implements CalculateTourUseCase {
 
 //
         tourSolution = new TourSolution(tourPaths, tspSolutionCost, solutionList);
-
-
-
-
-
     }
 
     protected HashMap<Long, Path> findShortestPaths(long startIntersectionId , HashSet<Long> targets, boolean useTimeAsCost) throws RuntimeException {

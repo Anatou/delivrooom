@@ -3,6 +3,7 @@ package fr.delivrooom.application.model.tsp;
 import fr.delivrooom.application.model.DeliveriesDemand;
 import fr.delivrooom.application.model.Delivery;
 import fr.delivrooom.application.model.Graphe;
+import fr.delivrooom.application.port.out.NotifyTSPProgressToGui;
 
 import java.util.*;
 
@@ -17,16 +18,26 @@ public abstract class TemplateTSP implements TSP {
     protected HashMap<Long, Long> pickupToDelivery;
     protected int calls;
 
+    protected double maxPossibilities;
+    protected double consideredPossibilities;
+
+
     public TemplateTSP() {
         this.calls = 0;
+        this.maxPossibilities = Double.MAX_VALUE;
+        this.consideredPossibilities = 0;
     }
 
-    public void chercheSolution(int tpsLimite, Graphe g, DeliveriesDemand demand){
+    public void chercheSolution(int tpsLimite, Graphe g, DeliveriesDemand demand, NotifyTSPProgressToGui notifyTSPProgressToGui){
         if (tpsLimite <= 0) return;
         tpsDebut = System.currentTimeMillis();
         this.tpsLimite = tpsLimite;
         this.demand = demand;
         this.g = g;
+        this.calls = 0;
+        this.consideredPossibilities = 0;
+        this.maxPossibilities = this.orderedPermutationCount(g.getNbSommets(), demand.deliveries().size());
+        System.out.println("Calculated max possibilities : " + maxPossibilities);
 
         meilleureSolution = new Long[g.getNbSommets()];
         HashSet<Long> reachableNodes = new HashSet<>();
@@ -45,18 +56,22 @@ public abstract class TemplateTSP implements TSP {
         branchAndBound(demand.store().getId(), reachableNodes, visitedNodes, 0.f);
         System.out.println("Number of calls: " + calls);
 
+        System.out.println("Total number of possibilities considered : " + this.consideredPossibilities);
     }
 
 
     private void branchAndBound(long currentNode, HashSet<Long> reachableNodes, List<Long> visitedNodes, float visitedCost){
 
         ++calls;
+        //System.out.println("branchAndBound call " + calls + " (" + (double)consideredPossibilities/maxPossibilities*100 + "%) : \n - currentNode : " + currentNode + "\n - reachableNodes : "+ reachableNodes + "\n - visitedNodes : " + visitedNodes + "\n - visitedCost : " + visitedCost + "\n - bestCost : " + bestCost);
 
         if (System.currentTimeMillis() - tpsDebut > tpsLimite) {
             System.out.println("Timeout reached after " + tpsLimite + " ms and " + calls + " calls.");
             return; //TODO: throw a timeout exception so we know whether or not we have a perfect solution
         }
         if (reachableNodes.isEmpty()){ // every delivery point has been visited
+            ++consideredPossibilities;
+            notifyProgress(notifyTSPProgressToGui);
             long warehouseId = demand.store().getId();
             if (g.estArc(currentNode, warehouseId)){ // return to warehouse
                 if (visitedCost + g.getCout(currentNode, warehouseId) < bestCost){ // we found a solution better  than the best one
@@ -83,6 +98,17 @@ public abstract class TemplateTSP implements TSP {
                     reachableNodes.remove(deliveryPoint);
                 }
             }
+        } else {
+            // we managed to skip a certain number of possibilities thanks to bound, but we must account for them in the progress bar
+
+            // we need to count how many constraints are left, i.e. how pickups are not done
+            int leftToVisit = g.getNbSommets() -1 - visitedNodes.size();
+            int pickupsDone = demand.arePickups(visitedNodes);
+            int constraints = (g.getNbSommets()-1)/2 - pickupsDone;
+            this.consideredPossibilities += this.orderedPermutationCount(leftToVisit, constraints);
+            //this.consideredPossibilities += this.orderedPermutationCount(reachableNodes.size(), reachableNodes.size()-pickupsDone);
+
+            notifyProgress(notifyTSPProgressToGui);
         }
     }
 
@@ -112,6 +138,23 @@ public abstract class TemplateTSP implements TSP {
     public float getCoutSolution(){
         if (meilleureSolution == null) return -1;
         return bestCost;
+    }
+
+    protected double factorial (long n) {
+        long res = 1;
+        for (long i = 2; i < n; ++i) {
+            res *= i;
+        }
+        return res;
+    }
+
+    protected double orderedPermutationCount(long n, long k) {
+        // returns the number of possible permutations of n elements with k constraints of precedence in a pair
+        return (double) (this.factorial(n) / Math.pow(2, k ));
+    }
+
+    protected void notifyProgress(NotifyTSPProgressToGui notifyTSPProgressToGui) {
+        notifyTSPProgressToGui.notifyTSPProgressToGui((float) (this.consideredPossibilities/this.maxPossibilities*100));
     }
 
 }
