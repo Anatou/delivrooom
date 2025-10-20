@@ -47,4 +47,14 @@ public record DeliveriesLoadedState(AppController controller) implements State {
         return "DeliveriesLoadedState";
     }
 
+    @Override
+    public void requestCalculateTour() {
+        try {
+            controller.calculateTour();
+        } catch (Exception e) {
+            controller.showError("Error calculating tour", e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
 }

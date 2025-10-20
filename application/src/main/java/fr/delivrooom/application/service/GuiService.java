@@ -1,8 +1,6 @@
 package fr.delivrooom.application.service;
 
-import fr.delivrooom.application.model.CityMap;
-import fr.delivrooom.application.model.DeliveriesDemand;
-import fr.delivrooom.application.model.TourSolution;
+import fr.delivrooom.application.model.*;
 import fr.delivrooom.application.port.in.GuiUseCase;
 import fr.delivrooom.application.port.out.CityMapRepository;
 import fr.delivrooom.application.port.out.DeliveriesRepository;
@@ -19,10 +17,5 @@ public record GuiService(CityMapRepository cityMapRepository, DeliveriesReposito
     @Override
     public DeliveriesDemand getDeliveriesDemand(CityMap cityMap, URL deliveriesURL) throws Exception {
         return deliveriesRepository.getDeliveriesDemand(cityMap, deliveriesURL);
-    }
-
-    @Override
-    public TourSolution getTourSolution() {
-        return null;
     }
 }

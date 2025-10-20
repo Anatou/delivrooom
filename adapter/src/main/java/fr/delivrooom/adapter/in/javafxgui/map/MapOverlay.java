@@ -93,7 +93,7 @@ public class MapOverlay extends StackPane {
         GraphicsContext gc = canvasLayer.getGraphicsContext2D();
         CityMap cityMap = controller.getCityMap();
         DeliveriesDemand deliveriesDemand = controller.getDeliveriesDemand();
-        TourCalculator tourCalculator = controller.getTourCalculator();
+        TourSolution tourSolution = controller.getTourSolution();
 
         // Draw roads
         gc.setStroke(Color.rgb(220, 220, 220));
@@ -113,23 +113,22 @@ public class MapOverlay extends StackPane {
         // Draw deliveries demands
         if (deliveriesDemand != null) {
 
-            if (tourCalculator == null || tourCalculator.getOptimalTour() == null) {
+            if (tourSolution == null) {
                 // Draw warehouse point in green
                 gc.setFill(Color.GREEN);
                 drawIntersection(gc, scale, minX, minY, deliveriesDemand.store(), 4 * unit_scalable, true);
 
                 // Takeout point is a red square, delivery point in a blue circle
                 for (Delivery delivery : deliveriesDemand.deliveries()) {
-                    gc.setFill(Color.RED);
-                    drawIntersection(gc, scale, minX, minY, delivery.takeoutIntersection(), 4 * unit_scalable, false);
                     gc.setFill(Color.BLUE);
+                    drawIntersection(gc, scale, minX, minY, delivery.takeoutIntersection(), 4 * unit_scalable, false);
+                    gc.setFill(Color.RED);
                     drawIntersection(gc, scale, minX, minY, delivery.deliveryIntersection(), 4 * unit_scalable, true);
                 }
             } else {
                 // Draw the calculated tour if available (numbers only on store/pickup/delivery in visit order)
                 gc.setStroke(Color.LIMEGREEN);
                 gc.setLineWidth(2 * unit_scalable);
-                TourSolution tourSolution = tourCalculator.getOptimalTour();
                 // Build map of target intersection ids -> type ("store","pickup","delivery")
 
 

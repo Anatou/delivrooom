@@ -46,4 +46,11 @@ public record MapLoadedState(AppController controller) implements State {
     public String getStateName() {
         return "MapLoadedState";
     }
+
+    @Override
+    public void requestCalculateTour() {
+        controller.showError("No deliveries loaded", "Please load deliveries first before calculating the tour");
+
+
+    }
 }
