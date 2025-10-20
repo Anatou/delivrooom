@@ -1,7 +1,7 @@
 package fr.delivrooom.application.service;
 
 import fr.delivrooom.application.model.*;
-import fr.delivrooom.application.model.tsp.TSP1;
+import fr.delivrooom.application.model.tsp.TSP3;
 import fr.delivrooom.application.model.tsp.TemplateTSP;
 import fr.delivrooom.application.port.in.CalculateTourUseCase;
 import fr.delivrooom.application.port.out.NotifyTSPProgressToGui;
@@ -88,9 +88,11 @@ public class TourCalculatorService implements CalculateTourUseCase {
             HashMap<Long, Path> pathsFromIntersection;
             if (useTimeAsCost) {
                 pathsFromIntersection = targetedDijkstraSearchTime(intersectionId, targetWithoutIntersectionId);
+
             }
             else {
                 pathsFromIntersection = findShortestPaths(intersectionId, targetWithoutIntersectionId, useTimeAsCost);
+
             }
 
             shortestPathsMatrix.put(intersectionId, pathsFromIntersection);
@@ -99,17 +101,17 @@ public class TourCalculatorService implements CalculateTourUseCase {
 
         shortestPathsGraph = new ShortestPathsGraph(shortestPathsMatrix);
 
+        long tpsDebut = System.currentTimeMillis();
         // Create a TSP solver and run it on the complete graph
-        TemplateTSP tspSolver = new TSP1();
-        int timeLimitMs = 10000; // 10 seconds time limit for TSP solving
-        tspSolver.chercheSolution(timeLimitMs, shortestPathsGraph, demand, notifyTSPProgressToGui);
+        TemplateTSP tspSolver = new TSP3();
+        int timeLimitMs = 20000; // 10 seconds time limit for TSP solving
+        tspSolver.chercheSolution(timeLimitMs, shortestPathsGraph, demand);
         Long[] tspSolution = tspSolver.getSolution();
         float tspSolutionCost = tspSolver.getCoutSolution();
-        System.out.println("TSP solution calculated");
 
         // Convert the TSP solution to a TourSolution by replacing each edge with the corresponding path in the original graph
         List<Path> tourPaths = new ArrayList<>();
-        System.out.println("Solution intersections order : ");
+        //System.out.println("Solution intersections order : ");
         List<Long> solutionList = Arrays.asList(tspSolution);
         // TODO : replace bestTime with actual time calculation (has to be done in TSP solver)
         float bestTime = 0.f;
@@ -120,17 +122,25 @@ public class TourCalculatorService implements CalculateTourUseCase {
             bestTime += path.totalTime();
             tourPaths.add(path);
             if (useTimeAsCost){
-                System.out.println(fromId + " -> " + toId + " (time cost: " + path.totalTime() + " seconds) |  length : " + path.totalLength() + " meters");
+                //System.out.println(fromId + " -> " + toId + " (time cost: " + path.totalTime() + " seconds) |  length : " + path.totalLength() + " meters");
             }else {
 
-                System.out.println(fromId + " -> " + toId + " (path length: " + path.totalLength() + ")" + " | " + path.totalTime() + " seconds");
+                //System.out.println(fromId + " -> " + toId + " (path length: " + path.totalLength() + ")" + " | " + path.totalTime() + " seconds");
             }
         }
-        System.out.println("tour paths constructed :" + tourPaths.size() + " paths");
-        System.out.println("Total tour cost (distance): " + tspSolutionCost);
-        System.out.println("Total tour cost (time): " + bestTime + " seconds | distance "+ tspSolutionCost/4.17 + " + waiting " + (bestTime - tspSolutionCost/4.17) + " seconds");
+//        System.out.println("tour paths constructed :" + tourPaths.size() + " paths");
+//        System.out.println("Total tour cost (distance): " + tspSolutionCost);
+//        System.out.println("Total tour cost (time): " + bestTime + " seconds | distance "+ tspSolutionCost/4.17 + " + waiting " + (bestTime - tspSolutionCost/4.17) + " seconds");
+        long temps = System.currentTimeMillis() - tpsDebut;
+        System.out.println("Time used to calculate TSP (ms): " + temps);
 
+//
         tourSolution = new TourSolution(tourPaths, tspSolutionCost, solutionList);
+
+
+
+
+
     }
 
     protected HashMap<Long, Path> findShortestPaths(long startIntersectionId , HashSet<Long> targets, boolean useTimeAsCost) throws RuntimeException {
