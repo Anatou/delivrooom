@@ -161,7 +161,7 @@ public class AppController {
      * Update the selected intersection in the sidebar.
      */
     protected void selectIntersection(Intersection intersection) {
-        sidebar.selectIntersection(intersection);
+        sidebar.getDeliveryCreationSection().selectIntersection(intersection);
     }
 
     public void addDelivery(Delivery delivery) {
