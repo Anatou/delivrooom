@@ -15,33 +15,31 @@ import org.kordamp.ikonli.javafx.FontIcon;
  */
 public class BottomSection extends VBox {
 
-    private final AppController controller;
     private final ProgressBar progressBar;
     private final Button goButton;
 
-    public BottomSection(AppController controller) {
+    public BottomSection() {
         super(10);
         setPadding(new Insets(10));
-        this.controller = controller;
-
         setAlignment(Pos.CENTER);
+        AppController controller = AppController.getController();
 
         // Progress bar (shown when loading)
         progressBar = new ProgressBar();
         progressBar.setMaxWidth(Double.MAX_VALUE);
         progressBar.setProgress(0.75); // Indeterminate progress
-//        progressBar.visibleProperty().bind(loadingProperty);
+        progressBar.visibleProperty().bind(controller.tourBeingCalculatedBinding());
+        progressBar.managedProperty().bind(progressBar.visibleProperty());
 
         // GO button (shown when not loading)
         goButton = new Button("GO");
         goButton.setGraphic(new FontIcon(FontAwesomeSolid.PLAY));
         goButton.setMaxWidth(Double.MAX_VALUE);
         goButton.getStyleClass().addAll("accent", "large");
-//        goButton.visibleProperty().bind(loadingProperty.not());
+        goButton.visibleProperty().bind(controller.tourBeingCalculatedBinding().not());
 
-        goButton.setOnAction(e -> {
-
-        });
+        goButton.setOnAction(e -> controller.handleCalculateTour());
+        goButton.managedProperty().bind(goButton.visibleProperty());
 
         getChildren().addAll(progressBar, goButton);
     }

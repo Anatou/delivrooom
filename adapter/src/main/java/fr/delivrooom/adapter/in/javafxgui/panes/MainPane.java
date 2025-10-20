@@ -9,21 +9,17 @@ import javafx.stage.Stage;
 
 public class MainPane extends BorderPane {
 
-    private final AppController controller;
     private final AppToolBar toolBar;
 
     public MainPane() {
         super();
-        // Create the controller
-        controller = new AppController();
-
         // Create UI components
-        MapCanvas canvas = new MapCanvas(controller);
-        Sidebar sidebar = new Sidebar(controller);
-        toolBar = new AppToolBar(controller);
+        MapCanvas canvas = new MapCanvas();
+        Sidebar sidebar = new Sidebar();
+        toolBar = new AppToolBar();
 
         // Wire the controller to the UI components
-        controller.wireComponents(canvas, sidebar);
+        AppController.getController().wireComponents(canvas, sidebar);
 
         // Set up the layout
         setTop(toolBar);

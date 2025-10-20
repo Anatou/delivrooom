@@ -1,6 +1,5 @@
 package fr.delivrooom.adapter.in.javafxgui.panes.sidebar.courier;
 
-import fr.delivrooom.adapter.in.javafxgui.controller.AppController;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.TitledPane;
@@ -14,13 +13,11 @@ import org.kordamp.ikonli.javafx.FontIcon;
  */
 public class CouriersSection extends VBox {
 
-    private final AppController controller;
     private final CouriersList couriersList;
     private final TitledPane titledPane;
 
-    public CouriersSection(AppController controller) {
+    public CouriersSection() {
         super(0);
-        this.controller = controller;
 
         // Create the couriers list
         couriersList = new CouriersList();

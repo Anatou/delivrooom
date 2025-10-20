@@ -14,15 +14,11 @@ import org.kordamp.ikonli.javafx.FontIcon;
  */
 public class DeliveriesSection extends VBox {
 
-    private final AppController controller;
     private final DeliveriesList deliveriesList;
     private final TitledPane titledPane;
 
-    public DeliveriesSection(AppController controller) {
+    public DeliveriesSection() {
         super(0);
-        // no border
-        this.controller = controller;
-
         // Create the deliveries list
         deliveriesList = new DeliveriesList();
 
@@ -69,6 +65,8 @@ public class DeliveriesSection extends VBox {
      * Refresh the deliveries list from the controller's data.
      */
     public void refreshDeliveries() {
+        AppController controller = AppController.getController();
+
         if (controller.getDeliveriesDemand() != null) {
             deliveriesList.setDeliveries(controller.getDeliveriesDemand().deliveries());
         } else {
