@@ -39,7 +39,7 @@ public abstract class TemplateTSP implements TSP {
         this.g = g;
         this.calls = 0;
         this.consideredPossibilities = 0;
-        this.maxPossibilities = this.orderedPermutationCount(g.getNbSommets(), demand.deliveries().size());
+        this.maxPossibilities = this.orderedPermutationCount(g.getNbSommets()-1, demand.deliveries().size());
         System.out.println("Calculated max possibilities : " + maxPossibilities);
 
         meilleureSolution = new Long[g.getNbSommets()];
@@ -60,6 +60,7 @@ public abstract class TemplateTSP implements TSP {
         System.out.println("Number of calls: " + calls);
 
         System.out.println("Total number of possibilities considered : " + this.consideredPossibilities);
+        System.out.println("Final Progress " + (float) (this.consideredPossibilities/this.maxPossibilities*100) + "%");
     }
 
 
@@ -104,12 +105,11 @@ public abstract class TemplateTSP implements TSP {
         } else {
             // we managed to skip a certain number of possibilities thanks to bound, but we must account for them in the progress bar
 
-            // we need to count how many constraints are left, i.e. how pickups are not done
-            int leftToVisit = g.getNbSommets() -1 - visitedNodes.size();
+            // we need to count how many constraints are left, i.e. how many pickups are not done
+            int leftToVisit = g.getNbSommets() - visitedNodes.size();
             int pickupsDone = demand.arePickups(visitedNodes);
             int constraints = (g.getNbSommets()-1)/2 - pickupsDone;
             this.consideredPossibilities += this.orderedPermutationCount(leftToVisit, constraints);
-            //this.consideredPossibilities += this.orderedPermutationCount(reachableNodes.size(), reachableNodes.size()-pickupsDone);
 
             notifyProgress(notifyTSPProgressToGui);
         }
@@ -145,7 +145,7 @@ public abstract class TemplateTSP implements TSP {
 
     protected double factorial (long n) {
         long res = 1;
-        for (long i = 2; i < n; ++i) {
+        for (long i = 2; i <= n; ++i) {
             res *= i;
         }
         return res;
