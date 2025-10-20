@@ -1,8 +1,6 @@
 package fr.delivrooom.application.service;
 
-import fr.delivrooom.application.model.CityMap;
-import fr.delivrooom.application.model.DeliveriesDemand;
-import fr.delivrooom.application.model.TourSolution;
+import fr.delivrooom.application.model.*;
 import fr.delivrooom.application.port.in.GuiUseCase;
 import fr.delivrooom.application.port.out.CityMapRepository;
 import fr.delivrooom.application.port.out.DeliveriesRepository;
@@ -22,7 +20,14 @@ public record GuiService(CityMapRepository cityMapRepository, DeliveriesReposito
     }
 
     @Override
-    public TourSolution getTourSolution() {
-        return null;
+    public TourSolution getTourSolution(CityMap cityMap, DeliveriesDemand deliveriesDemand) {
+        CityGraph cityGraph = new CityGraph(cityMap);
+        TourCalculator tourCalculator = new TourCalculator(cityGraph);
+
+        if (tourCalculator.doesCalculatedTourNeedsToBeChanged(deliveriesDemand)) {
+            tourCalculator.findOptimalTour(deliveriesDemand, false);
+        }
+
+        return tourCalculator.getOptimalTour();
     }
 }

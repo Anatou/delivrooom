@@ -31,7 +31,7 @@ public class AppController {
     // Loaded data
     private CityMap cityMap;
     private DeliveriesDemand deliveriesDemand;
-    private TourCalculator tourCalculator;
+    private TourSolution tourSolution;
 
     public AppController() {
         this.currentState = new SimpleObjectProperty<>(new InitialState(this));
@@ -118,17 +118,11 @@ public class AppController {
      */
     protected void updateMapCanvas() {
         if (mapCanvas != null) {
-            CityGraph cityGraph = new CityGraph(cityMap);
-            tourCalculator = new TourCalculator(cityGraph);
-
             new Thread(() -> {
-                if (tourCalculator.doesCalculatedTourNeedsToBeChanged(deliveriesDemand)) {
-                    tourCalculator.findOptimalTour(deliveriesDemand, false);
-
-                    Platform.runLater(() -> {
-                        mapCanvas.drawMap();
-                    });
-                }
+                tourSolution = JavaFXApp.guiUseCase().getTourSolution(cityMap, deliveriesDemand);
+                Platform.runLater(() -> {
+                    mapCanvas.drawMap();
+                });
             }).start();
 
             mapCanvas.setAutoFraming(true);
@@ -206,8 +200,8 @@ public class AppController {
         return currentState;
     }
 
-    public TourCalculator getTourCalculator() {
-        return tourCalculator;
+    public TourSolution getTourSolution() {
+        return tourSolution;
     }
 
     public enum DefaultMapFilesType {
