@@ -8,9 +8,7 @@ import fr.delivrooom.adapter.out.XMLCityMapLoader;
 import fr.delivrooom.application.model.*;
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
 import javafx.scene.control.Alert;
 
 import java.io.File;
@@ -38,6 +36,8 @@ public class AppController {
     private static AppController instance;
     // 0 = not running, 0 < x < 1 = running, 1 = done
     private DoubleProperty tourCalculationProgress = new SimpleDoubleProperty(0);
+    // Easter egg: meme mode for map tiles
+    private BooleanProperty memeModeProperty = new SimpleBooleanProperty(false);
 
     private AppController() {
         this.currentState = new SimpleObjectProperty<>(new InitialState(this));
@@ -132,7 +132,7 @@ public class AppController {
     /**
      * Update the MapCanvas with current data.
      */
-    protected void updateMapCanvas() {
+    public void updateMapCanvas() {
         if (mapCanvas != null) {
             mapCanvas.setAutoFraming(true);
             mapCanvas.drawMap();
@@ -256,6 +256,28 @@ public class AppController {
                 e.printStackTrace();
             }
         }).start();
+    }
+
+    /**
+     * Get the meme mode property for the easter egg.
+     * When true, map tiles will load random memes instead of actual map tiles.
+     *
+     * @return The meme mode property
+     */
+    public BooleanProperty memeModeProperty() {
+        return memeModeProperty;
+    }
+
+    /**
+     * Toggle the meme mode on/off and clear the tile cache.
+     */
+    public void toggleMemeMode() {
+        memeModeProperty.set(!memeModeProperty.get());
+        // Clear tile cache and trigger redraw
+        if (mapCanvas != null) {
+            mapCanvas.clearTileCache();
+            mapCanvas.drawMap();
+        }
     }
 
     public enum DefaultMapFilesType {
