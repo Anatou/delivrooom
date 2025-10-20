@@ -7,6 +7,7 @@ import fr.delivrooom.adapter.out.XMLCityMapLoader;
 import fr.delivrooom.application.model.CityMap;
 import fr.delivrooom.application.model.DeliveriesDemand;
 import fr.delivrooom.application.model.Delivery;
+import fr.delivrooom.application.model.Intersection;
 import javafx.scene.control.Alert;
 
 import java.io.File;
@@ -112,6 +113,11 @@ public class AppController {
         }
     }
 
+    public MapCanvas getMapCanvas() {
+        return mapCanvas;
+    }
+
+
     /**
      * Set the current state.
      * Called by state implementations to transition between states.
@@ -193,5 +199,9 @@ public class AppController {
             return true;
         }
         return false;
+    }
+
+    public Intersection FindIntersectionById(Long id){
+        return mapCanvas.FindIntersectionById(id);
     }
 }

@@ -451,4 +451,16 @@ public class MapCanvas extends StackPane {
         double maxY;
         double scale;
     }
+    public Intersection FindIntersectionById(Long id){
+        return currentCityMap.intersections().get(id);
+    }
+
+
+    public Long updateAddLayer(){
+        return currentCityMap.intersections().keySet().iterator().next();
+    }
+    public Long updateRemoveLayer(){
+        return currentCityMap.intersections().keySet().iterator().next();
+    }
+
 }
