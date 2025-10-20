@@ -23,7 +23,6 @@ import java.util.List;
 
 public class MapOverlay extends StackPane {
 
-    private final AppController controller;
     private final Canvas canvasLayer;
     private final Pane deliveryLayer;
     private final Pane intersectionLayer;
@@ -35,13 +34,14 @@ public class MapOverlay extends StackPane {
     private double minX;
     private double minY;
 
-    public MapOverlay(AppController controller) {
-        this.controller = controller;
+    public MapOverlay() {
         this.canvasLayer = new Canvas();
         this.deliveryLayer = new Pane();
         this.intersectionLayer = new Pane();
 
         getChildren().addAll(canvasLayer, deliveryLayer, intersectionLayer);
+
+        AppController controller = AppController.getController();
 
         controller.stateProperty().addListener((observable, oldValue, newValue) -> {
             updateOverlay(width, height, scale, minX, minY);
@@ -59,6 +59,7 @@ public class MapOverlay extends StackPane {
     }
 
     public void updateOverlay(double width, double height, double scale, double minX, double minY) {
+        AppController controller = AppController.getController();
         unit_scalable = 2e-7 * scale;
         this.width = width;
         this.height = height;
@@ -90,6 +91,8 @@ public class MapOverlay extends StackPane {
     }
 
     public void updateCanvasLayer() {
+        AppController controller = AppController.getController();
+
         GraphicsContext gc = canvasLayer.getGraphicsContext2D();
         CityMap cityMap = controller.getCityMap();
         DeliveriesDemand deliveriesDemand = controller.getDeliveriesDemand();
@@ -230,7 +233,7 @@ public class MapOverlay extends StackPane {
     }
 
     public void updateDeliveryLayer() {
-        DeliveriesDemand deliveriesDemand = controller.getDeliveriesDemand();
+        DeliveriesDemand deliveriesDemand = AppController.getController().getDeliveriesDemand();
 
         for (Delivery delivery : deliveriesDemand.deliveries()) {
             // Add interactive circle over delivery point
@@ -270,7 +273,7 @@ public class MapOverlay extends StackPane {
     }
 
     public void updateIntersectionLayer() {
-        CityMap cityMap = controller.getCityMap();
+        CityMap cityMap = AppController.getController().getCityMap();
 
         for (Intersection intersection : cityMap.intersections().values()) {
             double intersectionX = (intersection.getNormalizedX() - minX) * scale;
@@ -282,7 +285,7 @@ public class MapOverlay extends StackPane {
             intersectionCircle.setCursor(Cursor.HAND);
 
             intersectionCircle.setOnMouseClicked(event -> {
-                controller.handleSelectIntersection(intersection);
+                AppController.getController().handleSelectIntersection(intersection);
             });
             intersectionLayer.getChildren().add(intersectionCircle);
         }

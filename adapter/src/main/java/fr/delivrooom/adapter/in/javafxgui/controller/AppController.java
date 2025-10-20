@@ -7,8 +7,9 @@ import fr.delivrooom.adapter.in.javafxgui.panes.Sidebar;
 import fr.delivrooom.adapter.out.XMLCityMapLoader;
 import fr.delivrooom.application.model.*;
 import javafx.application.Platform;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.Alert;
 
@@ -34,10 +35,20 @@ public class AppController {
     private CityMap cityMap;
     private DeliveriesDemand deliveriesDemand;
     private TourSolution tourSolution;
-    private BooleanProperty isTourBeingCalculated = new SimpleBooleanProperty(false);
-    public AppController() {
+    private static AppController instance;
+    // 0 = not running, 0 < x < 1 = running, 1 = done
+    private DoubleProperty tourCalculationProgress = new SimpleDoubleProperty(0);
+
+    private AppController() {
         this.currentState = new SimpleObjectProperty<>(new InitialState(this));
         this.commandManager = new CommandManager();
+    }
+
+    public static AppController getController() {
+        if (instance == null) {
+            instance = new AppController();
+        }
+        return instance;
     }
 
     /**
@@ -161,7 +172,7 @@ public class AppController {
      * Update the selected intersection in the sidebar.
      */
     protected void selectIntersection(Intersection intersection) {
-        sidebar.selectIntersection(intersection);
+        sidebar.getDeliveryCreationSection().selectIntersection(intersection);
     }
 
     public void addDelivery(Delivery delivery) {
@@ -202,11 +213,17 @@ public class AppController {
         return tourSolution;
     }
 
-    public BooleanProperty isTourBeingCalculatedProperty() {
-        return isTourBeingCalculated;
+    public double getTourCalculationProgress() {
+        return tourCalculationProgress.get();
     }
 
+    public DoubleProperty tourCalculationProgressProperty() {
+        return tourCalculationProgress;
+    }
 
+    public BooleanBinding tourBeingCalculatedBinding() {
+        return tourCalculationProgress.greaterThan(0.0).and(tourCalculationProgress.lessThan(1.0));
+    }
 
     /**
      * Calculate the tour on demand (background thread). Requires a loaded city map and deliveries.
@@ -216,7 +233,7 @@ public class AppController {
     }
 
     public void calculateTour() {
-        if (isTourBeingCalculated.get()) {
+        if (tourCalculationProgress.get() > 0 && tourCalculationProgress.get() < 1) {
             showError("Cannot calculate tour", "Already running");
             return;
         }
@@ -224,12 +241,12 @@ public class AppController {
         new Thread(() -> {
 
             try {
-                this.isTourBeingCalculated.set(true);
+                this.tourCalculationProgress.set(0.0001); // Small value, but not 0 cause it would be invisible
                 if (JavaFXApp.getCalculateTourUseCase().doesCalculatedTourNeedsToBeChanged(deliveriesDemand)) {
                     JavaFXApp.getCalculateTourUseCase().findOptimalTour(deliveriesDemand, false);
                 }
                 tourSolution = JavaFXApp.getCalculateTourUseCase().getOptimalTour();
-                this.isTourBeingCalculated.set(false);
+                this.tourCalculationProgress.set(1);
                 Platform.runLater(() -> {
                     mapCanvas.drawMap();
                 });

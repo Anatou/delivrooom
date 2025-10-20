@@ -24,7 +24,6 @@ import java.util.Objects;
 
 public class AppToolBar extends ToolBar {
 
-    private final AppController controller;
     private final ToggleSwitch themeToggle;
     private Stage stage;
     private Scene scene;
@@ -33,9 +32,9 @@ public class AppToolBar extends ToolBar {
     private Image logoImgDark;
     private ImageView logo;
 
-    public AppToolBar(AppController controller) {
+    public AppToolBar() {
         super();
-        this.controller = controller;
+        AppController controller = AppController.getController();
 
         MenuButton open = new MenuButton("Open");
 
@@ -93,7 +92,7 @@ public class AppToolBar extends ToolBar {
         );
         File file = fileChooser.showOpenDialog(stage);
         if (file != null) {
-            controller.handleOpenMapFile(file);
+            AppController.getController().handleOpenMapFile(file);
         }
     }
 
@@ -105,12 +104,12 @@ public class AppToolBar extends ToolBar {
         );
         File file = fileChooser.showOpenDialog(stage);
         if (file != null) {
-            controller.handleOpenDeliveriesFile(file);
+            AppController.getController().handleOpenDeliveriesFile(file);
         }
     }
 
     private void handleLoadDefault(AppController.DefaultMapFilesType type) {
-        controller.handleLoadDefaultFiles(type);
+        AppController.getController().handleLoadDefaultFiles(type);
     }
 
     private void handleThemeSwitch() {
