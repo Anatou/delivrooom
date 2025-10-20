@@ -19,7 +19,7 @@ public class ShortestPathsGraph implements Graphe{
 
     public float getCout(long i, long j) {
         if (adjacencyMatrix.containsKey(i) && adjacencyMatrix.get(i).containsKey(j)) {
-            return adjacencyMatrix.get(i).get(j).getTotalLength();
+            return adjacencyMatrix.get(i).get(j).totalLength();
         }
         return -1;
     }
