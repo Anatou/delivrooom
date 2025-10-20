@@ -47,4 +47,9 @@ public record SelectIntersectionState(AppController controller) implements State
     public String getStateName() {
         return "SelectIntersectionState";
     }
+
+    @Override
+    public void requestCalculateTour() {
+        controller.showError("Cannot calculate tour", "Please select an intersection first.");
+    }
 }

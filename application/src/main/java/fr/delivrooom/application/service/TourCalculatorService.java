@@ -1,44 +1,73 @@
-package fr.delivrooom.application.model;
+package fr.delivrooom.application.service;
 
+import fr.delivrooom.application.model.*;
 import fr.delivrooom.application.model.tsp.TSP1;
 import fr.delivrooom.application.model.tsp.TemplateTSP;
+import fr.delivrooom.application.port.in.CalculateTourUseCase;
+import fr.delivrooom.application.port.out.NotifyTSPProgressToGui;
 
 import java.util.*;
 
-public class TourCalculator {
+public class TourCalculatorService implements CalculateTourUseCase {
+
+    protected boolean hasMapChangedSinceLastCompute;
 
     protected CityGraph graph;
     protected TourSolution tourSolution;
     protected DeliveriesDemand calculatedDemand;
 
-    public TourCalculator(CityGraph g) {
+    protected final NotifyTSPProgressToGui notifyTSPProgressToGui;
+
+    public TourCalculatorService(NotifyTSPProgressToGui notifyTSPProgressToGui) {
         // create a Tour calculator with a graph
-        this.graph = g;
+        this.notifyTSPProgressToGui = notifyTSPProgressToGui;
         this.tourSolution = null;
         this.calculatedDemand = null;
+        this.graph = null;
+        this.hasMapChangedSinceLastCompute = false;
     }
 
-    public Graphe getGraph() { return graph; }
+    @Override
+    public void provideCityMap(CityMap m) {
+        this.graph = new CityGraph(m);
+        hasMapChangedSinceLastCompute = true;
 
+    }
+
+    @Override
     public boolean doesCalculatedTourNeedsToBeChanged(DeliveriesDemand demand) {
         // checks if the demand is different from the last calculated one or if no tour has been calculated yet
-        if (calculatedDemand == null){
+        if (hasMapChangedSinceLastCompute) {
+            return true;
+        }
+        else if (calculatedDemand == null){
             if (demand == null) {
                 return false;
             } else {
                 return true;
             }
-        } else {
+        }
+        else {
             return !calculatedDemand.equals(demand);
         }
     }
 
+    @Override
+    public TourSolution getOptimalTour() {
+        return tourSolution;
+    }
+
+    @Override
     public void findOptimalTour(DeliveriesDemand demand, boolean useTimeAsCost) throws RuntimeException {
         // first : find all shortest paths between any pair of nodes in the graph
-
+        hasMapChangedSinceLastCompute = false;
         calculatedDemand = demand;
 
-        // Create a complete graph of g by running djikstra from each node to get the shortest path to every other node
+        if (graph == null) {
+            throw new RuntimeException("CityGraph must be in TourCalculator before attempting to find optimal tour");
+        }
+
+        // Create a complete graph of g by running dijkstra from each node to get the shortest path to every other node
         ShortestPathsGraph shortestPathsGraph;
         HashMap<Long, HashMap<Long, Path>> shortestPathsMatrix = new HashMap<>();
 
@@ -111,18 +140,6 @@ public class TourCalculator {
 
     }
 
-    public TourSolution getOptimalTour() {
-        return tourSolution;
-    }
-
-    public float getTourLength() {
-        if (tourSolution != null) {
-            return tourSolution.totalLength();
-        } else {
-            return  -1f;
-        }
-    }
-
     protected HashMap<Long, Path> findShortestPaths(long startIntersectionId , HashSet<Long> targets, boolean useTimeAsCost) throws RuntimeException {
         /* find the shortest paths from startIntersectionId to all targets
          * using Dijkstra's algorithm (for now)
@@ -134,11 +151,6 @@ public class TourCalculator {
 //        }
         return targetedDijkstraSearch(startIntersectionId, targets, useTimeAsCost);
     }
-
-    public HashMap<Long, Path> targetedDijkstraSearchTest(long startIntersectionId, HashSet<Long> targets) throws RuntimeException {
-        return this.targetedDijkstraSearch(startIntersectionId, targets, false);
-    }
-
 
     protected HashMap<Long, Path> targetedDijkstraSearch(long startIntersectionId, HashSet<Long> targets, boolean useTime) throws RuntimeException {
         int n = graph.getNbSommets();

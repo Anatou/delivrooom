@@ -7,6 +7,8 @@ import fr.delivrooom.adapter.in.javafxgui.panes.Sidebar;
 import fr.delivrooom.adapter.out.XMLCityMapLoader;
 import fr.delivrooom.application.model.*;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.Alert;
 
@@ -32,7 +34,7 @@ public class AppController {
     private CityMap cityMap;
     private DeliveriesDemand deliveriesDemand;
     private TourSolution tourSolution;
-
+    private BooleanProperty isTourBeingCalculated = new SimpleBooleanProperty(false);
     public AppController() {
         this.currentState = new SimpleObjectProperty<>(new InitialState(this));
         this.commandManager = new CommandManager();
@@ -99,6 +101,8 @@ public class AppController {
      */
     protected void loadMapFile(URL url) throws Exception {
         this.cityMap = JavaFXApp.guiUseCase().getCityMap(url);
+        JavaFXApp.getCalculateTourUseCase().provideCityMap(cityMap);
+        tourSolution = null;
         updateMapCanvas();
     }
 
@@ -110,6 +114,7 @@ public class AppController {
      */
     protected void loadDeliveriesFile(URL url) throws Exception {
         this.deliveriesDemand = JavaFXApp.guiUseCase().getDeliveriesDemand(cityMap, url);
+        tourSolution = null;
         updateMapCanvas();
     }
 
@@ -118,13 +123,6 @@ public class AppController {
      */
     protected void updateMapCanvas() {
         if (mapCanvas != null) {
-            new Thread(() -> {
-                tourSolution = JavaFXApp.guiUseCase().getTourSolution(cityMap, deliveriesDemand);
-                Platform.runLater(() -> {
-                    mapCanvas.drawMap();
-                });
-            }).start();
-
             mapCanvas.setAutoFraming(true);
             mapCanvas.drawMap();
         }
@@ -202,6 +200,45 @@ public class AppController {
 
     public TourSolution getTourSolution() {
         return tourSolution;
+    }
+
+    public BooleanProperty isTourBeingCalculatedProperty() {
+        return isTourBeingCalculated;
+    }
+
+
+
+    /**
+     * Calculate the tour on demand (background thread). Requires a loaded city map and deliveries.
+     */
+    public void handleCalculateTour() {
+        getState().requestCalculateTour();
+    }
+
+    public void calculateTour() {
+        if (isTourBeingCalculated.get()) {
+            showError("Cannot calculate tour", "Already running");
+            return;
+        }
+
+        new Thread(() -> {
+
+            try {
+                this.isTourBeingCalculated.set(true);
+                if (JavaFXApp.getCalculateTourUseCase().doesCalculatedTourNeedsToBeChanged(deliveriesDemand)) {
+                    JavaFXApp.getCalculateTourUseCase().findOptimalTour(deliveriesDemand, false);
+                }
+                tourSolution = JavaFXApp.getCalculateTourUseCase().getOptimalTour();
+                this.isTourBeingCalculated.set(false);
+                Platform.runLater(() -> {
+                    mapCanvas.drawMap();
+                });
+
+            } catch (Exception e) {
+                Platform.runLater(() -> showError("Error while calculating tour", e.getMessage() == null ? e.toString() : e.getMessage()));
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     public enum DefaultMapFilesType {
