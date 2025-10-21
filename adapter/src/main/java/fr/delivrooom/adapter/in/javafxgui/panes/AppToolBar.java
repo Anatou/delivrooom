@@ -1,6 +1,5 @@
 package fr.delivrooom.adapter.in.javafxgui.panes;
 
-
 import atlantafx.base.controls.Spacer;
 import atlantafx.base.controls.ToggleSwitch;
 import atlantafx.base.theme.PrimerDark;
@@ -70,6 +69,10 @@ public class AppToolBar extends ToolBar {
         logo.setSmooth(true);
         logo.setPreserveRatio(true);
 
+        // Easter egg: clicking the logo toggles meme mode
+        logo.setOnMouseClicked(e -> handleLogoClick());
+        logo.setStyle("-fx-cursor: hand;"); // Show it's clickable
+
         this.getItems().addAll(open, new Spacer(20), undoBtn, redoBtn, new Spacer(10), themeToggle, new Spacer(), logo, new Spacer(5));
     }
 
@@ -125,5 +128,13 @@ public class AppToolBar extends ToolBar {
             themeToggle.setGraphic(new FontIcon(FontAwesomeSolid.MOON));
             logo.setImage(logoImgLight);
         }
+    }
+
+    /**
+     * Handle logo click - toggles meme mode (easter egg)
+     */
+    private void handleLogoClick() {
+        AppController controller = AppController.getController();
+        controller.toggleMemeMode();
     }
 }

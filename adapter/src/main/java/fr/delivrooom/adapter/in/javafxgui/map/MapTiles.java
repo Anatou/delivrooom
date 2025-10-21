@@ -1,17 +1,21 @@
 package fr.delivrooom.adapter.in.javafxgui.map;
 
 import fr.delivrooom.adapter.in.javafxgui.JavaFXApp;
+import fr.delivrooom.adapter.in.javafxgui.controller.AppController;
 import javafx.application.Platform;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -25,9 +29,47 @@ public class MapTiles extends Canvas {
 
     private final Map<String, Image> tileCache = new ConcurrentHashMap<>();
     private final Map<String, CompletableFuture<Image>> pendingTiles = new ConcurrentHashMap<>();
+    private List<String> memeFiles = new ArrayList<>();
+    private Random random = new Random();
 
     public MapTiles() {
         ZOOM_SCALE_FACTOR = JavaFXApp.getConfigPropertyUseCase().getDoubleProperty("map.zoom.scaleFactor", 1.0);
+        loadMemeFiles();
+    }
+
+    /**
+     * Load the list of meme files from resources/assets/memes
+     */
+    private void loadMemeFiles() {
+        int count = 0;
+        while (true) {
+            if (memeExists(count + ".png")) {
+                memeFiles.add(count + ".png");
+            } else if (memeExists(count + ".jpg")) {
+                memeFiles.add(count + ".jpg");
+            } else if (memeExists(count + ".jpeg")) {
+                memeFiles.add(count + ".jpeg");
+            } else {
+                break;
+            }
+            count++;
+        }
+    }
+
+    private boolean memeExists(String name) {
+        return JavaFXApp.class.getResource("/assets/memes/" + name) != null;
+    }
+
+    /**
+     * Clear the tile cache and cancel pending requests
+     */
+    public void clearCache() {
+        tileCache.clear();
+        for (CompletableFuture<Image> future : pendingTiles.values()) {
+            future.cancel(true);
+        }
+        pendingTiles.clear();
+        System.out.println("Tile cache cleared");
     }
 
 
@@ -68,6 +110,19 @@ public class MapTiles extends Canvas {
     private void loadTileAsync(String tileKey, Runnable onLoad) {
         CompletableFuture<Image> future = CompletableFuture.supplyAsync(() -> {
             try {
+                // Check if meme mode is enabled
+                if (AppController.getController().memeModeProperty().get()) {
+                    String memePath = "/assets/memes/" + memeFiles.get(random.nextInt(memeFiles.size()));
+                    InputStream memeStream = JavaFXApp.class.getResourceAsStream(memePath);
+                    if (memeStream != null) {
+                        Image image = new Image(memeStream);
+                        if (!image.isError()) {
+                            return image;
+                        }
+                    }
+                }
+
+                // Normal map tile loading
                 String urlStr = MAPTILER_URL + tileKey + ".jpg?key=" + MAPTILER_API_KEY;
                 URL url = new URI(urlStr).toURL();
                 System.out.println("Downloading tile " + tileKey);
