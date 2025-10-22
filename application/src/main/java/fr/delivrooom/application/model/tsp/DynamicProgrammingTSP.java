@@ -150,7 +150,7 @@ chemin allant de i jusque 0 en passant par chaque sommet de S exactement une foi
         return order;
     }
 
-    public Long[] getBestSolution() {
+    public Long[] getSolution() {
         return meilleureSolution;
     }
 
