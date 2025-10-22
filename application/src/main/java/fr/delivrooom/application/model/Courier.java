@@ -1,5 +1,7 @@
 package fr.delivrooom.application.model;
 
+import java.util.ArrayList;
+
 public class Courier {
     private final int id;
     private DeliveriesDemand deliveriesDemand;

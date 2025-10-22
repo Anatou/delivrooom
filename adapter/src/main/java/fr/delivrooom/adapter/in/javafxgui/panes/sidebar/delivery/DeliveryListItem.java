@@ -19,11 +19,13 @@ public class DeliveryListItem extends HBox {
 
     private final Delivery delivery;
     private final DeliveryTooltip tooltip;
+    private final DeliveryActionButtons actionButtons;
 
     public DeliveryListItem(Delivery delivery) {
         super(5);
         this.delivery = delivery;
-        this.tooltip = new DeliveryTooltip(delivery);
+        this.tooltip = new DeliveryTooltip(delivery, false);
+        this.actionButtons = new DeliveryActionButtons(delivery);
 
         setPadding(new Insets(8));
         setAlignment(Pos.CENTER_LEFT);
@@ -58,7 +60,8 @@ public class DeliveryListItem extends HBox {
             }
         });
 
-        getChildren().addAll(deliveryIcon, infoBox, spacer, infoBtn);
+
+        getChildren().addAll(deliveryIcon, infoBox, spacer, actionButtons, infoBtn);
 
         // Make the entire item clickable to show tooltip
         setOnMouseClicked(e -> {
@@ -82,5 +85,9 @@ public class DeliveryListItem extends HBox {
 
     public DeliveryTooltip getTooltip() {
         return tooltip;
+    }
+
+    public DeliveryActionButtons getActionButtons() {
+        return actionButtons;
     }
 }

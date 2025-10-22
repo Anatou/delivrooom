@@ -4,6 +4,7 @@ import fr.delivrooom.adapter.in.javafxgui.JavaFXApp;
 import fr.delivrooom.adapter.in.javafxgui.command.CommandManager;
 import fr.delivrooom.adapter.in.javafxgui.map.MapCanvas;
 import fr.delivrooom.adapter.in.javafxgui.panes.Sidebar;
+import fr.delivrooom.adapter.in.javafxgui.panes.sidebar.delivery.DeliveryListItem;
 import fr.delivrooom.adapter.out.XMLCityMapLoader;
 import fr.delivrooom.application.model.*;
 import javafx.application.Platform;
@@ -43,6 +44,7 @@ public class AppController {
     private AppController() {
         this.currentState = new SimpleObjectProperty<>(new InitialState(this));
         this.commandManager = new CommandManager();
+        this.couriers = FXCollections.observableArrayList();
     }
 
     public static AppController getController() {
@@ -71,6 +73,12 @@ public class AppController {
         } catch (MalformedURLException e) {
             showError("Invalid file URL", e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    public void handleCourierAssignmentChange(Delivery updatedDelivery, Courier newCourier) {
+        for (DeliveryListItem item : sidebar.getDeliveriesSection().getDeliveriesList().getDeliveryItems()) {
+            item.getActionButtons().updateDisplayedSelectedCourier(updatedDelivery, newCourier);
         }
     }
 
