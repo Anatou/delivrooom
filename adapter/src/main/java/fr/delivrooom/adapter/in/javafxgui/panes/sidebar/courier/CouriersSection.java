@@ -1,8 +1,10 @@
 package fr.delivrooom.adapter.in.javafxgui.panes.sidebar.courier;
 
+import atlantafx.base.controls.Spacer;
 import fr.delivrooom.adapter.in.javafxgui.controller.AppController;
 import fr.delivrooom.application.model.Courier;
 import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -75,7 +77,7 @@ public class CouriersSection extends VBox {
 
         titleBox.getChildren().addAll(icon, textBox);
 
-        content.getChildren().addAll(bulkCreateBox, couriersList, addCourierBtn);
+        content.getChildren().addAll(bulkCreateBox, couriersList, new Spacer(5, Orientation.VERTICAL), addCourierBtn);
 
         // Create collapsible TitledPane
         titledPane = new TitledPane();

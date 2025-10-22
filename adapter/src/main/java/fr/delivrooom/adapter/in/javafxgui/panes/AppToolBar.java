@@ -41,7 +41,7 @@ public class AppToolBar extends ToolBar {
         MenuItem openMapBtn = new MenuItem("Open City Map");
         openMapBtn.setOnAction(e -> handleOpenMapFile());
         MenuItem openDemandsBtn = new MenuItem("Open Delivery Demands");
-        openDemandsBtn.disableProperty().bind(controller.stateProperty().map(s -> !(s instanceof InitialState)));
+        openDemandsBtn.disableProperty().bind(controller.stateProperty().map(s -> s instanceof InitialState));
         openDemandsBtn.setOnAction(e -> handleOpenDeliveriesFile());
         open.getItems().addAll(openMapBtn, openDemandsBtn);
 
