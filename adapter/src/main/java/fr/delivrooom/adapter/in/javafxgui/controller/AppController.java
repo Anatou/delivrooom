@@ -249,10 +249,15 @@ public class AppController {
                 this.tourCalculationProgress.set(1);
                 Platform.runLater(() -> {
                     mapCanvas.drawMap();
+                    this.tourCalculationProgress.set(0);
                 });
 
             } catch (Exception e) {
-                Platform.runLater(() -> showError("Error while calculating tour", e.getMessage() == null ? e.toString() : e.getMessage()));
+                Platform.runLater(() -> {
+                    showError("Error while calculating tour", e.getMessage() == null ? e.toString() : e.getMessage());
+                    // En cas d'erreur, remettre aussi la progression à 0
+                    this.tourCalculationProgress.set(0);
+                });
                 e.printStackTrace();
             }
         }).start();
