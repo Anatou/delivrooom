@@ -161,7 +161,7 @@ public abstract class TemplateTSP implements TSP {
     protected void notifyProgress(NotifyTSPProgressToGui notifyTSPProgressToGui) {
         float progress = (float) (int) (this.consideredPossibilities/this.maxPossibilities*100);
         if ( (int) progress != (int) this.lastProgress ) {
-            notifyTSPProgressToGui.notifyTSPProgressToGui(progress);
+            notifyTSPProgressToGui.notifyTSPProgressToGui(progress / 100);
             this.lastProgress = progress;
         }
     }
