@@ -56,7 +56,6 @@ public class AppToolBar extends ToolBar {
         Button redoBtn = new Button("", new FontIcon(FontAwesomeSolid.REDO));
         redoBtn.setOnAction(e -> controller.getCommandManager().redo());
 
-
         themeToggle = new ToggleSwitch("");
         themeToggle.setGraphic(new FontIcon(FontAwesomeSolid.MOON));
         themeToggle.selectedProperty().addListener(o -> handleThemeSwitch());

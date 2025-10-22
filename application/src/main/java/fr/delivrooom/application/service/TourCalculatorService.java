@@ -54,7 +54,8 @@ public class TourCalculatorService implements CalculateTourUseCase {
     public void findOptimalTour(DeliveriesDemand demand, boolean useTimeAsCost) throws RuntimeException {
         // first : find all shortest paths between any pair of nodes in the graph
         hasMapChangedSinceLastCompute = false;
-        calculatedDemand = demand;
+
+        calculatedDemand = new DeliveriesDemand(new ArrayList<>(demand.deliveries()), demand.store());
 
         if (graph == null) {
             throw new RuntimeException("CityGraph must be in TourCalculator before attempting to find optimal tour");
