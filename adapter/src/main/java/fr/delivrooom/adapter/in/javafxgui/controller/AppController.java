@@ -4,6 +4,8 @@ import fr.delivrooom.adapter.in.javafxgui.JavaFXApp;
 import fr.delivrooom.adapter.in.javafxgui.command.CommandManager;
 import fr.delivrooom.adapter.in.javafxgui.map.MapCanvas;
 import fr.delivrooom.adapter.in.javafxgui.panes.Sidebar;
+import fr.delivrooom.adapter.in.javafxgui.panes.sidebar.DeliveryCreationSection;
+import fr.delivrooom.adapter.in.javafxgui.panes.sidebar.TestSection;
 import fr.delivrooom.adapter.out.XMLCityMapLoader;
 import fr.delivrooom.application.model.*;
 import javafx.application.Platform;
@@ -21,6 +23,9 @@ import java.net.URL;
  */
 public class AppController {
 
+    // Waiting for intersection selection
+    private String waitingfor;
+    private DeliveryCreationSection waitingSidebar;
     // State management
     private final CommandManager commandManager;
     private SimpleObjectProperty<State> currentState;
@@ -51,6 +56,10 @@ public class AppController {
         return instance;
     }
 
+    public Sidebar getSidebar(){
+        return sidebar;
+    }
+
     /**
      * Must be called right after the UI components are initialized.
      */
@@ -72,6 +81,20 @@ public class AppController {
             e.printStackTrace();
         }
     }
+
+    public void setSidebarWaitingFor(String type, DeliveryCreationSection sidebar){
+        this.waitingfor = type;
+        this.waitingSidebar = sidebar;
+    }
+
+    public String getSidebarWaitingFor(){
+        return this.waitingfor;
+    }
+
+    public DeliveryCreationSection getWaitingSidebar(){
+        return this.waitingSidebar;
+    }
+
 
     /**
      * Handle opening a delivery file through the current state.
@@ -172,7 +195,10 @@ public class AppController {
      * Update the selected intersection in the sidebar.
      */
     protected void selectIntersection(Intersection intersection) {
-        sidebar.getDeliveryCreationSection().selectIntersection(intersection);
+        //sidebar.getTestSection().selectIntersection(intersection);
+        if(getWaitingSidebar()!=null){
+            getWaitingSidebar().selectIntersection((intersection)); ////////////////////////////////////////////////////////////////////////////////
+        }
     }
 
     public void addDelivery(Delivery delivery) {

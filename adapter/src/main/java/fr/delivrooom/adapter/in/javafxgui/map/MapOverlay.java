@@ -254,6 +254,7 @@ public class MapOverlay extends StackPane {
             deliveryCircle.setCursor(Cursor.HAND);
 
             deliveryCircle.setOnMouseClicked(event -> {
+                //AppController.getController().handleSelectIntersection(deliveryIntersection);//////////////////????
                 Label content = new Label("Delivery ID : " + deliveryIntersection.getId());
                 Popover popover = new Popover(content);
                 popover.setArrowLocation(Popover.ArrowLocation.TOP_CENTER);
@@ -270,6 +271,7 @@ public class MapOverlay extends StackPane {
             pickupCircle.setCursor(Cursor.HAND);
 
             pickupCircle.setOnMouseClicked(event -> {
+                //AppController.getController().handleSelectIntersection(pickupIntersection); //////////////???
                 Label content = new Label("Pickup ID : " + pickupIntersection.getId());
                 PopOver popover = new PopOver(content);
                 popover.setArrowLocation(PopOver.ArrowLocation.TOP_CENTER);
