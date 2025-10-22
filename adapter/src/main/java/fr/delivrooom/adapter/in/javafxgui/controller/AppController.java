@@ -246,7 +246,7 @@ public class AppController {
                     JavaFXApp.getCalculateTourUseCase().findOptimalTour(deliveriesDemand, false);
                 }
                 tourSolution = JavaFXApp.getCalculateTourUseCase().getOptimalTour();
-                //this.tourCalculationProgress.set(1);
+                this.tourCalculationProgress.set(1);
                 Platform.runLater(() -> {
                     mapCanvas.drawMap();
                 });
