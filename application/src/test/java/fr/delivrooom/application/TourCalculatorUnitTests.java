@@ -9,9 +9,9 @@ import org.junit.jupiter.api.Test;
 import java.util.*;
 
 class NotifyTSPProgressMock implements NotifyTSPProgressToGui {
-    Float lastPercentage;
+    Double lastPercentage;
     @Override
-    public void notifyTSPProgressToGui(float percentage) {
+    public void notifyTSPProgressToGui(double percentage) {
         if (lastPercentage != null) {
             Assertions.assertTrue(percentage > lastPercentage);
         }
