@@ -2,8 +2,6 @@ package fr.delivrooom.application.service;
 
 import fr.delivrooom.application.model.*;
 import fr.delivrooom.application.model.tsp.DynamicProgrammingTSP;
-import fr.delivrooom.application.model.tsp.TSP;
-import fr.delivrooom.application.model.tsp.TSP3;
 import fr.delivrooom.application.port.in.CalculateTourUseCase;
 import fr.delivrooom.application.port.out.NotifyTSPProgressToGui;
 
@@ -97,10 +95,10 @@ public class TourCalculatorService implements CalculateTourUseCase {
 
         long tpsDebut = System.currentTimeMillis();
         // Create a TSP solver and run it on the complete graph
-        TSP tspSolver = new TSP3();
+        DynamicProgrammingTSP tspSolver = new DynamicProgrammingTSP();
         int timeLimitMs = 10000; // 10 seconds time limit for TSP solving
         tspSolver.searchSolution(timeLimitMs, shortestPathsGraph, demand, this.notifyTSPProgressToGui);
-        Long[] tspSolution = tspSolver.getBestSolution();
+        Long[] tspSolution = tspSolver.getSolution();
         float tspSolutionCost = tspSolver.getBestCost();
 
         // Convert the TSP solution to a TourSolution by replacing each edge with the corresponding path in the original graph
