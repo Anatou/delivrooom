@@ -10,6 +10,7 @@ import javafx.scene.layout.VBox;
 import org.kordamp.ikonli.fontawesome6.FontAwesomeSolid;
 import org.kordamp.ikonli.javafx.FontIcon;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 
 
 /**
@@ -34,11 +35,18 @@ public class BottomSection extends VBox {
         progressBar.setProgress(0); // Initial progress
         progressBar.visibleProperty().bind(controller.tourBeingCalculatedBinding());
         progressBar.managedProperty().bind(progressBar.visibleProperty());
+        progressBar.progressProperty().bind(controller.tourCalculationProgressProperty());
 
         // Progress label (percentage)
         progressLabel = new Label("0%"); // Initial text
         progressLabel.visibleProperty().bind(controller.tourBeingCalculatedBinding());
         progressLabel.managedProperty().bind(progressLabel.visibleProperty());
+
+        controller.tourCalculationProgressProperty().addListener((obs, oldVal, newVal) -> {
+            Platform.runLater(() -> {
+                progressLabel.setText(String.format("%.0f%%", newVal.doubleValue() * 100));
+            });
+        });
 
         // GO button (shown when not loading)
         goButton = new Button("GO");
@@ -52,21 +60,8 @@ public class BottomSection extends VBox {
 
         getChildren().addAll(progressBar, progressLabel, goButton);
 
-        // Bind progress bar and label to notifyTSPprogression
-        controller.tourCalculationProgressProperty().addListener((obs, oldValue, newValue) -> {
-            updateProgress(newValue.doubleValue());
-        });
+
 
     }
-
-    public void updateProgress(double progress) {
-        Platform.runLater(() -> {
-            System.out.println("Mise à jour du progress : " + progress); // Log pour vérifier la valeur
-            progressBar.setProgress(progress);
-            progressLabel.setText(String.format("%.0f%%", progress * 100)); // Met à jour le pourcentage
-        });
-    }
-
-
 
 }
