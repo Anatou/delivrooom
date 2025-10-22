@@ -206,6 +206,8 @@ public class AppController {
                 + " from intersection " + delivery.takeoutIntersection().getId()
                 + " to intersection " + delivery.deliveryIntersection().getId());
         this.deliveriesDemand.deliveries().add(delivery);
+        sidebar.getDeliveriesSection().refreshDeliveries();
+        updateMapCanvas();
     }
 
     public void removeDelivery(Delivery delivery) {
@@ -213,6 +215,8 @@ public class AppController {
                 + " from intersection " + delivery.takeoutIntersection().getId()
                 + " to intersection " + delivery.deliveryIntersection().getId());
         this.deliveriesDemand.deliveries().remove(delivery);
+        sidebar.getDeliveriesSection().refreshDeliveries();
+        updateMapCanvas();
     }
 
     public State getState() {

@@ -7,7 +7,9 @@ public record AddDeliveryCommand(AppController controller, Delivery delivery) im
 
     @Override
     public void execute() {
+
         controller.addDelivery(delivery);
+
     }
 
     @Override

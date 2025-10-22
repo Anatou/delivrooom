@@ -9,9 +9,11 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import org.kordamp.ikonli.fontawesome6.FontAwesomeSolid;
 import org.kordamp.ikonli.javafx.FontIcon;
+
 
 /**
  * Section for creating new deliveries.
@@ -42,7 +44,7 @@ public class DeliveryCreationSection extends VBox {
         });
 
         // Add test delivery button
-        Button addDeliveryBtn = new Button("Add Test Delivery");
+        Button addDeliveryBtn = new Button("Add Delivery");
         addDeliveryBtn.setGraphic(new FontIcon(FontAwesomeSolid.PLUS));
         addDeliveryBtn.setMaxWidth(Double.MAX_VALUE);
         addDeliveryBtn.getStyleClass().add("success");
@@ -51,9 +53,20 @@ public class DeliveryCreationSection extends VBox {
         Label labelTakeout = new Label("Selected TakeOut Intersection: ");
         labelTakeout.setId("labelTakeout");
         Button buttonTakeout = new Button("Select TakeOut Intersection");
+        buttonTakeout.setGraphic(new FontIcon(FontAwesomeSolid.LOCATION_ARROW));
+        TextField durationFieldTakeout = new TextField();
+        durationFieldTakeout.setId("durationFieldTakeout");
+        durationFieldTakeout.setPromptText("Enter duration in minutes");
+
         Label labelDelivery = new Label("Selected Delivery Intersection: ");
         labelDelivery.setId("labelDelivery");
         Button buttonDelivery = new Button("Select Delivery Intersection");
+        buttonDelivery.setGraphic(new FontIcon(FontAwesomeSolid.LOCATION_ARROW));
+        TextField durationFieldDelivery = new TextField();
+        durationFieldDelivery.setId("durationFieldDelivery");
+        durationFieldDelivery.setPromptText("Enter duration in minutes");
+
+
         Button buttonConfirmAddDelivery = new Button("Confirm");
 
         buttonTakeout.setOnAction(e -> {
@@ -71,8 +84,8 @@ public class DeliveryCreationSection extends VBox {
         addTitle.setStyle("-fx-font-weight: bold; -fx-font-size: 14;");
         this.addDeliveryBox = new VBox(8, addTitle, addDeliveryBtn,
                 new Separator(),
-                labelTakeout, buttonTakeout,
-                labelDelivery, buttonDelivery,
+                labelTakeout, buttonTakeout,durationFieldTakeout,
+                labelDelivery, buttonDelivery,durationFieldDelivery,
                 buttonConfirmAddDelivery
         );
         addDeliveryBox.setPadding(new Insets(10));
@@ -107,12 +120,30 @@ public class DeliveryCreationSection extends VBox {
 
 
     private void handleConfirmAddDelivery(){
+        String takeoutDuration = ((TextField) addDeliveryBox.lookup("#durationFieldTakeout")).getText();
+        String deliveryDuration =((TextField) addDeliveryBox.lookup("#durationFieldDelivery")).getText();
+        int tDuration = 0;
+        int dDuration = 0;
+        if (takeout!= null && delivery!=null && takeoutDuration!=null && deliveryDuration!=null) {
+            try {
+                tDuration = Integer.parseInt(takeoutDuration);
+                dDuration = Integer.parseInt(deliveryDuration);
+            } catch (NumberFormatException e) {
+                System.out.println("Please enter a valid number!");
+            }
+            Delivery addedDelivery = new Delivery(this.takeout, this.delivery, tDuration , dDuration);
+            AddDeliveryCommand addDeliveryCommand = new AddDeliveryCommand(controller, addedDelivery);
+            controller.getCommandManager().executeCommand(addDeliveryCommand);
+            /*controller.getSidebar().getDeliveriesSection().refreshDeliveries();
+            controller.updateMapCanvas();*/
 
-        Delivery addedDelivery = new Delivery(this.takeout, this.delivery, 5, 5);
-        AddDeliveryCommand addDeliveryCommand = new AddDeliveryCommand(controller, addedDelivery);
-        controller.getCommandManager().executeCommand(addDeliveryCommand);
-        controller.getSidebar().getDeliveriesSection().refreshDeliveries();
-        controller.updateMapCanvas();
+            ((TextField) addDeliveryBox.lookup("#durationFieldTakeout")).clear();
+            ((TextField) addDeliveryBox.lookup("#durationFieldDelivery")).clear();
+
+
+        }else{
+            System.out.println("Fill all the...");
+        }
 
     }
 
@@ -150,11 +181,14 @@ public class DeliveryCreationSection extends VBox {
 
         this.addDeliveryBox.setVisible(true);
         this.addDeliveryBox.setManaged(true);
+        takeout = null;
+        delivery = null;
 
         Label labelDelivery = (Label) addDeliveryBox.lookup("#labelDelivery");
         labelDelivery.setText("Selected Delivery Intersection: ");
         Label labelTakeout = (Label) addDeliveryBox.lookup("#labelTakeout");
         labelTakeout.setText("Selected TakeOut Intersection: ");
+
 
     }
 
