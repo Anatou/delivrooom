@@ -1,4 +1,6 @@
 package fr.delivrooom.adapter.in.javafxgui.panes.sidebar.courier;
+
+import atlantafx.base.controls.Spacer;
 import fr.delivrooom.application.model.Courier;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -6,8 +8,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
 import org.kordamp.ikonli.fontawesome6.FontAwesomeSolid;
 import org.kordamp.ikonli.javafx.FontIcon;
 
@@ -34,20 +34,17 @@ public class CourierListItem extends ListCell<Courier> {
             setText(null);
             HBox box = new HBox(5);
 
-            setPadding(new Insets(5));
+            setPadding(new Insets(2, 5, 2, 5));
             setAlignment(Pos.CENTER_LEFT);
-            getStyleClass().add("courier-list-item");
+            setPrefHeight(CouriersList.COURIER_ITEM_HEIGHT);
 
             // Courier label
             Label courierLabel = new Label("Courier " + courier.getId());
             courierLabel.getStyleClass().add("text");
 
-            // Spacer
-            Region spacer = new Region();
-            HBox.setHgrow(spacer, Priority.ALWAYS);
-
             // Calculate button
             Button calculateBtn = new Button();
+            calculateBtn.setMinHeight(0);
             calculateBtn.setGraphic(new FontIcon(FontAwesomeSolid.PLAY));
             calculateBtn.getStyleClass().addAll("button-icon", "success");
             calculateBtn.setOnAction(e -> onCalculate.accept(courier));
@@ -55,12 +52,15 @@ public class CourierListItem extends ListCell<Courier> {
 
             // Delete button
             Button deleteBtn = new Button();
+            deleteBtn.setMinHeight(0);
             deleteBtn.setGraphic(new FontIcon(FontAwesomeSolid.TRASH));
             deleteBtn.getStyleClass().addAll("button-icon", "danger");
             deleteBtn.setOnAction(e -> onDelete.accept(courier));
             deleteBtn.setTooltip(new javafx.scene.control.Tooltip("Delete courier"));
 
-            box.getChildren().addAll(courierLabel, spacer, calculateBtn, deleteBtn);
+            box.setAlignment(Pos.CENTER_LEFT);
+            box.setPrefHeight(CouriersList.COURIER_ITEM_HEIGHT - 4);
+            box.getChildren().addAll(courierLabel, new Spacer(), calculateBtn, deleteBtn);
             setGraphic(box);
         }
     }

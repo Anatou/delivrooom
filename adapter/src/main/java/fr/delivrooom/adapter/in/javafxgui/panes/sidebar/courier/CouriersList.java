@@ -2,7 +2,7 @@ package fr.delivrooom.adapter.in.javafxgui.panes.sidebar.courier;
 
 import fr.delivrooom.adapter.in.javafxgui.controller.AppController;
 import fr.delivrooom.application.model.Courier;
-import javafx.geometry.Insets;
+import javafx.beans.binding.Bindings;
 import javafx.scene.control.ListView;
 
 import java.util.List;
@@ -10,12 +10,13 @@ import java.util.List;
 
 public class CouriersList extends ListView<Courier> {
 
+    public static final double COURIER_ITEM_HEIGHT = 35;
+
     public CouriersList() {
         super();
 
-        setPadding(new Insets(5));
-        setPrefHeight(USE_COMPUTED_SIZE);
-
+        prefHeightProperty().bind(Bindings.size(getItems()).multiply(COURIER_ITEM_HEIGHT));
+        setBorder(null);
 
         AppController.getController().getCouriers().addListener((javafx.collections.ListChangeListener.Change<? extends Courier> c) -> {
             while (c.next()) {
