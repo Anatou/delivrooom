@@ -22,12 +22,14 @@ public abstract class TemplateTSP implements TSP {
     protected double maxPossibilities;
     protected double consideredPossibilities;
     protected NotifyTSPProgressToGui notifyTSPProgressToGui;
+    protected double lastProgress;
 
 
     public TemplateTSP() {
         this.calls = 0;
         this.maxPossibilities = Double.MAX_VALUE;
         this.consideredPossibilities = 0;
+        this.lastProgress = 0.;
     }
 
     public void searchSolution(int tpsLimite, Graphe g, DeliveriesDemand demand, NotifyTSPProgressToGui notifyTSPProgressToGui){
@@ -157,7 +159,11 @@ public abstract class TemplateTSP implements TSP {
     }
 
     protected void notifyProgress(NotifyTSPProgressToGui notifyTSPProgressToGui) {
-        notifyTSPProgressToGui.notifyTSPProgressToGui((float) (this.consideredPossibilities/this.maxPossibilities*100));
+        float progress = (float) (int) (this.consideredPossibilities/this.maxPossibilities*100);
+        if ( (int) progress != (int) this.lastProgress ) {
+            notifyTSPProgressToGui.notifyTSPProgressToGui(progress);
+            this.lastProgress = progress;
+        }
     }
 
 }
