@@ -27,7 +27,7 @@ public class DynamicProgrammingTSP {
     protected double consideredPossibilities;
     protected NotifyTSPProgressToGui notifyTSPProgressToGui;
 
-    public void searchSolution(Graphe g, DeliveriesDemand demand, NotifyTSPProgressToGui notifyTSPProgressToGui) {
+    public void searchSolution(int tpsLimite, Graphe g, DeliveriesDemand demand, NotifyTSPProgressToGui notifyTSPProgressToGui) {
         this.notifyTSPProgressToGui = notifyTSPProgressToGui;
         this.g = g;
         this.demand = demand;

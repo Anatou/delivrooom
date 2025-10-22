@@ -12,18 +12,18 @@ public interface TSP {
      * @param tpsLimite
      * @param g
      */
-    public void chercheSolution(int tpsLimite, Graphe g, DeliveriesDemand demand, NotifyTSPProgressToGui notifyTSPProgressToGui);
+    public void searchSolution(int tpsLimite, Graphe g, DeliveriesDemand demand, NotifyTSPProgressToGui notifyTSPProgressToGui);
 
     /**
      * @return le ieme sommet visite dans la solution calculee par <code>chercheSolution</code>
      * (-1 si <code>chercheSolution</code> n'a pas encore ete appele, ou si i < 0 ou i >= g.getNbSommets())
      */
-    public Long[] getSolution();
+    public Long[] getBestSolution();
 
     /**
      * @return la somme des couts des arcs de la solution calculee par <code>chercheSolution</code>
      * (-1 si <code>chercheSolution</code> n'a pas encore ete appele).
      */
-    public float getCoutSolution();
+    public float getBestCost();
 
 }
