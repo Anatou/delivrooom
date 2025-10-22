@@ -8,7 +8,7 @@ import java.util.*;
 
 // TODO : add progress bar updates in the computeD method
 
-public class DynamicProgrammingTSP {
+public class DynamicProgrammingTSP extends TemplateTSP {
     protected Long[] meilleureSolution;
     protected Graphe g;
     protected float bestCost;
@@ -27,6 +27,7 @@ public class DynamicProgrammingTSP {
     protected double consideredPossibilities;
     protected NotifyTSPProgressToGui notifyTSPProgressToGui;
 
+    @Override
     public void searchSolution(int tpsLimite, Graphe g, DeliveriesDemand demand, NotifyTSPProgressToGui notifyTSPProgressToGui) {
         this.notifyTSPProgressToGui = notifyTSPProgressToGui;
         this.g = g;
@@ -64,6 +65,16 @@ public class DynamicProgrammingTSP {
         bestCost = computeD(0, fullMask);
         List<Long> order = reconstructOrder();
         meilleureSolution = order.toArray(new Long[0]);
+    }
+
+    @Override
+    protected float bound(Long sommetCourant, Collection<Long> nonVus) {
+        return 0;
+    }
+
+    @Override
+    protected Iterator<Long> iterator(Long sommetCrt, Collection<Long> nonVus, Graphe g) {
+        return null;
     }
 
     protected float computeD(int i, int mask) {
@@ -150,10 +161,12 @@ chemin allant de i jusque 0 en passant par chaque sommet de S exactement une foi
         return order;
     }
 
+    @Override
     public Long[] getBestSolution() {
         return meilleureSolution;
     }
 
+    @Override
     public float getBestCost() {
         return bestCost;
     }
