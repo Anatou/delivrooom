@@ -117,3 +117,4 @@ public class Sidebar extends VBox {
     }
 
 }
+
