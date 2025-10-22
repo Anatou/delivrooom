@@ -30,7 +30,7 @@ public abstract class TemplateTSP implements TSP {
         this.consideredPossibilities = 0;
     }
 
-    public void chercheSolution(int tpsLimite, Graphe g, DeliveriesDemand demand, NotifyTSPProgressToGui notifyTSPProgressToGui){
+    public void searchSolution(int tpsLimite, Graphe g, DeliveriesDemand demand, NotifyTSPProgressToGui notifyTSPProgressToGui){
         if (tpsLimite <= 0) return;
         tpsDebut = System.currentTimeMillis();
         this.notifyTSPProgressToGui = notifyTSPProgressToGui;
@@ -134,11 +134,11 @@ public abstract class TemplateTSP implements TSP {
      */
     protected abstract Iterator<Long> iterator(Long sommetCrt, Collection<Long> nonVus, Graphe g);
 
-    public Long[] getSolution(){
+    public Long[] getBestSolution(){
         return meilleureSolution;
     }
 
-    public float getCoutSolution(){
+    public float getBestCost(){
         if (meilleureSolution == null) return -1;
         return bestCost;
     }
