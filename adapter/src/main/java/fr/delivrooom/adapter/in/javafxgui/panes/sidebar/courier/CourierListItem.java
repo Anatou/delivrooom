@@ -1,5 +1,4 @@
 package fr.delivrooom.adapter.in.javafxgui.panes.sidebar.courier;
-
 import fr.delivrooom.application.model.Courier;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -11,51 +10,59 @@ import javafx.scene.layout.Region;
 import org.kordamp.ikonli.fontawesome6.FontAwesomeSolid;
 import org.kordamp.ikonli.javafx.FontIcon;
 
+import java.util.function.Consumer;
+
 /**
  * Represents a single courier item in the list.
  */
 public class CourierListItem extends HBox {
 
-    private final Courier courier;
-    private final Runnable onDelete;
-    private final Runnable onCalculate;
-
-    public CourierListItem(int courierId, Runnable onDelete, Runnable onCalculate) {
-        super(5);
-        this.courier = new Courier(courierId, null);
+    public CourierListItem(Consumer<Courier> onDelete, Consumer<Courier> onCalculate) {
         this.onDelete = onDelete;
         this.onCalculate = onCalculate;
-
-        setPadding(new Insets(5));
-        setAlignment(Pos.CENTER_LEFT);
-        getStyleClass().add("courier-list-item");
-
-        // Courier label
-        Label courierLabel = new Label("Courier " + courierId);
-        courierLabel.getStyleClass().add("text");
-
-        // Spacer
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-
-        // Calculate button
-        Button calculateBtn = new Button();
-        calculateBtn.setGraphic(new FontIcon(FontAwesomeSolid.PLAY));
-        calculateBtn.getStyleClass().addAll("button-icon", "success");
-        calculateBtn.setOnAction(e -> onCalculate.run());
-        calculateBtn.setTooltip(new javafx.scene.control.Tooltip("Calculate route"));
-
-        // Delete button
-        Button deleteBtn = new Button();
-        deleteBtn.setGraphic(new FontIcon(FontAwesomeSolid.TRASH));
-        deleteBtn.getStyleClass().addAll("button-icon", "danger");
-        deleteBtn.setOnAction(e -> onDelete.run());
-        deleteBtn.setTooltip(new javafx.scene.control.Tooltip("Delete courier"));
-
-        getChildren().addAll(courierLabel, spacer, calculateBtn, deleteBtn);
     }
 
-    public int getCourierId() {
-        return courier.getId();
+    @Override
+    public void updateItem(Courier courier, boolean empty) {
+        super.updateItem(courier, empty);
+
+        if (empty) {
+            setText(null);
+            setGraphic(null);
+        } else {
+            setText(null);
+            HBox box = new HBox(5);
+
+            setPadding(new Insets(5));
+            setAlignment(Pos.CENTER_LEFT);
+            getStyleClass().add("courier-list-item");
+
+            // Courier label
+            Label courierLabel = new Label("Courier " + courier.getId());
+            courierLabel.getStyleClass().add("text");
+
+            // Spacer
+            Region spacer = new Region();
+            HBox.setHgrow(spacer, Priority.ALWAYS);
+
+            // Calculate button
+            Button calculateBtn = new Button();
+            calculateBtn.setGraphic(new FontIcon(FontAwesomeSolid.PLAY));
+            calculateBtn.getStyleClass().addAll("button-icon", "success");
+            calculateBtn.setOnAction(e -> onCalculate.accept(courier));
+            calculateBtn.setTooltip(new javafx.scene.control.Tooltip("Calculate route"));
+
+            // Delete button
+            Button deleteBtn = new Button();
+            deleteBtn.setGraphic(new FontIcon(FontAwesomeSolid.TRASH));
+            deleteBtn.getStyleClass().addAll("button-icon", "danger");
+            deleteBtn.setOnAction(e -> onDelete.accept(courier));
+            deleteBtn.setTooltip(new javafx.scene.control.Tooltip("Delete courier"));
+
+            box.getChildren().addAll(courierLabel, spacer, calculateBtn, deleteBtn);
+            setGraphic(box);
+        }
     }
+
+
 }

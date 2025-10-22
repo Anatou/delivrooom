@@ -33,6 +33,7 @@ public class AppController {
     private CityMap cityMap;
     private DeliveriesDemand deliveriesDemand;
     private TourSolution tourSolution;
+    private ObservableList<Courier> couriers;
     private static AppController instance;
     // 0 = not running, 0 < x < 1 = running, 1 = done
     private DoubleProperty tourCalculationProgress = new SimpleDoubleProperty(0);
@@ -138,6 +139,11 @@ public class AppController {
             mapCanvas.drawMap();
         }
     }
+
+    public ObservableList<Courier> getCouriers() {
+        return couriers;
+    }
+
 
     /**
      * Get the loaded city map.
@@ -280,18 +286,24 @@ public class AppController {
         }
     }
 
-    public void calculateTourForCourier() {
+    public void calculateTourForCourier(Courier courier) {
         if (tourCalculationProgress.get() > 0 && tourCalculationProgress.get() < 1) {
             showError("Cannot calculate tour", "Already running");
             return;
         }
 
+        if (courier.getDeliveriesDemand().deliveries().isEmpty() || courier.getDeliveriesDemand() == null) {
+            showError("Cannot calculate tour", "Courier has no deliveries assigned");
+            return;
+        }
         new Thread(() -> {
 
             try {
                 this.tourCalculationProgress.set(0.0001); // Small value, but not 0 cause it would be invisible
-                if (JavaFXApp.getCalculateTourUseCase().doesCalculatedTourNeedsToBeChanged(deliveriesDemand)) {
-                    JavaFXApp.getCalculateTourUseCase().findOptimalTour(deliveriesDemand, false);
+                if (JavaFXApp.getCalculateTourUseCase().doesCalculatedTourNeedsToBeChanged(courier.getDeliveriesDemand())) {
+                    System.out.println("tour needs to be recalculated for courier " + courier.getId());
+                    JavaFXApp.getCalculateTourUseCase().findOptimalTour(courier.getDeliveriesDemand(), false);
+
                 }
                 tourSolution = JavaFXApp.getCalculateTourUseCase().getOptimalTour();
                 this.tourCalculationProgress.set(1);

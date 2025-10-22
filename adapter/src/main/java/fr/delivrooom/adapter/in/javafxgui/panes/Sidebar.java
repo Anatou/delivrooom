@@ -73,6 +73,10 @@ public class Sidebar extends VBox {
         AppController.getController().stateProperty().addListener((obs, oldState, newState) -> {
             deliveriesSection.refreshDeliveries();
         });
+        // Listen to courier changes to refresh the list
+        AppController.getController().stateProperty().addListener((obs, oldState, newState) -> {
+            deliveriesSection.refreshCourier();
+        });
     }
 
     private Separator getNoPaddingSeparator() {

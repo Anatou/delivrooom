@@ -3,15 +3,10 @@ package fr.delivrooom.adapter.in.javafxgui.panes.sidebar.courier;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.Spinner;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
-import org.kordamp.ikonli.fontawesome6.FontAwesomeSolid;
-import org.kordamp.ikonli.javafx.FontIcon;
+import javafx.scene.control.ListView;
+
+import java.util.List;
+
 
 /**
  * List of couriers with controls to add/remove couriers.
@@ -88,12 +83,22 @@ public class CouriersList extends VBox {
         );
     }
 
-    private void calculateCourierRoute(int courierId) {
-        // TODO: Implement route calculation for specific courier
-        System.out.println("Calculating route for courier " + courierId);
-    }
+    private void calculateCourierRoute(Courier courier) {
+        AppController appController = AppController.getController();
+        List<Courier> couriers = appController.getCouriers();
+        Courier courier_found = null;
+        System.out.println("Searching for courier with ID: " + courier.getId());
+        for (Courier courier_ : couriers) {
+            System.out.println("Checking courier with ID: " + courier_.getId());
+            if (courier_.getId() == courier.getId()) {
+                courier_found = courier_;
+                break;
+            }
+        }
 
-    public ObservableList<CourierListItem> getCourierItems() {
-        return courierItems;
+        // affichage des deliveries demand du courrier
+        System.out.println("deliveries demand of :" + courier_found + " \n" + courier_found.getDeliveriesDemand());
+        System.out.println("Calculating route for courier " + courier_found);
+        appController.calculateTourForCourier(courier_found);
     }
 }
