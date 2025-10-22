@@ -38,18 +38,11 @@ public class TourCalculatorService implements CalculateTourUseCase {
     @Override
     public boolean doesCalculatedTourNeedsToBeChanged(DeliveriesDemand demand) {
         // checks if the demand is different from the last calculated one or if no tour has been calculated yet
-        if (hasMapChangedSinceLastCompute) {
-            return true;
-        }
-        else if (calculatedDemand == null){
-            if (demand == null) {
-                return false;
-            } else {
-                return true;
-            }
+        if (calculatedDemand == null) {
+            return demand != null && !demand.deliveries().isEmpty();
         }
         else {
-            return !calculatedDemand.equals(demand);
+            return hasMapChangedSinceLastCompute || !calculatedDemand.equals(demand);
         }
     }
 

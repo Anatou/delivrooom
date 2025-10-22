@@ -47,6 +47,14 @@ public class MapOverlay extends StackPane {
             updateOverlay(width, height, scale, minX, minY);
         });
 
+        controller.memeModeProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                setOpacity(0.5);
+            } else {
+                setOpacity(1.0);
+            }
+        });
+
         addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
             if (controller.getState() instanceof SelectIntersectionState) {
                 if (event.getTarget() instanceof Node node) {

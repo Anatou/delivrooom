@@ -246,6 +246,13 @@ public class MapCanvas extends StackPane {
         overlayLayer.updateOverlay(getWidth(), getHeight(), scale, minX, minY);
     }
 
+    /**
+     * Clear the tile cache (used for easter egg meme mode)
+     */
+    public void clearTileCache() {
+        tilesLayer.clearCache();
+    }
+
     private static class AutoView {
         double minX;
         double minY;
