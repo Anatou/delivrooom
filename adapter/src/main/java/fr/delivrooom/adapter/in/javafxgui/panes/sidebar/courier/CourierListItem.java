@@ -1,5 +1,6 @@
 package fr.delivrooom.adapter.in.javafxgui.panes.sidebar.courier;
 
+import fr.delivrooom.application.model.Courier;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -15,13 +16,13 @@ import org.kordamp.ikonli.javafx.FontIcon;
  */
 public class CourierListItem extends HBox {
 
-    private final int courierId;
+    private final Courier courier;
     private final Runnable onDelete;
     private final Runnable onCalculate;
 
     public CourierListItem(int courierId, Runnable onDelete, Runnable onCalculate) {
         super(5);
-        this.courierId = courierId;
+        this.courier = new Courier(courierId, null);
         this.onDelete = onDelete;
         this.onCalculate = onCalculate;
 
@@ -55,6 +56,6 @@ public class CourierListItem extends HBox {
     }
 
     public int getCourierId() {
-        return courierId;
+        return courier.getId();
     }
 }

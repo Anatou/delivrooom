@@ -15,4 +15,8 @@ public class Courier {
         return tourSolution;
     }
 
+    public int getId() {
+        return id;
+    }
+
 }

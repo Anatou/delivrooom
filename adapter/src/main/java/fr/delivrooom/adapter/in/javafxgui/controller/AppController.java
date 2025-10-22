@@ -285,6 +285,32 @@ public class AppController {
         }
     }
 
+    public void calculateTourForCourier() {
+        if (tourCalculationProgress.get() > 0 && tourCalculationProgress.get() < 1) {
+            showError("Cannot calculate tour", "Already running");
+            return;
+        }
+
+        new Thread(() -> {
+
+            try {
+                this.tourCalculationProgress.set(0.0001); // Small value, but not 0 cause it would be invisible
+                if (JavaFXApp.getCalculateTourUseCase().doesCalculatedTourNeedsToBeChanged(deliveriesDemand)) {
+                    JavaFXApp.getCalculateTourUseCase().findOptimalTour(deliveriesDemand, false);
+                }
+                tourSolution = JavaFXApp.getCalculateTourUseCase().getOptimalTour();
+                this.tourCalculationProgress.set(1);
+                Platform.runLater(() -> {
+                    mapCanvas.drawMap();
+                });
+
+            } catch (Exception e) {
+                Platform.runLater(() -> showError("Error while calculating tour", e.getMessage() == null ? e.toString() : e.getMessage()));
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
     public enum DefaultMapFilesType {
         SMALL_1("Small 1", "petitPlan", "demandePetit1"),
         SMALL_2("Small 2", "petitPlan", "demandePetit2"),
