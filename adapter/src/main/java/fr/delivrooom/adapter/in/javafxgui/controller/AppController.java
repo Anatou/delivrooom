@@ -125,6 +125,8 @@ public class AppController {
         this.cityMap = JavaFXApp.guiUseCase().getCityMap(url);
         JavaFXApp.getCalculateTourUseCase().provideCityMap(cityMap);
         tourSolution = null;
+        // now needs to delete every delivery demand of every courier
+        deleteDeliveryDemandOfCourier();
         updateMapCanvas();
     }
 
@@ -137,6 +139,7 @@ public class AppController {
     protected void loadDeliveriesFile(URL url) throws Exception {
         this.deliveriesDemand = JavaFXApp.guiUseCase().getDeliveriesDemand(cityMap, url);
         tourSolution = null;
+        deleteDeliveryDemandOfCourier();
         updateMapCanvas();
     }
 
@@ -150,6 +153,14 @@ public class AppController {
         }
     }
 
+    public void deleteDeliveryDemandOfCourier() {
+        for (Courier courier : couriers) {
+            if (courier.getDeliveriesDemand() != null) {
+                courier.getDeliveriesDemand().deliveries().clear();
+            } else {
+            }
+        }
+    }
     public ObservableList<Courier> getCouriers() {
         return couriers;
     }
