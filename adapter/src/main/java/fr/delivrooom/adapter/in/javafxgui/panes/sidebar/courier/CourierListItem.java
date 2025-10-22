@@ -4,6 +4,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -12,10 +13,10 @@ import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.util.function.Consumer;
 
-/**
- * Represents a single courier item in the list.
- */
-public class CourierListItem extends HBox {
+public class CourierListItem extends ListCell<Courier> {
+
+    private final Consumer<Courier> onDelete;
+    private final Consumer<Courier> onCalculate;
 
     public CourierListItem(Consumer<Courier> onDelete, Consumer<Courier> onCalculate) {
         this.onDelete = onDelete;
