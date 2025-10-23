@@ -59,19 +59,18 @@ public interface State {
     CommandResult createRemoveDeliveryCommand(Delivery delivery);
 
     /**
-     * Create a command to select an intersection.
+     * Select an intersection.
+     * Shows an error dialog if the state is not StateSelectIntersection.
      *
-     * @param intersection The intersection to select
-     * @return A CommandResult with either a command or an error message
+     * @param intersection The intersection to select. Can be null.
      */
-    CommandResult createSelectIntersectionCommand(Intersection intersection);
+    void selectIntersection(Intersection intersection);
 
     /**
-     * Create a command to request intersection selection mode.
-     *
-     * @return A CommandResult with either a command or an error message
+     * Create a request intersection, switching to the StateSelectIntersection.
+     * Shows an error dialog if the state is not StateDeliveriesLoaded.
      */
-    CommandResult createRequestIntersectionSelectionCommand();
+    void requestIntersectionSelection();
 
     /**
      * Create a command to calculate the tour for all deliveries.

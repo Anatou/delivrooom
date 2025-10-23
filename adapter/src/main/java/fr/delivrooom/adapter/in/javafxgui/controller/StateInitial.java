@@ -36,14 +36,14 @@ public record StateInitial(AppController controller) implements State {
     }
 
     @Override
-    public CommandResult createSelectIntersectionCommand(Intersection intersection) {
-        return CommandResult.error("No map loaded",
-                "Please load a map file first before selecting an intersection.");
+    public void selectIntersection(Intersection intersection) {
+        controller.showError("Not in selection mode",
+                "Please click 'Select Intersection' button first to enter selection mode.");
     }
 
     @Override
-    public CommandResult createRequestIntersectionSelectionCommand() {
-        return CommandResult.error("No map loaded",
+    public void requestIntersectionSelection() {
+        controller.showError("No map loaded",
                 "Please load a map file first before selecting an intersection.");
     }
 

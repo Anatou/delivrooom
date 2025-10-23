@@ -33,14 +33,14 @@ public record StateDeliveriesLoaded(AppController controller) implements State {
     }
 
     @Override
-    public CommandResult createSelectIntersectionCommand(Intersection intersection) {
-        return CommandResult.error("Not in selection mode",
+    public void selectIntersection(Intersection intersection) {
+        controller.showError("Not in selection mode",
                 "Please click 'Select Intersection' button first to enter selection mode.");
     }
 
     @Override
-    public CommandResult createRequestIntersectionSelectionCommand() {
-        return CommandResult.success(new CommandRequestIntersectionSelection(controller, this));
+    public void requestIntersectionSelection() {
+        controller.transitionToState(new StateSelectIntersection(controller));
     }
 
     @Override

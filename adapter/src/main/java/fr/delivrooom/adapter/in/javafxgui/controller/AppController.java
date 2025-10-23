@@ -178,16 +178,14 @@ public class AppController {
      * @param intersection The intersection to select
      */
     public void requestSelectIntersection(Intersection intersection) {
-        CommandResult result = getState().createSelectIntersectionCommand(intersection);
-        requestCommand(result);
+        getState().selectIntersection(intersection);
     }
 
     /**
      * Request to enter intersection selection mode.
      */
     public void requestIntersectionSelection() {
-        CommandResult result = getState().createRequestIntersectionSelectionCommand();
-        requestCommand(result);
+        getState().requestIntersectionSelection();
     }
 
     /**

@@ -33,14 +33,15 @@ public record StateSelectIntersection(AppController controller) implements State
     }
 
     @Override
-    public CommandResult createSelectIntersectionCommand(Intersection intersection) {
-        return CommandResult.error("Not implemented yet", "Please wait for next release.");
+    public void selectIntersection(Intersection intersection) {
+        controller.doSelectIntersection(intersection);
+        controller.transitionToState(new StateDeliveriesLoaded(controller));
     }
 
     @Override
-    public CommandResult createRequestIntersectionSelectionCommand() {
-        return CommandResult.error("Already in selection mode",
-                "You are already in intersection selection mode. Click on the map to select an intersection.");
+    public void requestIntersectionSelection() {
+        controller.showError("No map loaded",
+                "Please load a map file first before selecting an intersection.");
     }
 
     @Override
