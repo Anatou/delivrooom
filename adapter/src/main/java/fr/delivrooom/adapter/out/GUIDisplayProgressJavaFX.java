@@ -15,7 +15,7 @@ public class GUIDisplayProgressJavaFX implements NotifyTSPProgressToGui {
         }
         double finalProgress = progress;
 
-        AppController.getController().tourCalculationProgressProperty().set(finalProgress);
+        Platform.runLater(() -> AppController.getController().tourCalculationProgressProperty().set(finalProgress));
 
     }
 }

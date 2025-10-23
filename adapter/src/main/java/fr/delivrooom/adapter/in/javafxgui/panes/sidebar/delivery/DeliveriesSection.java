@@ -1,6 +1,7 @@
 package fr.delivrooom.adapter.in.javafxgui.panes.sidebar.delivery;
 
 import fr.delivrooom.adapter.in.javafxgui.controller.AppController;
+import fr.delivrooom.application.model.Courier;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.TitledPane;
@@ -9,18 +10,22 @@ import javafx.scene.layout.VBox;
 import org.kordamp.ikonli.fontawesome6.FontAwesomeSolid;
 import org.kordamp.ikonli.javafx.FontIcon;
 
+import java.util.List;
+
 /**
  * Collapsible section containing the list of deliveries.
  */
 public class DeliveriesSection extends VBox {
 
     private final DeliveriesList deliveriesList;
+    private List<Courier> couriers;
     private final TitledPane titledPane;
 
     public DeliveriesSection() {
         super(0);
         // Create the deliveries list
         deliveriesList = new DeliveriesList();
+        couriers = null;
 
         // Create custom title with icon and description
         HBox titleBox = new HBox(6);
@@ -72,5 +77,19 @@ public class DeliveriesSection extends VBox {
         } else {
             deliveriesList.clearDeliveries();
         }
+
+
+    }
+
+    public void refreshCourier() {
+        AppController controller = AppController.getController();
+
+        if (controller.getCouriers() != null) {
+            couriers = controller.getCouriers();
+        } else {
+            couriers = null;
+        }
+
+
     }
 }

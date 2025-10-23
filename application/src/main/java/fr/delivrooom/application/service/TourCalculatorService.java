@@ -11,12 +11,11 @@ import java.util.*;
 
 public class TourCalculatorService implements CalculateTourUseCase {
 
+    protected boolean useDynamicProgramming = false;
     protected boolean hasMapChangedSinceLastCompute;
-
     protected CityGraph graph;
     protected TourSolution tourSolution;
     protected DeliveriesDemand calculatedDemand;
-
     protected final NotifyTSPProgressToGui notifyTSPProgressToGui;
 
     public TourCalculatorService(NotifyTSPProgressToGui notifyTSPProgressToGui) {
@@ -55,7 +54,8 @@ public class TourCalculatorService implements CalculateTourUseCase {
     public void findOptimalTour(DeliveriesDemand demand, boolean useTimeAsCost) throws RuntimeException {
         // first : find all shortest paths between any pair of nodes in the graph
         hasMapChangedSinceLastCompute = false;
-        calculatedDemand = demand;
+
+        calculatedDemand = new DeliveriesDemand(new ArrayList<>(demand.deliveries()), demand.store());
 
         if (graph == null) {
             throw new RuntimeException("CityGraph must be in TourCalculator before attempting to find optimal tour");
@@ -97,7 +97,13 @@ public class TourCalculatorService implements CalculateTourUseCase {
 
         long tpsDebut = System.currentTimeMillis();
         // Create a TSP solver and run it on the complete graph
-        TSP tspSolver = new TSP3();
+        TSP tspSolver;
+        if (!useDynamicProgramming) {
+            tspSolver = new TSP3();
+        }
+        else {
+            tspSolver = new DynamicProgrammingTSP();
+        }
         int timeLimitMs = 10000; // 10 seconds time limit for TSP solving
         tspSolver.searchSolution(timeLimitMs, shortestPathsGraph, demand, this.notifyTSPProgressToGui);
         Long[] tspSolution = tspSolver.getBestSolution();

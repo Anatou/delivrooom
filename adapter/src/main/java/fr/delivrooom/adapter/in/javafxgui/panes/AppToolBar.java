@@ -6,6 +6,7 @@ import atlantafx.base.theme.PrimerDark;
 import atlantafx.base.theme.PrimerLight;
 import fr.delivrooom.adapter.in.javafxgui.JavaFXApp;
 import fr.delivrooom.adapter.in.javafxgui.controller.AppController;
+import fr.delivrooom.adapter.in.javafxgui.controller.InitialState;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuButton;
@@ -37,9 +38,10 @@ public class AppToolBar extends ToolBar {
 
         MenuButton open = new MenuButton("Open");
 
-        MenuItem openMapBtn = new MenuItem("Open Map");
+        MenuItem openMapBtn = new MenuItem("Open City Map");
         openMapBtn.setOnAction(e -> handleOpenMapFile());
-        MenuItem openDemandsBtn = new MenuItem("Open Demands");
+        MenuItem openDemandsBtn = new MenuItem("Open Delivery Demands");
+        openDemandsBtn.disableProperty().bind(controller.stateProperty().map(s -> s instanceof InitialState));
         openDemandsBtn.setOnAction(e -> handleOpenDeliveriesFile());
         open.getItems().addAll(openMapBtn, openDemandsBtn);
 
@@ -55,7 +57,6 @@ public class AppToolBar extends ToolBar {
 
         Button redoBtn = new Button("", new FontIcon(FontAwesomeSolid.REDO));
         redoBtn.setOnAction(e -> controller.getCommandManager().redo());
-
 
         themeToggle = new ToggleSwitch("");
         themeToggle.setGraphic(new FontIcon(FontAwesomeSolid.MOON));

@@ -11,6 +11,8 @@ import fr.delivrooom.application.model.*;
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.*;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.control.Alert;
 
 import java.io.File;
@@ -23,9 +25,6 @@ import java.net.URL;
  */
 public class AppController {
 
-    // Waiting for intersection selection
-    private String waitingfor;
-    private DeliveryCreationSection waitingSidebar;
     // State management
     private final CommandManager commandManager;
     private SimpleObjectProperty<State> currentState;
@@ -38,6 +37,7 @@ public class AppController {
     private CityMap cityMap;
     private DeliveriesDemand deliveriesDemand;
     private TourSolution tourSolution;
+    private ObservableList<Courier> couriers;
     private static AppController instance;
     // 0 = not running, 0 < x < 1 = running, 1 = done
     private DoubleProperty tourCalculationProgress = new SimpleDoubleProperty(0);
@@ -47,6 +47,7 @@ public class AppController {
     private AppController() {
         this.currentState = new SimpleObjectProperty<>(new InitialState(this));
         this.commandManager = new CommandManager();
+        this.couriers = FXCollections.observableArrayList();
     }
 
     public static AppController getController() {
@@ -82,6 +83,12 @@ public class AppController {
         }
     }
 
+    public void handleCourierAssignmentChange(Delivery updatedDelivery, Courier newCourier) {
+        for (DeliveryListItem item : sidebar.getDeliveriesSection().getDeliveriesList().getDeliveryItems()) {
+            item.getActionButtons().updateDisplayedSelectedCourier(updatedDelivery, newCourier);
+        }
+    }
+
     public void setSidebarWaitingFor(String type, DeliveryCreationSection sidebar){
         this.waitingfor = type;
         this.waitingSidebar = sidebar;
@@ -94,7 +101,6 @@ public class AppController {
     public DeliveryCreationSection getWaitingSidebar(){
         return this.waitingSidebar;
     }
-
 
     /**
      * Handle opening a delivery file through the current state.
@@ -137,6 +143,8 @@ public class AppController {
         this.cityMap = JavaFXApp.guiUseCase().getCityMap(url);
         JavaFXApp.getCalculateTourUseCase().provideCityMap(cityMap);
         tourSolution = null;
+        // now needs to delete every delivery demand of every courier
+        deleteDeliveryDemandOfCourier();
         updateMapCanvas();
     }
 
@@ -149,6 +157,7 @@ public class AppController {
     protected void loadDeliveriesFile(URL url) throws Exception {
         this.deliveriesDemand = JavaFXApp.guiUseCase().getDeliveriesDemand(cityMap, url);
         tourSolution = null;
+        deleteDeliveryDemandOfCourier();
         updateMapCanvas();
     }
 
@@ -161,6 +170,19 @@ public class AppController {
             mapCanvas.drawMap();
         }
     }
+
+    public void deleteDeliveryDemandOfCourier() {
+        for (Courier courier : couriers) {
+            if (courier.getDeliveriesDemand() != null) {
+                courier.getDeliveriesDemand().deliveries().clear();
+            } else {
+            }
+        }
+    }
+    public ObservableList<Courier> getCouriers() {
+        return couriers;
+    }
+
 
     /**
      * Get the loaded city map.
@@ -195,10 +217,7 @@ public class AppController {
      * Update the selected intersection in the sidebar.
      */
     protected void selectIntersection(Intersection intersection) {
-        //sidebar.getTestSection().selectIntersection(intersection);
-        if(getWaitingSidebar()!=null){
-            getWaitingSidebar().selectIntersection((intersection)); ////////////////////////////////////////////////////////////////////////////////
-        }
+        sidebar.getDeliveryCreationSection().selectIntersection(intersection);
     }
 
     public void addDelivery(Delivery delivery) {
@@ -308,6 +327,38 @@ public class AppController {
             mapCanvas.clearTileCache();
             mapCanvas.drawMap();
         }
+    }
+
+    public void calculateTourForCourier(Courier courier) {
+        if (tourCalculationProgress.get() > 0 && tourCalculationProgress.get() < 1) {
+            showError("Cannot calculate tour", "Already running");
+            return;
+        }
+
+        if (courier.getDeliveriesDemand().deliveries().isEmpty() || courier.getDeliveriesDemand() == null) {
+            showError("Cannot calculate tour", "Courier has no deliveries assigned");
+            return;
+        }
+        new Thread(() -> {
+
+            try {
+                this.tourCalculationProgress.set(0.0001); // Small value, but not 0 cause it would be invisible
+                if (JavaFXApp.getCalculateTourUseCase().doesCalculatedTourNeedsToBeChanged(courier.getDeliveriesDemand())) {
+                    System.out.println("tour needs to be recalculated for courier " + courier.getId());
+                    JavaFXApp.getCalculateTourUseCase().findOptimalTour(courier.getDeliveriesDemand(), false);
+
+                }
+                tourSolution = JavaFXApp.getCalculateTourUseCase().getOptimalTour();
+                this.tourCalculationProgress.set(1);
+                Platform.runLater(() -> {
+                    mapCanvas.drawMap();
+                });
+
+            } catch (Exception e) {
+                Platform.runLater(() -> showError("Error while calculating tour", e.getMessage() == null ? e.toString() : e.getMessage()));
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     public enum DefaultMapFilesType {
