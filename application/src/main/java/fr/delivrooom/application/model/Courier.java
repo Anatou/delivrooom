@@ -26,7 +26,7 @@ public class Courier {
     }
 
     public void setDeliveriesDemand(DeliveriesDemand deliveriesDemand) {
-        deliveriesDemand = deliveriesDemand;
+        this.deliveriesDemand = deliveriesDemand;
     }
 
     public void deleteTourSolution() {

@@ -2,6 +2,7 @@ package fr.delivrooom.adapter.in.javafxgui.controller;
 
 import fr.delivrooom.application.model.Courier;
 import fr.delivrooom.application.model.Delivery;
+import fr.delivrooom.application.model.Intersection;
 
 /**
  * Command to assign a courier to a delivery.
@@ -11,11 +12,13 @@ public class CommandAssignCourier implements Command {
 
     private final AppController controller;
     private final Delivery delivery;
+    private final Intersection store;
     private final Courier newCourier;
     private Courier previousCourier;
 
-    public CommandAssignCourier(AppController controller, Delivery delivery, Courier newCourier) {
+    public CommandAssignCourier(AppController controller, Delivery delivery, Intersection store, Courier newCourier) {
         this.controller = controller;
+        this.store = store;
         this.delivery = delivery;
         this.newCourier = newCourier;
     }
@@ -23,11 +26,11 @@ public class CommandAssignCourier implements Command {
     @Override
     public void execute() {
         previousCourier = controller.getCourierForDelivery(delivery);
-        controller.doAssignCourier(delivery, newCourier);
+        controller.doAssignCourier(delivery, store, newCourier);
     }
 
     @Override
     public void undo() {
-        controller.doAssignCourier(delivery, previousCourier);
+        controller.doAssignCourier(delivery, store, previousCourier);
     }
 }

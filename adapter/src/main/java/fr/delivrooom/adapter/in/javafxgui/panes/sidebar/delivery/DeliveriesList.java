@@ -41,7 +41,6 @@ public class DeliveriesList extends VBox {
         // Scroll pane for delivery items
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setFitToWidth(true);
-        scrollPane.setMaxHeight(250);
         scrollPane.getStyleClass().add("edge-to-edge");
         VBox.setVgrow(scrollPane, Priority.ALWAYS);
 
@@ -82,7 +81,4 @@ public class DeliveriesList extends VBox {
         }
     }
 
-    public ObservableList<DeliveryListItem> getDeliveryItems() {
-        return deliveryItems;
-    }
 }

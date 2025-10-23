@@ -11,7 +11,6 @@ import org.kordamp.ikonli.javafx.FontIcon;
 
 public class DeliveryActionButtons extends HBox {
 
-    Courier lastSelectedCourier = null;
     Delivery delivery;
     ComboBox<Courier> courierComboBox;
 
@@ -31,25 +30,14 @@ public class DeliveryActionButtons extends HBox {
 
         courierComboBox.setPromptText("Courier");
         courierComboBox.setItems(appController.couriersProperty());
+        courierComboBox.getSelectionModel().select(appController.getCourierForDelivery(delivery));
 
 
         courierComboBox.setOnAction(e -> {
-            if (lastSelectedCourier != null) {
-                lastSelectedCourier.removeDelivery(delivery);
-            }
-            if (courierComboBox.getValue() != null) {
-                courierComboBox.getValue().addDelivery(delivery, appController.deliveriesDemandProperty().getValue().store());
-                lastSelectedCourier = courierComboBox.getValue();
-            }
             appController.requestAssignCourier(delivery, courierComboBox.getValue());
         });
 
         getChildren().addAll(courierComboBox, deleteBtn);
     }
 
-    public void updateDisplayedSelectedCourier(Delivery updatedDelivery, Courier newCourier) {
-        if (delivery.equals(updatedDelivery)) {
-            courierComboBox.setValue(newCourier);
-        }
-    }
 }

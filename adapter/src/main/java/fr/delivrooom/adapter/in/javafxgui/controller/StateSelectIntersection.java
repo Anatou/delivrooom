@@ -55,7 +55,8 @@ public record StateSelectIntersection(AppController controller) implements State
 
     @Override
     public CommandResult createAssignCourierCommand(Delivery delivery, Courier courier) {
-        return CommandResult.success(new CommandAssignCourier(controller, delivery, courier));
+        Intersection store = controller.deliveriesDemandProperty().getValue().store();
+        return CommandResult.success(new CommandAssignCourier(controller, delivery, store, courier));
     }
 
     @Override

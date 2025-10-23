@@ -54,6 +54,11 @@ public class CouriersList extends ListView<Courier> {
         // affichage des deliveries demand du courrier
         System.out.println("deliveries demand of :" + courier_found + " \n" + courier_found.getDeliveriesDemand());
         System.out.println("Calculating route for courier " + courier_found);
+
+        System.out.println("deliveries demand of :" + courier + " \n" + courier.getDeliveriesDemand());
+        System.out.println("Calculating route for courier " + courier);
+
+
         appController.requestCalculateCourierTour(courier_found);
     }
 }

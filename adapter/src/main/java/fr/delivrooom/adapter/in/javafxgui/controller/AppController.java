@@ -2,7 +2,6 @@ package fr.delivrooom.adapter.in.javafxgui.controller;
 
 import fr.delivrooom.adapter.in.javafxgui.JavaFXApp;
 import fr.delivrooom.adapter.in.javafxgui.panes.Sidebar;
-import fr.delivrooom.adapter.in.javafxgui.panes.sidebar.delivery.DeliveryListItem;
 import fr.delivrooom.adapter.in.javafxgui.utils.InvalidableReadOnlyObjectWrapper;
 import fr.delivrooom.adapter.out.XMLCityMapLoader;
 import fr.delivrooom.application.model.*;
@@ -477,13 +476,17 @@ public class AppController {
      * @param delivery The delivery to assign
      * @param courier  The courier to assign to the delivery
      */
-    protected void doAssignCourier(Delivery delivery, Courier courier) {
-        // Update UI to reflect the courier assignment
-        if (sidebar != null) {
-            for (DeliveryListItem item : sidebar.getDeliveriesSection().getDeliveriesList().getDeliveryItems()) {
-                item.getActionButtons().updateDisplayedSelectedCourier(delivery, courier);
+    protected void doAssignCourier(Delivery delivery, Intersection store, Courier courier) {
+        Courier assignedCourier = getCourierForDelivery(delivery);
+        if (assignedCourier != null) {
+            if (!assignedCourier.equals(courier)) {
+                assignedCourier.removeDelivery(delivery);
+                courier.addDelivery(delivery, store);
             }
+        } else {
+            courier.addDelivery(delivery, store);
         }
+        this.deliveriesDemand.invalidate();
     }
 
     /**
@@ -507,7 +510,7 @@ public class AppController {
      * @param delivery The delivery to check
      * @return The assigned courier, or null if none
      */
-    Courier getCourierForDelivery(Delivery delivery) {
+    public Courier getCourierForDelivery(Delivery delivery) {
         for (Courier courier : couriers) {
             if (courier.getDeliveriesDemand() != null &&
                     courier.getDeliveriesDemand().deliveries().contains(delivery)) {
