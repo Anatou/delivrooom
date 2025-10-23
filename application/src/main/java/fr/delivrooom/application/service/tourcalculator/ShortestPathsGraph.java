@@ -1,9 +1,11 @@
-package fr.delivrooom.application.model;
+package fr.delivrooom.application.service.tourcalculator;
+
+import fr.delivrooom.application.model.Path;
 
 import java.util.HashMap;
 import java.util.List;
 
-public class ShortestPathsGraph implements Graphe{
+public class ShortestPathsGraph implements Graphe {
 
     protected HashMap<Long, HashMap<Long, Path>> adjacencyMatrix;
     protected int intersectionsCount;
@@ -24,15 +26,15 @@ public class ShortestPathsGraph implements Graphe{
         return -1;
     }
 
-    public boolean estArc(long i, long j){
+    public boolean estArc(long i, long j) {
         return (adjacencyMatrix.containsKey(i) && adjacencyMatrix.get(i).containsKey(j));
     }
 
-    public HashMap<Long, HashMap<Long, Path>> getAdjacencyMatrix(){
+    public HashMap<Long, HashMap<Long, Path>> getAdjacencyMatrix() {
         return adjacencyMatrix;
     }
 
-    public List<Long> arcs(long i){
+    public List<Long> arcs(long i) {
         if (this.adjacencyMatrix.containsKey(i)) {
             return this.adjacencyMatrix.get(i).keySet().stream().toList();
         }

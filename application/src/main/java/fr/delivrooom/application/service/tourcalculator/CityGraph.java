@@ -1,4 +1,7 @@
-package fr.delivrooom.application.model;
+package fr.delivrooom.application.service.tourcalculator;
+
+import fr.delivrooom.application.model.CityMap;
+import fr.delivrooom.application.model.Road;
 
 import java.util.ArrayList;
 import java.util.HashMap;

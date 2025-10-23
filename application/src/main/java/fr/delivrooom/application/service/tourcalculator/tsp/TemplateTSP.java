@@ -1,9 +1,9 @@
-package fr.delivrooom.application.model.tsp;
+package fr.delivrooom.application.service.tourcalculator.tsp;
 
 import fr.delivrooom.application.model.DeliveriesDemand;
 import fr.delivrooom.application.model.Delivery;
-import fr.delivrooom.application.model.Graphe;
 import fr.delivrooom.application.port.out.NotifyTSPProgressToGui;
+import fr.delivrooom.application.service.tourcalculator.Graphe;
 
 import java.util.*;
 

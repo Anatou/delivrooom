@@ -1,24 +1,19 @@
-package fr.delivrooom.application.model.tsp;
+package fr.delivrooom.application.service.tourcalculator.tsp;
 
-import fr.delivrooom.application.model.DeliveriesDemand;
-import fr.delivrooom.application.model.Graphe;
-import fr.delivrooom.application.port.out.NotifyTSPProgressToGui;
+import fr.delivrooom.application.service.tourcalculator.Graphe;
 
 import java.util.*;
 
-public class TSP4 extends TemplateTSP {
+public class TSP3 extends TemplateTSP {
 
     @Override
     protected float bound(Long currentVertex, Collection<Long> unseen) {
         /**
-         Approche exacte basée sur un principe de programmation dynamique, qui a une complexité en temps
-         inférieure à celle de l’algorithme par séparation et évaluation (même si cette complexité reste exponentielle),
-         mais qui n’est pas anytime (elle calcule une seule solution, qui est la solution optimale) ;
-
-         La propriété d’optimalité des sous-chemins vue en cours nous permet de définir D(i, S)
-         récursivement :
-         — si S = ∅, alors D(i, S) = cout[i][0] ;
-         — si S̸ = ∅, alors D(i, S) = minj∈S (cout[i][j] + D(j, S \ {j}).
+         Une fonction d’évaluation plus évoluée (qui calcule une borne plus proche de la solution optimale, mais avec
+         une complexité plus élevée) consiste à calculer le coût c de l’arbre couvrant minimal du sous-graphe induit par les
+         sommets non visités, et à ajouter à c :
+         — le coût du plus petit arc reliant le dernier sommet visité et arrivant sur un des sommets non visités,
+         — et le coût du plus petit arc reliant un des sommets non visités à 0.
          */
 
         // lists to store costs and predecessors for Prim's algorithm
@@ -126,5 +121,4 @@ public class TSP4 extends TemplateTSP {
     protected Iterator<Long> iterator(Long currentVertex, Collection<Long> unseen, Graphe g) {
         return new IteratorSeq(unseen, currentVertex, g);
     }
-    
 }
