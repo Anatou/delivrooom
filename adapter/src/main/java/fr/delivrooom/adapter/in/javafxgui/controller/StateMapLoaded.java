@@ -5,16 +5,16 @@ import fr.delivrooom.application.model.Intersection;
 import java.net.URL;
 
 /**
- * Initial state - no map or deliveries loaded yet.
- * Only allows opening a map file.
+ * Map loaded state - a map has been loaded.
+ * Allows opening a new map file or loading deliveries.
  */
-public record InitialState(AppController controller) implements State {
+public record StateMapLoaded(AppController controller) implements State {
 
     @Override
     public void openMapFile(URL url) {
         try {
             controller.loadMapFile(url);
-            controller.setState(new MapLoadedState(controller));
+            controller.setState(new StateMapLoaded(controller));
         } catch (Exception e) {
             controller.showError("Error loading map", e.getMessage());
             e.printStackTrace();
@@ -23,7 +23,13 @@ public record InitialState(AppController controller) implements State {
 
     @Override
     public void openDeliveriesFile(URL url) {
-        controller.showError("No map loaded", "Please load a map file first before loading deliveries.");
+        try {
+            controller.loadDeliveriesFile(url);
+            controller.setState(new StateDeliveriesLoaded(controller));
+        } catch (Exception e) {
+            controller.showError("Error loading deliveries", e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -33,17 +39,18 @@ public record InitialState(AppController controller) implements State {
 
     @Override
     public void requestIntersectionSelection() {
-        controller.showError("No map loaded", "Please load a map file first before selecting an intersection.");
+        controller.showError("No deliveries loaded", "Please load deliveries first before selecting an intersection.");
     }
 
     @Override
     public String getStateName() {
-        return "InitialState";
+        return "MapLoadedState";
     }
 
     @Override
     public void requestCalculateTour() {
-        controller.showError("Cannot calculate tour", "No map or deliveries loaded.");
-    }
+        controller.showError("No deliveries loaded", "Please load deliveries first before calculating the tour");
 
+
+    }
 }

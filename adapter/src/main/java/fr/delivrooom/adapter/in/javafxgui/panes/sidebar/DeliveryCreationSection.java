@@ -1,7 +1,7 @@
 package fr.delivrooom.adapter.in.javafxgui.panes.sidebar;
 
-import fr.delivrooom.adapter.in.javafxgui.command.AddDeliveryCommand;
 import fr.delivrooom.adapter.in.javafxgui.controller.AppController;
+import fr.delivrooom.adapter.in.javafxgui.controller.CommandAddDelivery;
 import fr.delivrooom.application.model.Delivery;
 import fr.delivrooom.application.model.Intersection;
 import javafx.geometry.Insets;
@@ -129,7 +129,7 @@ public class DeliveryCreationSection extends VBox {
                 System.out.println("Please enter a valid number!");
             }
             Delivery addedDelivery = new Delivery(this.takeout, this.delivery, tDuration, dDuration);
-            AddDeliveryCommand addDeliveryCommand = new AddDeliveryCommand(controller, addedDelivery);
+            CommandAddDelivery addDeliveryCommand = new CommandAddDelivery(controller, addedDelivery);
             controller.getCommandManager().executeCommand(addDeliveryCommand);
             /*controller.getSidebar().getDeliveriesSection().refreshDeliveries();
             controller.updateMapCanvas();*/

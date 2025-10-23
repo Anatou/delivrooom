@@ -2,8 +2,8 @@ package fr.delivrooom.adapter.in.javafxgui.map;
 
 import atlantafx.base.controls.Popover;
 import fr.delivrooom.adapter.in.javafxgui.controller.AppController;
-import fr.delivrooom.adapter.in.javafxgui.controller.DeliveriesLoadedState;
-import fr.delivrooom.adapter.in.javafxgui.controller.SelectIntersectionState;
+import fr.delivrooom.adapter.in.javafxgui.controller.StateDeliveriesLoaded;
+import fr.delivrooom.adapter.in.javafxgui.controller.StateSelectIntersection;
 import fr.delivrooom.adapter.in.javafxgui.panes.sidebar.delivery.DeliveryTooltip;
 import fr.delivrooom.application.model.*;
 import javafx.geometry.Point2D;
@@ -55,7 +55,7 @@ public class MapOverlay extends StackPane {
         });
 
         addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
-            if (controller.getState() instanceof SelectIntersectionState) {
+            if (controller.getState() instanceof StateSelectIntersection) {
                 if (event.getTarget() instanceof Node node) {
                     if (node.getUserData() != "selectIntersection") {
                         controller.handleSelectIntersection(null);
@@ -83,11 +83,11 @@ public class MapOverlay extends StackPane {
 
         updateCanvasLayer();
 
-        if (controller.getState() instanceof SelectIntersectionState) {
+        if (controller.getState() instanceof StateSelectIntersection) {
             intersectionLayer.setVisible(true);
             deliveryLayer.setVisible(false);
             updateIntersectionLayer();
-        } else if (controller.getState() instanceof DeliveriesLoadedState) {
+        } else if (controller.getState() instanceof StateDeliveriesLoaded) {
             intersectionLayer.setVisible(false);
             deliveryLayer.setVisible(true);
             updateDeliveryLayer();

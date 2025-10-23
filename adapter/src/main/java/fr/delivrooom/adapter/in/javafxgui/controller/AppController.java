@@ -1,7 +1,6 @@
 package fr.delivrooom.adapter.in.javafxgui.controller;
 
 import fr.delivrooom.adapter.in.javafxgui.JavaFXApp;
-import fr.delivrooom.adapter.in.javafxgui.command.CommandManager;
 import fr.delivrooom.adapter.in.javafxgui.map.MapCanvas;
 import fr.delivrooom.adapter.in.javafxgui.panes.Sidebar;
 import fr.delivrooom.adapter.in.javafxgui.panes.sidebar.delivery.DeliveryListItem;
@@ -19,10 +18,13 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
- * Main application controller implementing the State design pattern.
+ * Main application controller implementing the State and Singleton design pattern.
  * Manages the application state and coordinates between UI components.
  */
 public class AppController {
+
+    // Singleton implementation
+    private static AppController instance;
 
     // State management
     private final CommandManager commandManager;
@@ -36,18 +38,15 @@ public class AppController {
     private CityMap cityMap;
     private DeliveriesDemand deliveriesDemand;
     private TourSolution tourSolution;
-    private ObservableList<Courier> couriers;
-    private static AppController instance;
+    private final ObservableList<Courier> couriers = FXCollections.observableArrayList();
 
     // 0 = not running, 0 < x < 1 = running, 1 = done
-    private DoubleProperty tourCalculationProgress = new SimpleDoubleProperty(0);
-    // Easter egg: meme mode for map tiles
-    private BooleanProperty memeModeProperty = new SimpleBooleanProperty(false);
+    private final DoubleProperty tourCalculationProgress = new SimpleDoubleProperty(0);
+    private final BooleanProperty memeModeProperty = new SimpleBooleanProperty(false);
 
     private AppController() {
-        this.currentState = new SimpleObjectProperty<>(new InitialState(this));
+        this.currentState = new SimpleObjectProperty<>(new StateInitial(this));
         this.commandManager = new CommandManager();
-        this.couriers = FXCollections.observableArrayList();
     }
 
     public static AppController getController() {
@@ -57,11 +56,8 @@ public class AppController {
         return instance;
     }
 
-    public Sidebar getSidebar(){
-        return sidebar;
-    }
-
     /**
+     * Sets the references to the main UI components.
      * Must be called right after the UI components are initialized.
      */
     public void wireComponents(MapCanvas mapCanvas, Sidebar sidebar) {
@@ -74,7 +70,7 @@ public class AppController {
      *
      * @param file The map file to open
      */
-    public void handleOpenMapFile(File file) {
+    protected void handleOpenMapFile(File file) {
         try {
             getState().openMapFile(file.toURI().toURL());
         } catch (MalformedURLException e) {
@@ -83,23 +79,36 @@ public class AppController {
         }
     }
 
-    public void handleCourierAssignmentChange(Delivery updatedDelivery, Courier newCourier) {
-        for (DeliveryListItem item : sidebar.getDeliveriesSection().getDeliveriesList().getDeliveryItems()) {
-            item.getActionButtons().updateDisplayedSelectedCourier(updatedDelivery, newCourier);
-        }
-    }
-
     /**
      * Handle opening a delivery file through the current state.
      *
      * @param file The deliveries file to open
      */
-    public void handleOpenDeliveriesFile(File file) {
+    protected void handleOpenDeliveriesFile(File file) {
         try {
             getState().openDeliveriesFile(file.toURI().toURL());
         } catch (MalformedURLException e) {
             showError("Invalid file URL", e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    public void handleLoadDefaultFiles(DefaultMapFilesType type) {
+        URL cityMapURL = XMLCityMapLoader.class.getResource("/xml/" + type.map + ".xml");
+        URL deliveriesURL = XMLCityMapLoader.class.getResource("/xml/" + type.deliveries + ".xml");
+        getState().openMapFile(cityMapURL);
+        getState().openDeliveriesFile(deliveriesURL);
+    }
+
+    /**
+     * Handle a change in the courier assignment of a delivery through the current state.
+     *
+     * @param updatedDelivery The delivery whose assignment has changed
+     * @param newCourier      The new assigned courier
+     */
+    protected void handleCourierAssignmentChange(Delivery updatedDelivery, Courier newCourier) {
+        for (DeliveryListItem item : sidebar.getDeliveriesSection().getDeliveriesList().getDeliveryItems()) {
+            item.getActionButtons().updateDisplayedSelectedCourier(updatedDelivery, newCourier);
         }
     }
 
@@ -162,29 +171,16 @@ public class AppController {
         for (Courier courier : couriers) {
             if (courier.getDeliveriesDemand() != null) {
                 courier.getDeliveriesDemand().deliveries().clear();
-            } else {
             }
         }
     }
+
     public ObservableList<Courier> getCouriers() {
         return couriers;
     }
-
-
-    /**
-     * Get the loaded city map.
-     *
-     * @return The city map or null if not loaded
-     */
     public CityMap getCityMap() {
         return cityMap;
     }
-
-    /**
-     * Get the loaded deliveries demand.
-     *
-     * @return The deliveries demand or null if not loaded
-     */
     public DeliveriesDemand getDeliveriesDemand() {
         return deliveriesDemand;
     }
@@ -193,12 +189,7 @@ public class AppController {
         return commandManager;
     }
 
-    public void handleLoadDefaultFiles(DefaultMapFilesType type) {
-        URL cityMapURL = XMLCityMapLoader.class.getResource("/xml/" + type.map + ".xml");
-        URL deliveriesURL = XMLCityMapLoader.class.getResource("/xml/" + type.deliveries + ".xml");
-        getState().openMapFile(cityMapURL);
-        getState().openDeliveriesFile(deliveriesURL);
-    }
+
 
     /**
      * Update the selected intersection in the sidebar.
@@ -215,7 +206,6 @@ public class AppController {
         sidebar.getDeliveriesSection().refreshDeliveries();
         updateMapCanvas();
     }
-
     public void removeDelivery(Delivery delivery) {
         System.out.println("Removing delivery " + delivery.takeoutIntersection().getId()
                 + " from intersection " + delivery.takeoutIntersection().getId()
@@ -225,9 +215,6 @@ public class AppController {
         updateMapCanvas();
     }
 
-    public State getState() {
-        return currentState.get();
-    }
 
     public void showError(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -237,10 +224,12 @@ public class AppController {
         alert.showAndWait();
     }
 
+    public State getState() {
+        return currentState.get();
+    }
     protected void setState(State newState) {
         currentState.set(newState);
     }
-
     public SimpleObjectProperty<State> stateProperty() {
         return currentState;
     }
@@ -248,18 +237,34 @@ public class AppController {
     public TourSolution getTourSolution() {
         return tourSolution;
     }
-
-    public double getTourCalculationProgress() {
-        return tourCalculationProgress.get();
-    }
-
     public DoubleProperty tourCalculationProgressProperty() {
         return tourCalculationProgress;
     }
-
     public BooleanBinding tourBeingCalculatedBinding() {
         return tourCalculationProgress.greaterThan(0.0).and(tourCalculationProgress.lessThan(1.0));
     }
+
+    /**
+     * Get the meme mode property for the easter egg.
+     * When true, map tiles will load random memes instead of actual map tiles.
+     *
+     * @return The meme mode property
+     */
+    public BooleanProperty memeModeProperty() {
+        return memeModeProperty;
+    }
+    /**
+     * Toggle the meme mode on/off and clear the tile cache.
+     */
+    public void toggleMemeMode() {
+        memeModeProperty.set(!memeModeProperty.get());
+        // Clear tile cache and trigger redraw
+        if (mapCanvas != null) {
+            mapCanvas.clearTileCache();
+            mapCanvas.drawMap();
+        }
+    }
+
 
     /**
      * Calculate the tour on demand (background thread). Requires a loaded city map and deliveries.
@@ -293,29 +298,6 @@ public class AppController {
             }
         }).start();
     }
-
-    /**
-     * Get the meme mode property for the easter egg.
-     * When true, map tiles will load random memes instead of actual map tiles.
-     *
-     * @return The meme mode property
-     */
-    public BooleanProperty memeModeProperty() {
-        return memeModeProperty;
-    }
-
-    /**
-     * Toggle the meme mode on/off and clear the tile cache.
-     */
-    public void toggleMemeMode() {
-        memeModeProperty.set(!memeModeProperty.get());
-        // Clear tile cache and trigger redraw
-        if (mapCanvas != null) {
-            mapCanvas.clearTileCache();
-            mapCanvas.drawMap();
-        }
-    }
-
     public void calculateTourForCourier(Courier courier) {
         if (tourCalculationProgress.get() > 0 && tourCalculationProgress.get() < 1) {
             showError("Cannot calculate tour", "Already running");

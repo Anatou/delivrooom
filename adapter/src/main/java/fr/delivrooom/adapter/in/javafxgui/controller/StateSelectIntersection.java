@@ -5,16 +5,16 @@ import fr.delivrooom.application.model.Intersection;
 import java.net.URL;
 
 /**
- * Map loaded state - a map has been loaded.
- * Allows opening a new map file or loading deliveries.
+ * Select intersection state - map and deliveries have been loaded, the use now wants to select an intersection.
+ * Allows the user to select an intersection on the map canvas.
  */
-public record MapLoadedState(AppController controller) implements State {
+public record StateSelectIntersection(AppController controller) implements State {
 
     @Override
     public void openMapFile(URL url) {
         try {
             controller.loadMapFile(url);
-            controller.setState(new MapLoadedState(controller));
+            controller.setState(new StateMapLoaded(controller));
         } catch (Exception e) {
             controller.showError("Error loading map", e.getMessage());
             e.printStackTrace();
@@ -25,7 +25,7 @@ public record MapLoadedState(AppController controller) implements State {
     public void openDeliveriesFile(URL url) {
         try {
             controller.loadDeliveriesFile(url);
-            controller.setState(new DeliveriesLoadedState(controller));
+            controller.setState(new StateDeliveriesLoaded(controller));
         } catch (Exception e) {
             controller.showError("Error loading deliveries", e.getMessage());
             e.printStackTrace();
@@ -34,23 +34,22 @@ public record MapLoadedState(AppController controller) implements State {
 
     @Override
     public void selectIntersection(Intersection intersection) {
-        controller.showError("Can’t select intersection", "Unable to select intersection for now.");
+        controller.selectIntersection(intersection);
+        controller.setState(new StateDeliveriesLoaded(controller));
     }
 
     @Override
     public void requestIntersectionSelection() {
-        controller.showError("No deliveries loaded", "Please load deliveries first before selecting an intersection.");
+        // Nothing to do here, already in this state.
     }
 
     @Override
     public String getStateName() {
-        return "MapLoadedState";
+        return "SelectIntersectionState";
     }
 
     @Override
     public void requestCalculateTour() {
-        controller.showError("No deliveries loaded", "Please load deliveries first before calculating the tour");
-
-
+        controller.showError("Cannot calculate tour", "Please select an intersection first.");
     }
 }
