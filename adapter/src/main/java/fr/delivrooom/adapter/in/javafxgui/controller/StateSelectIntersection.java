@@ -40,8 +40,7 @@ public record StateSelectIntersection(AppController controller) implements State
 
     @Override
     public void requestIntersectionSelection() {
-        controller.showError("No map loaded",
-                "Please load a map file first before selecting an intersection.");
+        // no-op
     }
 
     @Override

@@ -1,6 +1,5 @@
 package fr.delivrooom.adapter.in.javafxgui.panes;
 
-import fr.delivrooom.adapter.in.javafxgui.controller.AppController;
 import fr.delivrooom.adapter.in.javafxgui.map.MapCanvas;
 import javafx.scene.Scene;
 import javafx.scene.control.SplitPane;
@@ -17,9 +16,6 @@ public class MainPane extends BorderPane {
         MapCanvas canvas = new MapCanvas();
         Sidebar sidebar = new Sidebar();
         toolBar = new AppToolBar();
-
-        // Wire the controller to the UI components
-        AppController.getController().wireComponents(sidebar);
 
         // Set up the layout
         setTop(toolBar);

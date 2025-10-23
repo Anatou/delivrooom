@@ -1,7 +1,6 @@
 package fr.delivrooom.adapter.in.javafxgui.controller;
 
 import fr.delivrooom.adapter.in.javafxgui.JavaFXApp;
-import fr.delivrooom.adapter.in.javafxgui.panes.Sidebar;
 import fr.delivrooom.adapter.in.javafxgui.utils.InvalidableReadOnlyObjectWrapper;
 import fr.delivrooom.adapter.out.XMLCityMapLoader;
 import fr.delivrooom.application.model.*;
@@ -66,9 +65,8 @@ public class AppController {
     private final ReadOnlyListWrapper<Courier> couriers = new ReadOnlyListWrapper<>(FXCollections.observableArrayList());
     // 0 = not running, 0 < x < 1 = running, 1 = done
     private final DoubleProperty tourCalculationProgress = new SimpleDoubleProperty(0);
+    private final InvalidableReadOnlyObjectWrapper<Intersection> selectedIntersection = new InvalidableReadOnlyObjectWrapper<>(null);
     private final BooleanProperty memeModeProperty = new SimpleBooleanProperty(false);
-    // UI components
-    private Sidebar sidebar;
 
     private AppController() {
     }
@@ -84,13 +82,6 @@ public class AppController {
     // PUBLIC API - Request Methods (for UI components)
     // ============================================================================
 
-    /**
-     * Sets the references to the main UI components.
-     * Must be called right after the UI components are initialized.
-     */
-    public void wireComponents(Sidebar sidebar) {
-        this.sidebar = sidebar;
-    }
 
     /**
      * Request to undo the last command.
@@ -380,9 +371,7 @@ public class AppController {
      * @param intersection The intersection to select, or null to clear selection
      */
     protected void doSelectIntersection(Intersection intersection) {
-        if (sidebar != null) {
-            sidebar.getDeliveryCreationSection().selectIntersection(intersection);
-        }
+        selectedIntersection.set(intersection);
     }
 
     /**
@@ -537,6 +526,10 @@ public class AppController {
 
     public ReadOnlyProperty<DeliveriesDemand> deliveriesDemandProperty() {
         return deliveriesDemand.getReadOnlyProperty();
+    }
+
+    public ReadOnlyProperty<Intersection> selectedIntersectionProperty() {
+        return selectedIntersection.getReadOnlyProperty();
     }
 
     public State getState() {

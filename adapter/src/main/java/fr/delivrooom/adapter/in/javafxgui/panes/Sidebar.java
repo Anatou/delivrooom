@@ -75,40 +75,5 @@ public class Sidebar extends VBox {
         return separator;
     }
 
-    /**
-     * Get the delivery creation section.
-     */
-    public DeliveryCreationSection getDeliveryCreationSection() {
-        return deliveryCreationSection;
-    }
-
-    /**
-     * Get the couriers section.
-     */
-    public CouriersSection getCouriersSection() {
-        return couriersSection;
-    }
-
-    /**
-     * Get the deliveries section.
-     */
-    public DeliveriesSection getDeliveriesSection() {
-        return deliveriesSection;
-    }
-
-    /**
-     * Get the test section.
-     */
-    public TestSection getTestSection() {
-        return testSection;
-    }
-
-    /**
-     * Get the bottom section.
-     */
-    public BottomSection getBottomSection() {
-        return bottomSection;
-    }
-
 }
 
