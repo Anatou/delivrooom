@@ -4,8 +4,7 @@ import fr.delivrooom.adapter.in.javafxgui.JavaFXApp;
 import fr.delivrooom.adapter.in.javafxgui.command.CommandManager;
 import fr.delivrooom.adapter.in.javafxgui.map.MapCanvas;
 import fr.delivrooom.adapter.in.javafxgui.panes.Sidebar;
-import fr.delivrooom.adapter.in.javafxgui.panes.sidebar.DeliveryCreationSection;
-import fr.delivrooom.adapter.in.javafxgui.panes.sidebar.TestSection;
+import fr.delivrooom.adapter.in.javafxgui.panes.sidebar.delivery.DeliveryListItem;
 import fr.delivrooom.adapter.out.XMLCityMapLoader;
 import fr.delivrooom.application.model.*;
 import javafx.application.Platform;
@@ -39,6 +38,7 @@ public class AppController {
     private TourSolution tourSolution;
     private ObservableList<Courier> couriers;
     private static AppController instance;
+
     // 0 = not running, 0 < x < 1 = running, 1 = done
     private DoubleProperty tourCalculationProgress = new SimpleDoubleProperty(0);
     // Easter egg: meme mode for map tiles
@@ -87,19 +87,6 @@ public class AppController {
         for (DeliveryListItem item : sidebar.getDeliveriesSection().getDeliveriesList().getDeliveryItems()) {
             item.getActionButtons().updateDisplayedSelectedCourier(updatedDelivery, newCourier);
         }
-    }
-
-    public void setSidebarWaitingFor(String type, DeliveryCreationSection sidebar){
-        this.waitingfor = type;
-        this.waitingSidebar = sidebar;
-    }
-
-    public String getSidebarWaitingFor(){
-        return this.waitingfor;
-    }
-
-    public DeliveryCreationSection getWaitingSidebar(){
-        return this.waitingSidebar;
     }
 
     /**

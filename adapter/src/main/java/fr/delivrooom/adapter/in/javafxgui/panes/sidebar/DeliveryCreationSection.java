@@ -25,6 +25,7 @@ public class DeliveryCreationSection extends VBox {
     private Intersection takeout;
     private Intersection delivery;
     private AppController controller;
+    private boolean requestedIntersectionIsTakeout = true;
 
     public DeliveryCreationSection() {
         super(10);
@@ -70,13 +71,12 @@ public class DeliveryCreationSection extends VBox {
         Button buttonConfirmAddDelivery = new Button("Confirm");
 
         buttonTakeout.setOnAction(e -> {
-            handleTakeoutSelection("add");
-
-
+            requestedIntersectionIsTakeout = true;
+            controller.handleRequestIntersectionSelection();
         });
         buttonDelivery.setOnAction(e -> {
-            handleDeliverySelection("add");
-
+            requestedIntersectionIsTakeout = false;
+            controller.handleRequestIntersectionSelection();
         });
 
 
@@ -84,8 +84,8 @@ public class DeliveryCreationSection extends VBox {
         addTitle.setStyle("-fx-font-weight: bold; -fx-font-size: 14;");
         this.addDeliveryBox = new VBox(8, addTitle, addDeliveryBtn,
                 new Separator(),
-                labelTakeout, buttonTakeout,durationFieldTakeout,
-                labelDelivery, buttonDelivery,durationFieldDelivery,
+                labelTakeout, buttonTakeout, durationFieldTakeout,
+                labelDelivery, buttonDelivery, durationFieldDelivery,
                 buttonConfirmAddDelivery
         );
         addDeliveryBox.setPadding(new Insets(10));
@@ -98,7 +98,6 @@ public class DeliveryCreationSection extends VBox {
             handleConfirmAddDelivery();
             addDeliveryBox.setVisible(false);
             addDeliveryBox.setManaged(false);
-
         });
 
 
@@ -117,21 +116,19 @@ public class DeliveryCreationSection extends VBox {
     }
 
 
-
-
-    private void handleConfirmAddDelivery(){
+    private void handleConfirmAddDelivery() {
         String takeoutDuration = ((TextField) addDeliveryBox.lookup("#durationFieldTakeout")).getText();
-        String deliveryDuration =((TextField) addDeliveryBox.lookup("#durationFieldDelivery")).getText();
+        String deliveryDuration = ((TextField) addDeliveryBox.lookup("#durationFieldDelivery")).getText();
         int tDuration = 0;
         int dDuration = 0;
-        if (takeout!= null && delivery!=null && takeoutDuration!=null && deliveryDuration!=null) {
+        if (takeout != null && delivery != null && takeoutDuration != null && deliveryDuration != null) {
             try {
                 tDuration = Integer.parseInt(takeoutDuration);
                 dDuration = Integer.parseInt(deliveryDuration);
             } catch (NumberFormatException e) {
                 System.out.println("Please enter a valid number!");
             }
-            Delivery addedDelivery = new Delivery(this.takeout, this.delivery, tDuration , dDuration);
+            Delivery addedDelivery = new Delivery(this.takeout, this.delivery, tDuration, dDuration);
             AddDeliveryCommand addDeliveryCommand = new AddDeliveryCommand(controller, addedDelivery);
             controller.getCommandManager().executeCommand(addDeliveryCommand);
             /*controller.getSidebar().getDeliveriesSection().refreshDeliveries();
@@ -141,44 +138,13 @@ public class DeliveryCreationSection extends VBox {
             ((TextField) addDeliveryBox.lookup("#durationFieldDelivery")).clear();
 
 
-        }else{
+        } else {
             System.out.println("Fill all the...");
         }
 
     }
 
-    private void handleTakeoutSelection(String mode){
-
-        if ( mode == "add") {
-            controller.handleRequestIntersectionSelection();
-            controller.setSidebarWaitingFor("addTakeout", this);
-
-            //takeoutId = controller.getMapCanvas().updateAddLayer();
-        }else{
-            controller.handleRequestIntersectionSelection();
-            controller.setSidebarWaitingFor("removeTakeout", this);
-            //takeoutId = controller.getMapCanvas().updateRemoveLayer();
-        }
-    }
-
-    private void handleDeliverySelection(String mode){
-        if ( mode == "add") {
-            controller.handleRequestIntersectionSelection();
-            controller.setSidebarWaitingFor("addDelivery", this);
-            //deliveryId = controller.getMapCanvas().updateAddLayer();
-        }else{
-            controller.handleRequestIntersectionSelection();
-            controller.setSidebarWaitingFor("removeDelivery", this);
-            //deliveryId = controller.getMapCanvas().updateRemoveLayer();
-        }
-
-
-    }
-
-
     private void handleAddTestDelivery() {
-        AppController controller = AppController.getController();
-
         this.addDeliveryBox.setVisible(true);
         this.addDeliveryBox.setManaged(true);
         takeout = null;
@@ -188,8 +154,6 @@ public class DeliveryCreationSection extends VBox {
         labelDelivery.setText("Selected Delivery Intersection: ");
         Label labelTakeout = (Label) addDeliveryBox.lookup("#labelTakeout");
         labelTakeout.setText("Selected TakeOut Intersection: ");
-
-
     }
 
     /**
@@ -201,29 +165,22 @@ public class DeliveryCreationSection extends VBox {
     public void selectIntersection(Intersection intersection) {
         if (intersection == null) {
             selectedIntersectionLabel.setText("No intersection selected");
-            //selectedIntersectionLabel.setText("No intersection selected");
         } else {
-            selectedIntersectionLabel.setText("Selected Intersection ID : "+intersection.getId());
+            selectedIntersectionLabel.setText("Selected Intersection ID : " + intersection.getId());
 
-
-            if (controller.getSidebarWaitingFor().equals("addTakeout")){
+            if (requestedIntersectionIsTakeout) {
                 addDeliveryBox.setVisible(true);
                 addDeliveryBox.setManaged(true);
                 this.takeout = intersection;
                 Label labelTakeout = (Label) addDeliveryBox.lookup("#labelTakeout");
-                labelTakeout.setText("Selected Takeout Intersection: "+ this.takeout.getId());
-            } else if (controller.getSidebarWaitingFor().equals("addDelivery")) {
+                labelTakeout.setText("Selected Takeout Intersection: " + this.takeout.getId());
+            } else {
                 addDeliveryBox.setVisible(true);
                 addDeliveryBox.setManaged(true);
                 this.delivery = intersection;
                 Label labelDelivery = (Label) addDeliveryBox.lookup("#labelDelivery");
-                labelDelivery.setText("Selected Delivery Intersection: "+ this.delivery.getId());
+                labelDelivery.setText("Selected Delivery Intersection: " + this.delivery.getId());
             }
-            //selectedIntersectionLabel.setText("Selected: ID " + intersection.getId());
-
-
-            // Reset waiting state
-            controller.setSidebarWaitingFor(null, null);
         }
     }
 
