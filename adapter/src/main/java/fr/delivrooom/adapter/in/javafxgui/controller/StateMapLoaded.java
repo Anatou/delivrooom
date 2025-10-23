@@ -1,5 +1,7 @@
 package fr.delivrooom.adapter.in.javafxgui.controller;
 
+import fr.delivrooom.application.model.Courier;
+import fr.delivrooom.application.model.Delivery;
 import fr.delivrooom.application.model.Intersection;
 
 import java.net.URL;
@@ -11,46 +13,69 @@ import java.net.URL;
 public record StateMapLoaded(AppController controller) implements State {
 
     @Override
-    public void openMapFile(URL url) {
-        try {
-            controller.loadMapFile(url);
-            controller.setState(new StateMapLoaded(controller));
-        } catch (Exception e) {
-            controller.showError("Error loading map", e.getMessage());
-            e.printStackTrace();
-        }
+    public CommandResult createOpenMapCommand(URL url) {
+        return CommandResult.success(new CommandLoadMap(controller, url, this));
     }
 
     @Override
-    public void openDeliveriesFile(URL url) {
-        try {
-            controller.loadDeliveriesFile(url);
-            controller.setState(new StateDeliveriesLoaded(controller));
-        } catch (Exception e) {
-            controller.showError("Error loading deliveries", e.getMessage());
-            e.printStackTrace();
-        }
+    public CommandResult createOpenDeliveriesCommand(URL url) {
+        return CommandResult.success(new CommandLoadDeliveries(controller, url, this));
     }
 
     @Override
-    public void selectIntersection(Intersection intersection) {
-        controller.showError("Can’t select intersection", "Unable to select intersection for now.");
+    public CommandResult createAddDeliveryCommand(Delivery delivery) {
+        return CommandResult.error("No deliveries loaded",
+                "Please load deliveries first before adding a delivery.");
     }
 
     @Override
-    public void requestIntersectionSelection() {
-        controller.showError("No deliveries loaded", "Please load deliveries first before selecting an intersection.");
+    public CommandResult createRemoveDeliveryCommand(Delivery delivery) {
+        return CommandResult.error("No deliveries loaded",
+                "Please load deliveries first before removing a delivery.");
+    }
+
+    @Override
+    public CommandResult createSelectIntersectionCommand(Intersection intersection) {
+        return CommandResult.error("No deliveries loaded",
+                "Please load deliveries first before selecting an intersection.");
+    }
+
+    @Override
+    public CommandResult createRequestIntersectionSelectionCommand() {
+        return CommandResult.error("No deliveries loaded",
+                "Please load deliveries first before selecting an intersection.");
+    }
+
+    @Override
+    public CommandResult createCalculateTourCommand() {
+        return CommandResult.error("No deliveries loaded",
+                "Please load deliveries first before calculating the tour.");
+    }
+
+    @Override
+    public CommandResult createCalculateCourierTourCommand(Courier courier) {
+        return CommandResult.error("No deliveries loaded",
+                "Please load deliveries first before calculating a courier tour.");
+    }
+
+    @Override
+    public CommandResult createAddCourierCommand(Courier courier) {
+        return CommandResult.success(new CommandAddCourier(controller, courier));
+    }
+
+    @Override
+    public CommandResult createRemoveCourierCommand(Courier courier) {
+        return CommandResult.success(new CommandRemoveCourier(controller, courier));
+    }
+
+    @Override
+    public CommandResult createAssignCourierCommand(Delivery delivery, Courier courier) {
+        return CommandResult.error("No deliveries loaded",
+                "Please load deliveries first before assigning couriers.");
     }
 
     @Override
     public String getStateName() {
         return "MapLoadedState";
-    }
-
-    @Override
-    public void requestCalculateTour() {
-        controller.showError("No deliveries loaded", "Please load deliveries first before calculating the tour");
-
-
     }
 }

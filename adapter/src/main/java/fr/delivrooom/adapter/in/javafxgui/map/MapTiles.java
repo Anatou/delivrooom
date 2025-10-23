@@ -72,6 +72,10 @@ public class MapTiles extends Canvas {
         System.out.println("Tile cache cleared");
     }
 
+    public void clear() {
+        getGraphicsContext2D().clearRect(0, 0, getWidth(), getHeight());
+    }
+
 
     /**
      * Get the tile unique identifier (key) used in the cache

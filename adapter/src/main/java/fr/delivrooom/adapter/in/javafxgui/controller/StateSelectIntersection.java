@@ -1,55 +1,75 @@
 package fr.delivrooom.adapter.in.javafxgui.controller;
 
+import fr.delivrooom.application.model.Courier;
+import fr.delivrooom.application.model.Delivery;
 import fr.delivrooom.application.model.Intersection;
 
 import java.net.URL;
 
 /**
- * Select intersection state - map and deliveries have been loaded, the use now wants to select an intersection.
- * Allows the user to select an intersection on the map canvas.
+ * Select intersection state - user is in intersection selection mode.
+ * Allows selecting an intersection and returns to DeliveriesLoaded state after selection.
  */
 public record StateSelectIntersection(AppController controller) implements State {
 
     @Override
-    public void openMapFile(URL url) {
-        try {
-            controller.loadMapFile(url);
-            controller.setState(new StateMapLoaded(controller));
-        } catch (Exception e) {
-            controller.showError("Error loading map", e.getMessage());
-            e.printStackTrace();
-        }
+    public CommandResult createOpenMapCommand(URL url) {
+        return CommandResult.success(new CommandLoadMap(controller, url, this));
     }
 
     @Override
-    public void openDeliveriesFile(URL url) {
-        try {
-            controller.loadDeliveriesFile(url);
-            controller.setState(new StateDeliveriesLoaded(controller));
-        } catch (Exception e) {
-            controller.showError("Error loading deliveries", e.getMessage());
-            e.printStackTrace();
-        }
+    public CommandResult createOpenDeliveriesCommand(URL url) {
+        return CommandResult.success(new CommandLoadDeliveries(controller, url, this));
     }
 
     @Override
-    public void selectIntersection(Intersection intersection) {
-        controller.selectIntersection(intersection);
-        controller.setState(new StateDeliveriesLoaded(controller));
+    public CommandResult createAddDeliveryCommand(Delivery delivery) {
+        return CommandResult.success(new CommandAddDelivery(controller, delivery));
     }
 
     @Override
-    public void requestIntersectionSelection() {
-        // Nothing to do here, already in this state.
+    public CommandResult createRemoveDeliveryCommand(Delivery delivery) {
+        return CommandResult.success(new CommandRemoveDelivery(controller, delivery));
+    }
+
+    @Override
+    public CommandResult createSelectIntersectionCommand(Intersection intersection) {
+        return CommandResult.error("Not implemented yet", "Please wait for next release.");
+    }
+
+    @Override
+    public CommandResult createRequestIntersectionSelectionCommand() {
+        return CommandResult.error("Already in selection mode",
+                "You are already in intersection selection mode. Click on the map to select an intersection.");
+    }
+
+    @Override
+    public CommandResult createCalculateTourCommand() {
+        return CommandResult.success(new CommandCalculateTour(controller));
+    }
+
+    @Override
+    public CommandResult createCalculateCourierTourCommand(Courier courier) {
+        return CommandResult.success(new CommandCalculateCourierTour(controller, courier));
+    }
+
+    @Override
+    public CommandResult createAssignCourierCommand(Delivery delivery, Courier courier) {
+        return CommandResult.success(new CommandAssignCourier(controller, delivery, courier));
+    }
+
+    @Override
+    public CommandResult createAddCourierCommand(Courier courier) {
+        return CommandResult.success(new CommandAddCourier(controller, courier));
+    }
+
+    @Override
+    public CommandResult createRemoveCourierCommand(Courier courier) {
+        return CommandResult.success(new CommandRemoveCourier(controller, courier));
     }
 
     @Override
     public String getStateName() {
         return "SelectIntersectionState";
-    }
-
-    @Override
-    public void requestCalculateTour() {
-        controller.showError("Cannot calculate tour", "Please select an intersection first.");
     }
 }

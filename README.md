@@ -23,6 +23,75 @@ cd config
 ../mvnw javafx:run
 ```
 
+## GUI Architecture: State-Driven Command Factory Pattern
+
+The application uses a sophisticated combination of **State Pattern** and **Command Pattern** to manage user interactions and application state
+transitions.
+
+### Architecture Flow
+
+```
+┌─────────────┐
+│UI Components│
+└──────┬──────┘
+       │ 1. User Action
+       ▼
+┌─────────────────┐
+│  AppController  │
+│  requestX()     │
+└──────┬──────────┘
+       │ 2. Ask State
+       ▼
+┌─────────────────┐
+│  Current State  │
+│  (Factory)      │
+└──────┬──────────┘
+       │ 3. Create Command
+       ▼
+┌─────────────────┐
+│    Command      │
+└──────┬──────────┘
+       │ 4. Execute via Manager
+       ▼
+┌─────────────────┐
+│ CommandManager  │
+│ (Undo/Redo)     │
+└──────┬──────────┘
+       │ 5. Execute
+       ▼
+┌─────────────────┐
+│    Command      │
+│  execute()      │
+└──────┬──────────┘
+       │ 6. Modify Data
+       ▼
+┌─────────────────┐
+│  AppController  │
+│  doX()          │
+└──────┬──────────┘
+       │ 7. May Trigger
+       ▼
+┌─────────────────┐
+│State Transition │
+└─────────────────┘
+```
+
+### Key Principles
+
+1. **States as Command Factories**: States don't execute operations; they create commands that encapsulate operations
+2. **Controller as Gateway**: Only 3 public methods: `requestCommand()`, `undoCommand()`, `redoCommand()`
+3. **Commands Encapsulate Logic**: All business operations are wrapped in undoable commands
+4. **Clear Method Naming**:
+    - `requestX()` - Public methods for UI to request operations
+    - `doX()` - Protected methods for commands to modify data
+
+### Benefits
+
+- ✅ **Full Undo/Redo Support**: All operations are undoable, including state transitions
+- ✅ **Strong Encapsulation**: Controller has minimal public API
+- ✅ **State Validation**: States control which operations are allowed
+- ✅ **Testability**: Clear separation of concerns
+- ✅ **Maintainability**: Easy to add new commands and states
 
 ## Implementations delivered (so far)
 

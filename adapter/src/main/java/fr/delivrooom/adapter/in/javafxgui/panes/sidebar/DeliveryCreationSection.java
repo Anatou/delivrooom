@@ -1,7 +1,6 @@
 package fr.delivrooom.adapter.in.javafxgui.panes.sidebar;
 
 import fr.delivrooom.adapter.in.javafxgui.controller.AppController;
-import fr.delivrooom.adapter.in.javafxgui.controller.CommandAddDelivery;
 import fr.delivrooom.application.model.Delivery;
 import fr.delivrooom.application.model.Intersection;
 import javafx.geometry.Insets;
@@ -20,7 +19,6 @@ import org.kordamp.ikonli.javafx.FontIcon;
  */
 public class DeliveryCreationSection extends VBox {
 
-    private final Label selectedIntersectionLabel;
     private final VBox addDeliveryBox;
     private Intersection takeout;
     private Intersection delivery;
@@ -72,11 +70,11 @@ public class DeliveryCreationSection extends VBox {
 
         buttonTakeout.setOnAction(e -> {
             requestedIntersectionIsTakeout = true;
-            controller.handleRequestIntersectionSelection();
+            controller.requestIntersectionSelection();
         });
         buttonDelivery.setOnAction(e -> {
             requestedIntersectionIsTakeout = false;
-            controller.handleRequestIntersectionSelection();
+            controller.requestIntersectionSelection();
         });
 
 
@@ -100,19 +98,7 @@ public class DeliveryCreationSection extends VBox {
             addDeliveryBox.setManaged(false);
         });
 
-
-        // Select intersection button
-        Button selectIntersectionBtn = new Button("Select Intersection");
-        selectIntersectionBtn.setGraphic(new FontIcon(FontAwesomeSolid.LOCATION_ARROW));
-        selectIntersectionBtn.setMaxWidth(Double.MAX_VALUE);
-        selectIntersectionBtn.setOnAction(e -> controller.handleRequestIntersectionSelection());
-
-        // Selected intersection label
-        selectedIntersectionLabel = new Label("No intersection selected");
-        selectedIntersectionLabel.getStyleClass().add("text-muted");
-        selectedIntersectionLabel.setWrapText(true);
-
-        getChildren().addAll(titleLabel, addDeliveryBtn, addDeliveryBox, selectIntersectionBtn, selectedIntersectionLabel);
+        getChildren().addAll(titleLabel, addDeliveryBtn, addDeliveryBox);
     }
 
 
@@ -129,15 +115,10 @@ public class DeliveryCreationSection extends VBox {
                 System.out.println("Please enter a valid number!");
             }
             Delivery addedDelivery = new Delivery(this.takeout, this.delivery, tDuration, dDuration);
-            CommandAddDelivery addDeliveryCommand = new CommandAddDelivery(controller, addedDelivery);
-            controller.getCommandManager().executeCommand(addDeliveryCommand);
-            /*controller.getSidebar().getDeliveriesSection().refreshDeliveries();
-            controller.updateMapCanvas();*/
+            controller.requestAddDelivery(addedDelivery);
 
             ((TextField) addDeliveryBox.lookup("#durationFieldTakeout")).clear();
             ((TextField) addDeliveryBox.lookup("#durationFieldDelivery")).clear();
-
-
         } else {
             System.out.println("Fill all the...");
         }
@@ -163,11 +144,7 @@ public class DeliveryCreationSection extends VBox {
      * @param intersection The selected intersection, or null if selection was aborted
      */
     public void selectIntersection(Intersection intersection) {
-        if (intersection == null) {
-            selectedIntersectionLabel.setText("No intersection selected");
-        } else {
-            selectedIntersectionLabel.setText("Selected Intersection ID : " + intersection.getId());
-
+        if (intersection != null) {
             if (requestedIntersectionIsTakeout) {
                 addDeliveryBox.setVisible(true);
                 addDeliveryBox.setManaged(true);

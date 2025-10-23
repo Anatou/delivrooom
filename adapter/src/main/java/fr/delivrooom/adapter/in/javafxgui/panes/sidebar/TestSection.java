@@ -1,3 +1,4 @@
+
 package fr.delivrooom.adapter.in.javafxgui.panes.sidebar;
 
 import fr.delivrooom.adapter.in.javafxgui.JavaFXApp;

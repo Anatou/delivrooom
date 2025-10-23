@@ -53,10 +53,10 @@ public class AppToolBar extends ToolBar {
 
 
         Button undoBtn = new Button("", new FontIcon(FontAwesomeSolid.UNDO));
-        undoBtn.setOnAction(e -> controller.getCommandManager().undo());
+        undoBtn.setOnAction(e -> controller.undoCommand());
 
         Button redoBtn = new Button("", new FontIcon(FontAwesomeSolid.REDO));
-        redoBtn.setOnAction(e -> controller.getCommandManager().redo());
+        redoBtn.setOnAction(e -> controller.redoCommand());
 
         themeToggle = new ToggleSwitch("");
         themeToggle.setGraphic(new FontIcon(FontAwesomeSolid.MOON));
@@ -96,7 +96,7 @@ public class AppToolBar extends ToolBar {
         );
         File file = fileChooser.showOpenDialog(stage);
         if (file != null) {
-            AppController.getController().handleOpenMapFile(file);
+            AppController.getController().requestOpenMapFile(file);
         }
     }
 
@@ -108,12 +108,12 @@ public class AppToolBar extends ToolBar {
         );
         File file = fileChooser.showOpenDialog(stage);
         if (file != null) {
-            AppController.getController().handleOpenDeliveriesFile(file);
+            AppController.getController().requestOpenDeliveriesFile(file);
         }
     }
 
     private void handleLoadDefault(AppController.DefaultMapFilesType type) {
-        AppController.getController().handleLoadDefaultFiles(type);
+        AppController.getController().requestLoadDefaultFiles(type);
     }
 
     private void handleThemeSwitch() {

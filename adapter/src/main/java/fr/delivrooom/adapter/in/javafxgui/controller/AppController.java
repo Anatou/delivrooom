@@ -1,9 +1,9 @@
 package fr.delivrooom.adapter.in.javafxgui.controller;
 
 import fr.delivrooom.adapter.in.javafxgui.JavaFXApp;
-import fr.delivrooom.adapter.in.javafxgui.map.MapCanvas;
 import fr.delivrooom.adapter.in.javafxgui.panes.Sidebar;
 import fr.delivrooom.adapter.in.javafxgui.panes.sidebar.delivery.DeliveryListItem;
+import fr.delivrooom.adapter.in.javafxgui.utils.InvalidableReadOnlyObjectWrapper;
 import fr.delivrooom.adapter.out.XMLCityMapLoader;
 import fr.delivrooom.application.model.*;
 import javafx.application.Platform;
@@ -16,10 +16,41 @@ import javafx.scene.control.Alert;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * Main application controller implementing the State and Singleton design pattern.
- * Manages the application state and coordinates between UI components.
+ * Main application controller implementing the State-Driven Command Factory pattern.
+ *
+ * <p><b>Architecture Pattern: State-Driven Command Factory</b></p>
+ * <pre>
+ * UI Component → Controller.requestX() → State.createXCommand() → CommandResult
+ *                                                                     ↓
+ *                Controller.doX() ← Command.execute() ← CommandManager
+ * </pre>
+ *
+ * <p><b>Public API (for UI components):</b></p>
+ * <ul>
+ *   <li>{@code requestX()} - Request operations (creates command via state)</li>
+ *   <li>{@code undoCommand()} - Undo the last command</li>
+ *   <li>{@code redoCommand()} - Redo the last undone command</li>
+ * </ul>
+ *
+ * <p><b>Protected API (for commands):</b></p>
+ * <ul>
+ *   <li>{@code doX()} - Perform actual data modifications</li>
+ * </ul>
+ *
+ * <p><b>Package-private API (for states/commands):</b></p>
+ * <ul>
+ *   <li>{@code transitionToState(State)} - Change application state</li>
+ * </ul>
+ *
+ * @see State
+ * @see Command
+ * @see CommandManager
+ * @see CommandResult
  */
 public class AppController {
 
@@ -27,26 +58,20 @@ public class AppController {
     private static AppController instance;
 
     // State management
-    private final CommandManager commandManager;
-    private SimpleObjectProperty<State> currentState;
-
-    // UI components
-    private MapCanvas mapCanvas;
-    private Sidebar sidebar;
-
+    private final CommandManager commandManager = new CommandManager();
+    private final InvalidableReadOnlyObjectWrapper<State> currentState = new InvalidableReadOnlyObjectWrapper<>(new StateInitial(this));
     // Loaded data
-    private CityMap cityMap;
-    private DeliveriesDemand deliveriesDemand;
-    private TourSolution tourSolution;
-    private final ObservableList<Courier> couriers = FXCollections.observableArrayList();
-
+    private final InvalidableReadOnlyObjectWrapper<CityMap> cityMap = new InvalidableReadOnlyObjectWrapper<>(null);
+    private final InvalidableReadOnlyObjectWrapper<DeliveriesDemand> deliveriesDemand = new InvalidableReadOnlyObjectWrapper<>(null);
+    private final InvalidableReadOnlyObjectWrapper<TourSolution> tourSolution = new InvalidableReadOnlyObjectWrapper<>(null);
+    private final ReadOnlyListWrapper<Courier> couriers = new ReadOnlyListWrapper<>(FXCollections.observableArrayList());
     // 0 = not running, 0 < x < 1 = running, 1 = done
     private final DoubleProperty tourCalculationProgress = new SimpleDoubleProperty(0);
     private final BooleanProperty memeModeProperty = new SimpleBooleanProperty(false);
+    // UI components
+    private Sidebar sidebar;
 
     private AppController() {
-        this.currentState = new SimpleObjectProperty<>(new StateInitial(this));
-        this.commandManager = new CommandManager();
     }
 
     public static AppController getController() {
@@ -56,23 +81,41 @@ public class AppController {
         return instance;
     }
 
+    // ============================================================================
+    // PUBLIC API - Request Methods (for UI components)
+    // ============================================================================
+
     /**
      * Sets the references to the main UI components.
      * Must be called right after the UI components are initialized.
      */
-    public void wireComponents(MapCanvas mapCanvas, Sidebar sidebar) {
-        this.mapCanvas = mapCanvas;
+    public void wireComponents(Sidebar sidebar) {
         this.sidebar = sidebar;
     }
 
     /**
-     * Handle opening a map file through the current state.
+     * Request to undo the last command.
+     */
+    public void undoCommand() {
+        commandManager.undo();
+    }
+
+    /**
+     * Request to redo the last undone command.
+     */
+    public void redoCommand() {
+        commandManager.redo();
+    }
+
+    /**
+     * Request to open a map file.
      *
      * @param file The map file to open
      */
-    protected void handleOpenMapFile(File file) {
+    public void requestOpenMapFile(File file) {
         try {
-            getState().openMapFile(file.toURI().toURL());
+            CommandResult result = getState().createOpenMapCommand(file.toURI().toURL());
+            requestCommand(result);
         } catch (MalformedURLException e) {
             showError("Invalid file URL", e.getMessage());
             e.printStackTrace();
@@ -80,166 +123,434 @@ public class AppController {
     }
 
     /**
-     * Handle opening a delivery file through the current state.
+     * Request to open a deliveries file.
      *
      * @param file The deliveries file to open
      */
-    protected void handleOpenDeliveriesFile(File file) {
+    public void requestOpenDeliveriesFile(File file) {
         try {
-            getState().openDeliveriesFile(file.toURI().toURL());
+            CommandResult result = getState().createOpenDeliveriesCommand(file.toURI().toURL());
+            requestCommand(result);
         } catch (MalformedURLException e) {
             showError("Invalid file URL", e.getMessage());
             e.printStackTrace();
         }
     }
 
-    public void handleLoadDefaultFiles(DefaultMapFilesType type) {
+    /**
+     * Request to load default map and deliveries files.
+     *
+     * @param type The type of default files to load
+     */
+    public void requestLoadDefaultFiles(DefaultMapFilesType type) {
         URL cityMapURL = XMLCityMapLoader.class.getResource("/xml/" + type.map + ".xml");
         URL deliveriesURL = XMLCityMapLoader.class.getResource("/xml/" + type.deliveries + ".xml");
-        getState().openMapFile(cityMapURL);
-        getState().openDeliveriesFile(deliveriesURL);
+
+        CommandResult mapResult = getState().createOpenMapCommand(cityMapURL);
+        requestCommand(mapResult);
+
+        CommandResult deliveriesResult = getState().createOpenDeliveriesCommand(deliveriesURL);
+        requestCommand(deliveriesResult);
     }
 
     /**
-     * Handle a change in the courier assignment of a delivery through the current state.
+     * Request to add a delivery.
      *
-     * @param updatedDelivery The delivery whose assignment has changed
-     * @param newCourier      The new assigned courier
+     * @param delivery The delivery to add
      */
-    protected void handleCourierAssignmentChange(Delivery updatedDelivery, Courier newCourier) {
-        for (DeliveryListItem item : sidebar.getDeliveriesSection().getDeliveriesList().getDeliveryItems()) {
-            item.getActionButtons().updateDisplayedSelectedCourier(updatedDelivery, newCourier);
-        }
+    public void requestAddDelivery(Delivery delivery) {
+        CommandResult result = getState().createAddDeliveryCommand(delivery);
+        requestCommand(result);
     }
 
     /**
-     * Handle selecting an intersection through the current state.
+     * Request to remove a delivery.
      *
-     * @param intersection The intersection to select, set as null if no intersection is selected
+     * @param delivery The delivery to remove
      */
-    public void handleSelectIntersection(Intersection intersection) {
-        getState().selectIntersection(intersection);
+    public void requestRemoveDelivery(Delivery delivery) {
+        CommandResult result = getState().createRemoveDeliveryCommand(delivery);
+        requestCommand(result);
     }
 
     /**
-     * Request to switch to intersection selection mode.
+     * Request to select an intersection.
+     *
+     * @param intersection The intersection to select
      */
-    public void handleRequestIntersectionSelection() {
-        getState().requestIntersectionSelection();
+    public void requestSelectIntersection(Intersection intersection) {
+        CommandResult result = getState().createSelectIntersectionCommand(intersection);
+        requestCommand(result);
     }
 
+    /**
+     * Request to enter intersection selection mode.
+     */
+    public void requestIntersectionSelection() {
+        CommandResult result = getState().createRequestIntersectionSelectionCommand();
+        requestCommand(result);
+    }
+
+    /**
+     * Request to calculate the tour for all deliveries.
+     */
+    public void requestCalculateTour() {
+        CommandResult result = getState().createCalculateTourCommand();
+        requestCommand(result);
+    }
+
+    /**
+     * Request to calculate the tour for a specific courier.
+     *
+     * @param courier The courier to calculate the tour for
+     */
+    public void requestCalculateCourierTour(Courier courier) {
+        CommandResult result = getState().createCalculateCourierTourCommand(courier);
+        requestCommand(result);
+    }
+
+    /**
+     * Request to assign a courier to a delivery.
+     *
+     * @param delivery The delivery to assign
+     * @param courier  The courier to assign
+     */
+    public void requestAssignCourier(Delivery delivery, Courier courier) {
+        CommandResult result = getState().createAssignCourierCommand(delivery, courier);
+        requestCommand(result);
+    }
+
+    /**
+     * Request to add a courier to the system.
+     *
+     * @param courier The courier to add
+     */
+    public void requestAddCourier(Courier courier) {
+        CommandResult result = getState().createAddCourierCommand(courier);
+        requestCommand(result);
+    }
+
+
+    // ============================================================================
+    // PROTECTED API - Do Methods (for commands to modify data)
+    // ============================================================================
+
+    /**
+     * Request to remove a courier from the system.
+     *
+     * @param courier The courier to remove
+     */
+    public void requestRemoveCourier(Courier courier) {
+        CommandResult result = getState().createRemoveCourierCommand(courier);
+        requestCommand(result);
+    }
 
     /**
      * Load a map file using the application service.
-     * Called by state implementations.
+     * Called by commands.
      *
      * @param url The map url to load
      */
-    protected void loadMapFile(URL url) throws Exception {
-        this.cityMap = JavaFXApp.guiUseCase().getCityMap(url);
-        JavaFXApp.getCalculateTourUseCase().provideCityMap(cityMap);
-        tourSolution = null;
-        // now needs to delete every delivery demand of every courier
+    protected void doLoadMapFile(URL url) throws Exception {
+        this.cityMap.set(JavaFXApp.guiUseCase().getCityMap(url));
+        this.tourSolution.set(null);
         deleteDeliveryDemandOfCourier();
-        updateMapCanvas();
     }
 
     /**
-     * Load a delivery file using the application service.
-     * Called by state implementations.
+     * Restore a previous city map state.
+     * Called by commands during undo.
+     *
+     * @param cityMap The city map to restore
+     */
+    protected void doRestoreCityMap(CityMap cityMap) {
+        this.cityMap.set(cityMap);
+    }
+
+    /**
+     * Load a deliveries file using the application service.
+     * Called by commands.
      *
      * @param url The deliveries file to load
      */
-    protected void loadDeliveriesFile(URL url) throws Exception {
-        this.deliveriesDemand = JavaFXApp.guiUseCase().getDeliveriesDemand(cityMap, url);
-        tourSolution = null;
+    protected void doLoadDeliveriesFile(URL url) throws Exception {
+        this.deliveriesDemand.set(JavaFXApp.guiUseCase().getDeliveriesDemand(cityMap.get(), url));
+        this.tourSolution.set(null);
         deleteDeliveryDemandOfCourier();
-        updateMapCanvas();
     }
 
     /**
-     * Update the MapCanvas with current data.
+     * Restore a previous deliveries demand state.
+     * Called by commands during undo.
+     *
+     * @param deliveriesDemand The deliveries demand to restore
      */
-    public void updateMapCanvas() {
-        if (mapCanvas != null) {
-            mapCanvas.setAutoFraming(true);
-            mapCanvas.drawMap();
+    protected void doRestoreDeliveriesDemand(DeliveriesDemand deliveriesDemand) {
+        this.deliveriesDemand.set(deliveriesDemand);
+    }
+
+    /**
+     * Capture the current courier deliveries state for undo purposes.
+     * Called by commands before modifying courier assignments.
+     *
+     * @return A map of couriers to their current deliveries demands
+     */
+    protected Map<Courier, DeliveriesDemand> doCaptureCourierDeliveries() {
+        Map<Courier, DeliveriesDemand> snapshot = new HashMap<>();
+        for (Courier courier : couriers) {
+            if (courier.getDeliveriesDemand() != null) {
+                // Create a deep copy of the deliveries demand
+                DeliveriesDemand copy = new DeliveriesDemand(
+                        new ArrayList<>(courier.getDeliveriesDemand().deliveries()),
+                        courier.getDeliveriesDemand().store()
+                );
+                snapshot.put(courier, copy);
+            }
+        }
+        return snapshot;
+    }
+
+    /**
+     * Restore courier deliveries state from a snapshot.
+     * Called by commands during undo.
+     *
+     * @param snapshot The snapshot to restore
+     */
+    protected void doRestoreCourierDeliveries(Map<Courier, DeliveriesDemand> snapshot) {
+        if (snapshot == null) return;
+
+        for (Courier courier : couriers) {
+            DeliveriesDemand restoredDemand = snapshot.get(courier);
+            if (restoredDemand != null) {
+                courier.setDeliveriesDemand(restoredDemand);
+            } else {
+                courier.setDeliveriesDemand(null);
+            }
+        }
+        deliveriesDemand.invalidate();
+    }
+
+    /**
+     * Add a delivery to the deliveries demand.
+     * Called by commands.
+     *
+     * @param delivery The delivery to add
+     */
+    protected void doAddDelivery(Delivery delivery) {
+        System.out.println("Adding delivery from intersection " + delivery.takeoutIntersection().getId()
+                + " to intersection " + delivery.deliveryIntersection().getId());
+        deliveriesDemand.get().deliveries().add(delivery);
+        deliveriesDemand.invalidate();
+    }
+
+    /**
+     * Remove a delivery from the deliveries demand.
+     * Called by commands.
+     *
+     * @param delivery The delivery to remove
+     */
+    protected void doRemoveDelivery(Delivery delivery) {
+        System.out.println("Removing delivery from intersection " + delivery.takeoutIntersection().getId()
+                + " to intersection " + delivery.deliveryIntersection().getId());
+        deliveriesDemand.get().deliveries().remove(delivery);
+        deliveriesDemand.invalidate();
+    }
+
+    /**
+     * Add a courier to the system.
+     * Called by commands.
+     *
+     * @param courier The courier to add
+     */
+    protected void doAddCourier(Courier courier) {
+        couriers.add(courier);
+    }
+
+    /**
+     * Remove a courier from the system.
+     * Called by commands.
+     *
+     * @param courier The courier to remove
+     */
+    protected void doRemoveCourier(Courier courier) {
+        couriers.remove(courier);
+    }
+
+    /**
+     * Select an intersection and update the UI.
+     * Called by commands.
+     *
+     * @param intersection The intersection to select, or null to clear selection
+     */
+    protected void doSelectIntersection(Intersection intersection) {
+        if (sidebar != null) {
+            sidebar.getDeliveryCreationSection().selectIntersection(intersection);
         }
     }
 
-    public void deleteDeliveryDemandOfCourier() {
-        for (Courier courier : couriers) {
-            if (courier.getDeliveriesDemand() != null) {
-                courier.getDeliveriesDemand().deliveries().clear();
+    /**
+     * Calculate the optimal tour for all deliveries.
+     * Called by commands.
+     */
+    protected void doCalculateTour() {
+        if (tourCalculationProgress.get() > 0 && tourCalculationProgress.get() < 1) {
+            showError("Cannot calculate tour", "Already running");
+            return;
+        }
+
+        new Thread(() -> {
+            try {
+                this.tourCalculationProgress.set(0.0001);
+                JavaFXApp.getCalculateTourUseCase().provideCityMap(cityMap.get());
+                if (JavaFXApp.getCalculateTourUseCase().doesCalculatedTourNeedsToBeChanged(deliveriesDemand.get())) {
+                    JavaFXApp.getCalculateTourUseCase().findOptimalTour(deliveriesDemand.get(), false);
+                }
+                TourSolution solution = JavaFXApp.getCalculateTourUseCase().getOptimalTour();
+                Platform.runLater(() -> {
+                    this.tourCalculationProgress.set(1);
+                    this.tourSolution.set(solution);
+                });
+            } catch (Exception e) {
+                Platform.runLater(() -> showError("Error while calculating tour",
+                        e.getMessage() == null ? e.toString() : e.getMessage()));
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
+    /**
+     * Calculate the optimal tour for a specific courier.
+     * Called by commands.
+     *
+     * @param courier The courier to calculate the tour for
+     */
+    protected void doCalculateTourForCourier(Courier courier) {
+        if (tourCalculationProgress.get() > 0 && tourCalculationProgress.get() < 1) {
+            showError("Cannot calculate tour", "Already running");
+            return;
+        }
+
+        if (courier.getDeliveriesDemand() == null || courier.getDeliveriesDemand().deliveries().isEmpty()) {
+            showError("Cannot calculate tour", "Courier has no deliveries assigned");
+            return;
+        }
+
+        new Thread(() -> {
+            try {
+                this.tourCalculationProgress.set(0.0001);
+                JavaFXApp.getCalculateTourUseCase().provideCityMap(cityMap.get());
+                if (JavaFXApp.getCalculateTourUseCase().doesCalculatedTourNeedsToBeChanged(courier.getDeliveriesDemand())) {
+                    System.out.println("Tour needs to be recalculated for courier " + courier.getId());
+                    JavaFXApp.getCalculateTourUseCase().findOptimalTour(courier.getDeliveriesDemand(), false);
+                }
+                TourSolution solution = JavaFXApp.getCalculateTourUseCase().getOptimalTour();
+                Platform.runLater(() -> {
+                    this.tourCalculationProgress.set(1);
+                    this.tourSolution.set(solution);
+                });
+            } catch (Exception e) {
+                Platform.runLater(() -> showError("Error while calculating tour",
+                        e.getMessage() == null ? e.toString() : e.getMessage()));
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
+    /**
+     * Restore a previous tour solution state.
+     * Called by commands during undo.
+     *
+     * @param tourSolution The tour solution to restore
+     */
+    protected void doRestoreTourSolution(TourSolution tourSolution) {
+        this.tourSolution.set(tourSolution);
+    }
+
+    // ============================================================================
+    // PACKAGE-PRIVATE API - State Management (for states and commands)
+    // ============================================================================
+
+    /**
+     * Assign a courier to a delivery.
+     * Called by commands.
+     *
+     * @param delivery The delivery to assign
+     * @param courier  The courier to assign to the delivery
+     */
+    protected void doAssignCourier(Delivery delivery, Courier courier) {
+        // Update UI to reflect the courier assignment
+        if (sidebar != null) {
+            for (DeliveryListItem item : sidebar.getDeliveriesSection().getDeliveriesList().getDeliveryItems()) {
+                item.getActionButtons().updateDisplayedSelectedCourier(delivery, courier);
             }
         }
     }
 
-    public ObservableList<Courier> getCouriers() {
-        return couriers;
-    }
-    public CityMap getCityMap() {
-        return cityMap;
-    }
-    public DeliveriesDemand getDeliveriesDemand() {
-        return deliveriesDemand;
-    }
-
-    public CommandManager getCommandManager() {
-        return commandManager;
+    /**
+     * Transition to a new state.
+     * Called by commands and states.
+     *
+     * @param newState The new state to transition to
+     */
+    void transitionToState(State newState) {
+        currentState.set(newState);
     }
 
-
+    // ============================================================================
+    // PUBLIC GETTERS & PROPERTIES
+    // ============================================================================
 
     /**
-     * Update the selected intersection in the sidebar.
+     * Get the courier currently assigned to a delivery.
+     * Called by commands.
+     *
+     * @param delivery The delivery to check
+     * @return The assigned courier, or null if none
      */
-    protected void selectIntersection(Intersection intersection) {
-        sidebar.getDeliveryCreationSection().selectIntersection(intersection);
+    Courier getCourierForDelivery(Delivery delivery) {
+        for (Courier courier : couriers) {
+            if (courier.getDeliveriesDemand() != null &&
+                    courier.getDeliveriesDemand().deliveries().contains(delivery)) {
+                return courier;
+            }
+        }
+        return null;
     }
 
-    public void addDelivery(Delivery delivery) {
-        System.out.println("Adding delivery " + delivery.takeoutIntersection().getId()
-                + " from intersection " + delivery.takeoutIntersection().getId()
-                + " to intersection " + delivery.deliveryIntersection().getId());
-        this.deliveriesDemand.deliveries().add(delivery);
-        sidebar.getDeliveriesSection().refreshDeliveries();
-        updateMapCanvas();
-    }
-    public void removeDelivery(Delivery delivery) {
-        System.out.println("Removing delivery " + delivery.takeoutIntersection().getId()
-                + " from intersection " + delivery.takeoutIntersection().getId()
-                + " to intersection " + delivery.deliveryIntersection().getId());
-        this.deliveriesDemand.deliveries().remove(delivery);
-        sidebar.getDeliveriesSection().refreshDeliveries();
-        updateMapCanvas();
+    /**
+     * This courier observable list should be used as a read-only list!
+     *
+     * @return The list of couriers in the system, as an observable list.
+     */
+    public ObservableList<Courier> couriersProperty() {
+        return couriers;
     }
 
+    public ReadOnlyProperty<CityMap> cityMapProperty() {
+        return cityMap.getReadOnlyProperty();
+    }
 
-    public void showError(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+    public ReadOnlyProperty<TourSolution> tourSolutionProperty() {
+        return tourSolution.getReadOnlyProperty();
+    }
+
+    public ReadOnlyProperty<DeliveriesDemand> deliveriesDemandProperty() {
+        return deliveriesDemand.getReadOnlyProperty();
     }
 
     public State getState() {
         return currentState.get();
     }
-    protected void setState(State newState) {
-        currentState.set(newState);
-    }
-    public SimpleObjectProperty<State> stateProperty() {
-        return currentState;
+
+    public ReadOnlyProperty<State> stateProperty() {
+        return currentState.getReadOnlyProperty();
     }
 
-    public TourSolution getTourSolution() {
-        return tourSolution;
-    }
+
     public DoubleProperty tourCalculationProgressProperty() {
         return tourCalculationProgress;
     }
+
     public BooleanBinding tourBeingCalculatedBinding() {
         return tourCalculationProgress.greaterThan(0.0).and(tourCalculationProgress.lessThan(1.0));
     }
@@ -253,81 +564,46 @@ public class AppController {
     public BooleanProperty memeModeProperty() {
         return memeModeProperty;
     }
+
     /**
      * Toggle the meme mode on/off and clear the tile cache.
      */
     public void toggleMemeMode() {
         memeModeProperty.set(!memeModeProperty.get());
-        // Clear tile cache and trigger redraw
-        if (mapCanvas != null) {
-            mapCanvas.clearTileCache();
-            mapCanvas.drawMap();
-        }
     }
 
+    // ============================================================================
+    // PRIVATE/UTILITY METHODS
+    // ============================================================================
+
+    public void showError(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
 
     /**
-     * Calculate the tour on demand (background thread). Requires a loaded city map and deliveries.
+     * Execute a command result through the command manager.
+     * Private to force UI to use specific requestX() methods.
+     *
+     * @param result The command result containing either a command or an error
      */
-    public void handleCalculateTour() {
-        getState().requestCalculateTour();
+    private void requestCommand(CommandResult result) {
+        if (result.isSuccess()) {
+            commandManager.executeCommand(result.command());
+        } else {
+            showError(result.errorTitle(), result.errorMessage());
+        }
     }
 
-    public void calculateTour() {
-        if (tourCalculationProgress.get() > 0 && tourCalculationProgress.get() < 1) {
-            showError("Cannot calculate tour", "Already running");
-            return;
-        }
-
-        new Thread(() -> {
-
-            try {
-                this.tourCalculationProgress.set(0.0001); // Small value, but not 0 cause it would be invisible
-                if (JavaFXApp.getCalculateTourUseCase().doesCalculatedTourNeedsToBeChanged(deliveriesDemand)) {
-                    JavaFXApp.getCalculateTourUseCase().findOptimalTour(deliveriesDemand, false);
-                }
-                tourSolution = JavaFXApp.getCalculateTourUseCase().getOptimalTour();
-                this.tourCalculationProgress.set(1);
-                Platform.runLater(() -> {
-                    mapCanvas.drawMap();
-                });
-
-            } catch (Exception e) {
-                Platform.runLater(() -> showError("Error while calculating tour", e.getMessage() == null ? e.toString() : e.getMessage()));
-                e.printStackTrace();
+    private void deleteDeliveryDemandOfCourier() {
+        for (Courier courier : couriers) {
+            if (courier.getDeliveriesDemand() != null) {
+                courier.getDeliveriesDemand().deliveries().clear();
             }
-        }).start();
-    }
-    public void calculateTourForCourier(Courier courier) {
-        if (tourCalculationProgress.get() > 0 && tourCalculationProgress.get() < 1) {
-            showError("Cannot calculate tour", "Already running");
-            return;
         }
-
-        if (courier.getDeliveriesDemand().deliveries().isEmpty() || courier.getDeliveriesDemand() == null) {
-            showError("Cannot calculate tour", "Courier has no deliveries assigned");
-            return;
-        }
-        new Thread(() -> {
-
-            try {
-                this.tourCalculationProgress.set(0.0001); // Small value, but not 0 cause it would be invisible
-                if (JavaFXApp.getCalculateTourUseCase().doesCalculatedTourNeedsToBeChanged(courier.getDeliveriesDemand())) {
-                    System.out.println("tour needs to be recalculated for courier " + courier.getId());
-                    JavaFXApp.getCalculateTourUseCase().findOptimalTour(courier.getDeliveriesDemand(), false);
-
-                }
-                tourSolution = JavaFXApp.getCalculateTourUseCase().getOptimalTour();
-                this.tourCalculationProgress.set(1);
-                Platform.runLater(() -> {
-                    mapCanvas.drawMap();
-                });
-
-            } catch (Exception e) {
-                Platform.runLater(() -> showError("Error while calculating tour", e.getMessage() == null ? e.toString() : e.getMessage()));
-                e.printStackTrace();
-            }
-        }).start();
     }
 
     public enum DefaultMapFilesType {

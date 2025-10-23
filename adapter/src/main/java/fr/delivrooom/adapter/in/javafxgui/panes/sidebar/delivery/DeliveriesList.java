@@ -1,5 +1,7 @@
 package fr.delivrooom.adapter.in.javafxgui.panes.sidebar.delivery;
 
+import fr.delivrooom.adapter.in.javafxgui.controller.AppController;
+import fr.delivrooom.application.model.DeliveriesDemand;
 import fr.delivrooom.application.model.Delivery;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -8,6 +10,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+
+import java.util.List;
 
 /**
  * List of deliveries.
@@ -54,42 +58,27 @@ public class DeliveriesList extends VBox {
                 scrollPane.setContent(deliveryItemsContainer);
             }
         });
-    }
 
-    /**
-     * Add a delivery to the list.
-     */
-    public void addDelivery(Delivery delivery) {
-        DeliveryListItem item = new DeliveryListItem(delivery);
-        deliveryItems.add(item);
-        deliveryItemsContainer.getChildren().add(item);
-    }
-
-    /**
-     * Remove a delivery from the list.
-     */
-    public void removeDelivery(Delivery delivery) {
-        deliveryItems.removeIf(item -> item.getDelivery().equals(delivery));
-        deliveryItemsContainer.getChildren().removeIf(node ->
-                node instanceof DeliveryListItem && ((DeliveryListItem) node).getDelivery().equals(delivery)
-        );
-    }
-
-    /**
-     * Clear all deliveries from the list.
-     */
-    public void clearDeliveries() {
-        deliveryItems.clear();
-        deliveryItemsContainer.getChildren().clear();
+        AppController.getController().deliveriesDemandProperty().addListener(o -> {
+            DeliveriesDemand deliveries = AppController.getController().deliveriesDemandProperty().getValue();
+            if (deliveries != null) {
+                setDeliveries(deliveries.deliveries());
+            } else {
+                setDeliveries(List.of());
+            }
+        });
     }
 
     /**
      * Update the list with a new set of deliveries.
      */
-    public void setDeliveries(java.util.List<Delivery> deliveries) {
-        clearDeliveries();
+    public void setDeliveries(List<Delivery> deliveries) {
+        deliveryItems.clear();
+        deliveryItemsContainer.getChildren().clear();
         for (Delivery delivery : deliveries) {
-            addDelivery(delivery);
+            DeliveryListItem item = new DeliveryListItem(delivery);
+            deliveryItems.add(item);
+            deliveryItemsContainer.getChildren().add(item);
         }
     }
 

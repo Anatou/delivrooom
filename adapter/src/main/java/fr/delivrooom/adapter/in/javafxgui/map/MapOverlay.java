@@ -1,3 +1,5 @@
+
+
 package fr.delivrooom.adapter.in.javafxgui.map;
 
 import atlantafx.base.controls.Popover;
@@ -58,11 +60,17 @@ public class MapOverlay extends StackPane {
             if (controller.getState() instanceof StateSelectIntersection) {
                 if (event.getTarget() instanceof Node node) {
                     if (node.getUserData() != "selectIntersection") {
-                        controller.handleSelectIntersection(null);
+                        controller.requestSelectIntersection(null);
                     }
                 }
             }
         });
+    }
+
+    public void clear() {
+        canvasLayer.getGraphicsContext2D().clearRect(0, 0, canvasLayer.getWidth(), canvasLayer.getHeight());
+        intersectionLayer.getChildren().clear();
+        deliveryLayer.getChildren().clear();
     }
 
     public void updateOverlay(double width, double height, double scale, double minX, double minY) {
@@ -101,9 +109,10 @@ public class MapOverlay extends StackPane {
         AppController controller = AppController.getController();
 
         GraphicsContext gc = canvasLayer.getGraphicsContext2D();
-        CityMap cityMap = controller.getCityMap();
-        DeliveriesDemand deliveriesDemand = controller.getDeliveriesDemand();
-        TourSolution tourSolution = controller.getTourSolution();
+        CityMap cityMap = controller.cityMapProperty().getValue();
+        if (cityMap == null) return;
+        DeliveriesDemand deliveriesDemand = controller.deliveriesDemandProperty().getValue();
+        TourSolution tourSolution = controller.tourSolutionProperty().getValue();
 
         // Draw roads
         gc.setStroke(Color.rgb(220, 220, 220));
@@ -240,7 +249,8 @@ public class MapOverlay extends StackPane {
     }
 
     public void updateDeliveryLayer() {
-        DeliveriesDemand deliveriesDemand = AppController.getController().getDeliveriesDemand();
+        DeliveriesDemand deliveriesDemand = AppController.getController().deliveriesDemandProperty().getValue();
+        if (deliveriesDemand == null) return;
 
         for (Delivery delivery : deliveriesDemand.deliveries()) {
             // Add interactive circle over delivery point
@@ -278,7 +288,8 @@ public class MapOverlay extends StackPane {
     }
 
     public void updateIntersectionLayer() {
-        CityMap cityMap = AppController.getController().getCityMap();
+        CityMap cityMap = AppController.getController().cityMapProperty().getValue();
+        if (cityMap == null) return;
 
         for (Intersection intersection : cityMap.intersections().values()) {
             double intersectionX = (intersection.getNormalizedX() - minX) * scale;
@@ -290,7 +301,7 @@ public class MapOverlay extends StackPane {
             intersectionCircle.setCursor(Cursor.HAND);
 
             intersectionCircle.setOnMouseClicked(event -> {
-                AppController.getController().handleSelectIntersection(intersection);
+                AppController.getController().requestSelectIntersection(intersection);
             });
             intersectionLayer.getChildren().add(intersectionCircle);
         }

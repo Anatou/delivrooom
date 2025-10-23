@@ -19,7 +19,7 @@ public class MainPane extends BorderPane {
         toolBar = new AppToolBar();
 
         // Wire the controller to the UI components
-        AppController.getController().wireComponents(canvas, sidebar);
+        AppController.getController().wireComponents(sidebar);
 
         // Set up the layout
         setTop(toolBar);

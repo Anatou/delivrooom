@@ -18,7 +18,7 @@ public class CouriersList extends ListView<Courier> {
         prefHeightProperty().bind(Bindings.size(getItems()).multiply(COURIER_ITEM_HEIGHT));
         setBorder(null);
 
-        AppController.getController().getCouriers().addListener((javafx.collections.ListChangeListener.Change<? extends Courier> c) -> {
+        AppController.getController().couriersProperty().addListener((javafx.collections.ListChangeListener.Change<? extends Courier> c) -> {
             while (c.next()) {
                 if (c.wasAdded()) {
                     getItems().addAll(c.getAddedSubList());
@@ -35,12 +35,12 @@ public class CouriersList extends ListView<Courier> {
     }
 
     private void deleteCourier(Courier courier) {
-        AppController.getController().getCouriers().removeIf(item -> item.getId() == courier.getId());
+        AppController.getController().requestRemoveCourier(courier);
     }
 
     private void calculateCourierRoute(Courier courier) {
         AppController appController = AppController.getController();
-        List<Courier> couriers = appController.getCouriers();
+        List<Courier> couriers = appController.couriersProperty();
         Courier courier_found = null;
         System.out.println("Searching for courier with ID: " + courier.getId());
         for (Courier courier_ : couriers) {
@@ -54,6 +54,6 @@ public class CouriersList extends ListView<Courier> {
         // affichage des deliveries demand du courrier
         System.out.println("deliveries demand of :" + courier_found + " \n" + courier_found.getDeliveriesDemand());
         System.out.println("Calculating route for courier " + courier_found);
-        appController.calculateTourForCourier(courier_found);
+        appController.requestCalculateCourierTour(courier_found);
     }
 }
