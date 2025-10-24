@@ -14,7 +14,6 @@ public class Courier {
         this.id = id;
         this.deliveriesDemand = null;
         this.tourSolution = null;
-//        this.color = new Color(Math.random(), Math.random(), Math.random(), 1);
         this.displayTourSolution = true;
     }
 
@@ -28,6 +27,10 @@ public class Courier {
 
     public DeliveriesDemand getDeliveriesDemand() {
         return deliveriesDemand;
+    }
+
+    public boolean hasDeliveriesDemand() {
+        return deliveriesDemand != null && !deliveriesDemand.deliveries().isEmpty();
     }
 
     public void setDeliveriesDemand(DeliveriesDemand deliveriesDemand) {
