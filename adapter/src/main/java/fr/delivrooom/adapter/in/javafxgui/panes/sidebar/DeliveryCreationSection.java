@@ -30,7 +30,7 @@ public class DeliveryCreationSection extends VBox {
     public DeliveryCreationSection() {
         super(0);
         //setPadding(new Insets(10));
-        setAlignment(Pos.TOP_LEFT);
+        //setAlignment(Pos.TOP_LEFT);
         this.controller = AppController.getController();
 
         // Create button and Sprinner : select takeout intersection and its duration
@@ -54,6 +54,7 @@ public class DeliveryCreationSection extends VBox {
         durationSpinnerDelivery.setId("durationSpinnerDelivery");
         durationSpinnerDelivery.setPromptText("Duration in minutes");
         HBox selectIntersectionDelivery = new HBox(5,buttonDelivery, durationSpinnerDelivery);
+
 
         // Create button Confirm the choice of the selected Delivery
         Button buttonConfirmAddDelivery = new Button("Add Delivery");
@@ -136,7 +137,7 @@ public class DeliveryCreationSection extends VBox {
 
         getChildren().add(titledPane);
 
-        getChildren().addAll(new Label(""), addDeliveryBox);
+        getChildren().addAll(addDeliveryBox);
     }
 
 }
