@@ -33,4 +33,9 @@ public class CommandAssignCourier implements Command {
     public void undo() {
         controller.doAssignCourier(delivery, store, previousCourier);
     }
+
+    @Override
+    public String toString() {
+        return "Assign Courier " + newCourier.getId() + " to " + delivery.takeoutIntersection().getId() + " > " + delivery.deliveryIntersection().getId();
+    }
 }

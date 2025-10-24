@@ -8,12 +8,14 @@ import fr.delivrooom.adapter.in.javafxgui.JavaFXApp;
 import fr.delivrooom.adapter.in.javafxgui.controller.AppController;
 import fr.delivrooom.adapter.in.javafxgui.controller.StateInitial;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.kordamp.ikonli.fontawesome6.FontAwesomeSolid;
@@ -28,9 +30,9 @@ public class AppToolBar extends ToolBar {
     private Stage stage;
     private Scene scene;
 
-    private Image logoImgLight;
-    private Image logoImgDark;
-    private ImageView logo;
+    private final Image logoImgLight;
+    private final Image logoImgDark;
+    private final ImageView logo;
 
     public AppToolBar() {
         super();
@@ -51,12 +53,34 @@ public class AppToolBar extends ToolBar {
             open.getItems().add(defaultBtn);
         }
 
+        MenuButton edit = new MenuButton("Edit");
 
-        Button undoBtn = new Button("", new FontIcon(FontAwesomeSolid.UNDO));
+        MenuItem undoBtn = new MenuItem("Undo", new FontIcon(FontAwesomeSolid.UNDO));
+        undoBtn.setAccelerator(new KeyCodeCombination(KeyCode.Z, KeyCombination.META_DOWN));
         undoBtn.setOnAction(e -> controller.undoCommand());
 
-        Button redoBtn = new Button("", new FontIcon(FontAwesomeSolid.REDO));
+        MenuItem redoBtn = new MenuItem("Redo", new FontIcon(FontAwesomeSolid.REDO));
+        redoBtn.setAccelerator(new KeyCodeCombination(KeyCode.Y, KeyCombination.META_DOWN));
         redoBtn.setOnAction(e -> controller.redoCommand());
+
+        edit.setOnShowing(e -> {
+            String undoName = controller.getNextUndoCommandName();
+            undoBtn.setDisable(undoName == null);
+            if (undoName == null) {
+                undoBtn.setText("Undo");
+            } else {
+                undoBtn.setText("Undo (" + undoName + ")");
+            }
+            String redoName = controller.getNextRedoCommandName();
+            redoBtn.setDisable(redoName == null);
+            if (redoName == null) {
+                redoBtn.setText("Redo");
+            } else {
+                redoBtn.setText("Redo (" + redoName + ")");
+            }
+        });
+
+        edit.getItems().addAll(undoBtn, redoBtn);
 
         themeToggle = new ToggleSwitch("");
         themeToggle.setGraphic(new FontIcon(FontAwesomeSolid.MOON));
@@ -69,12 +93,9 @@ public class AppToolBar extends ToolBar {
         logo.setFitHeight(25);
         logo.setSmooth(true);
         logo.setPreserveRatio(true);
+        logo.setOnMouseClicked(e -> AppController.getController().toggleMemeMode());
 
-        // Easter egg: clicking the logo toggles meme mode
-        logo.setOnMouseClicked(e -> handleLogoClick());
-        logo.setStyle("-fx-cursor: hand;"); // Show it's clickable
-
-        this.getItems().addAll(open, new Spacer(20), undoBtn, redoBtn, new Spacer(10), themeToggle, new Spacer(), logo, new Spacer(5));
+        this.getItems().addAll(open, edit, new Spacer(10), themeToggle, new Spacer(), logo, new Spacer(5));
     }
 
     /**
@@ -129,13 +150,5 @@ public class AppToolBar extends ToolBar {
             themeToggle.setGraphic(new FontIcon(FontAwesomeSolid.MOON));
             logo.setImage(logoImgLight);
         }
-    }
-
-    /**
-     * Handle logo click - toggles meme mode (easter egg)
-     */
-    private void handleLogoClick() {
-        AppController controller = AppController.getController();
-        controller.toggleMemeMode();
     }
 }

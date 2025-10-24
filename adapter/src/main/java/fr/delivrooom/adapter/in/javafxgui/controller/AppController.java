@@ -97,6 +97,16 @@ public class AppController {
         commandManager.redo();
     }
 
+    public String getNextUndoCommandName() {
+        Command cmd = commandManager.getNextUndoCommand();
+        return cmd != null ? cmd.toString() : null;
+    }
+
+    public String getNextRedoCommandName() {
+        Command cmd = commandManager.getNextRedoCommand();
+        return cmd != null ? cmd.toString() : null;
+    }
+
     /**
      * Request to open a map file.
      *
@@ -465,9 +475,9 @@ public class AppController {
         if (assignedCourier != null) {
             if (!assignedCourier.equals(courier)) {
                 assignedCourier.removeDelivery(delivery);
-                courier.addDelivery(delivery, store);
+                if (courier != null) courier.addDelivery(delivery, store);
             }
-        } else {
+        } else if (courier != null) {
             courier.addDelivery(delivery, store);
         }
         this.deliveriesDemand.invalidate();
