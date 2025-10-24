@@ -220,6 +220,9 @@ public class AppController {
         requestCommand(result);
     }
 
+    public void requestSaveTourFile() {
+        getState().saveTour("tour.bin");
+    }
 
     // ============================================================================
     // PROTECTED API - Do Methods (for commands to modify data)
