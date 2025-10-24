@@ -25,4 +25,10 @@ public class CommandCalculateTour implements Command {
     public void undo() {
         controller.doRestoreTourSolution(previousTourSolution);
     }
+
+    @Override
+    public String toString() {
+        return "Calculate tour";
+    }
+
 }

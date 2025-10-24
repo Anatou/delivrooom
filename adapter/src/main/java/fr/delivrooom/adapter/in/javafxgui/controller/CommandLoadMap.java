@@ -43,4 +43,9 @@ public class CommandLoadMap implements Command {
             e.printStackTrace();
         }
     }
+
+    @Override
+    public String toString() {
+        return "Load map " + mapUrl.toString();
+    }
 }

@@ -55,6 +55,9 @@ public class MapCanvas extends StackPane {
         AppController.getController().cityMapProperty().addListener(listener);
         AppController.getController().deliveriesDemandProperty().addListener(listener);
         AppController.getController().tourSolutionProperty().addListener(listener);
+        AppController.getController().memeModeProperty().addListener((o) -> {
+            drawMap();
+        });
     }
 
     private void setupCanvas() {

@@ -29,12 +29,16 @@ public class MapTiles extends Canvas {
 
     private final Map<String, Image> tileCache = new ConcurrentHashMap<>();
     private final Map<String, CompletableFuture<Image>> pendingTiles = new ConcurrentHashMap<>();
-    private List<String> memeFiles = new ArrayList<>();
-    private Random random = new Random();
+    private final List<String> memeFiles = new ArrayList<>();
+    private final Random random = new Random();
 
     public MapTiles() {
         ZOOM_SCALE_FACTOR = JavaFXApp.getConfigPropertyUseCase().getDoubleProperty("map.zoom.scaleFactor", 1.0);
         loadMemeFiles();
+
+        AppController.getController().memeModeProperty().addListener((obs, oldVal, newVal) -> {
+            tileCache.clear();
+        });
     }
 
     /**
