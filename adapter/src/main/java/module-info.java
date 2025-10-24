@@ -1,27 +1,25 @@
 module fr.delivrooom.adapter {
 
+    // Exports ports implementations for the bootstrap, and the JavaFX gui to javafx.*
+    exports fr.delivrooom.adapter.in.javafxgui to fr.delivrooom.config, javafx.base, javafx.graphics, javafx.controls;
+    exports fr.delivrooom.adapter.out to fr.delivrooom.config;
 
-    exports fr.delivrooom.adapter.in.javafxgui;
-    exports fr.delivrooom.adapter.out;
-    opens fr.delivrooom.adapter.in.javafxgui to javafx.fxml;
-    opens fr.delivrooom.adapter.in.javafxgui.controller to javafx.fxml;
-    opens fr.delivrooom.adapter.in.javafxgui.command to javafx.fxml;
-    opens fr.delivrooom.adapter.in.javafxgui.map to javafx.fxml;
-    opens fr.delivrooom.adapter.in.javafxgui.panes to javafx.fxml;
-    opens fr.delivrooom.adapter.in.javafxgui.panes.sidebar to javafx.fxml;
-    opens fr.delivrooom.adapter.in.javafxgui.panes.sidebar.courier to javafx.fxml;
-    opens fr.delivrooom.adapter.in.javafxgui.panes.sidebar.delivery to javafx.fxml;
+    // Export JavaFX gui to JavaFX
 
+    // Require the application module for the model and ports interfaces
     requires fr.delivrooom.application;
 
+    // JavaFX modules
     requires javafx.controls;
-    requires java.xml;
     requires javafx.graphics;
     requires javafx.base;
+
+    // Java modules
+    requires java.xml;
+
+    // JavaFX themes, extensions and icons
     requires atlantafx.base;
     requires org.controlsfx.controls;
-
     requires org.kordamp.ikonli.javafx;
     requires org.kordamp.ikonli.fontawesome6;
-    requires jdk.jdi;
 }

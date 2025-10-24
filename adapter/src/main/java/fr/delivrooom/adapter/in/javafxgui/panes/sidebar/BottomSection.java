@@ -1,6 +1,7 @@
 package fr.delivrooom.adapter.in.javafxgui.panes.sidebar;
 
 import fr.delivrooom.adapter.in.javafxgui.controller.AppController;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -9,8 +10,6 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.VBox;
 import org.kordamp.ikonli.fontawesome6.FontAwesomeSolid;
 import org.kordamp.ikonli.javafx.FontIcon;
-import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
 
 
 /**
@@ -55,7 +54,7 @@ public class BottomSection extends VBox {
         goButton.getStyleClass().addAll("accent", "large");
         goButton.visibleProperty().bind(controller.tourBeingCalculatedBinding().not());
 
-        goButton.setOnAction(e -> controller.handleCalculateTour());
+        goButton.setOnAction(e -> controller.requestCalculateTour());
         goButton.managedProperty().bind(goButton.visibleProperty());
 
         getChildren().addAll(progressBar, progressLabel, goButton);

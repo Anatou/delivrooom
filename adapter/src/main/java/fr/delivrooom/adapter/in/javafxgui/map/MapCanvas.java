@@ -1,6 +1,7 @@
 package fr.delivrooom.adapter.in.javafxgui.map;
 
 import fr.delivrooom.adapter.in.javafxgui.controller.AppController;
+import fr.delivrooom.adapter.in.javafxgui.controller.StateInitial;
 import fr.delivrooom.application.model.CityMap;
 import fr.delivrooom.application.model.Intersection;
 import javafx.beans.InvalidationListener;
@@ -44,6 +45,15 @@ public class MapCanvas extends StackPane {
         getChildren().addAll(tilesLayer, overlayLayer, controlsLayer);
         setupCanvas();
         setupControls();
+
+        AppController.getController().cityMapProperty().addListener(o -> {
+            this.autoFraming = true;
+            drawMap();
+        });
+        AppController.getController().deliveriesDemandProperty().addListener(o -> drawMap());
+        AppController.getController().tourSolutionProperty().addListener(o -> drawMap());
+        AppController.getController().couriersProperty().addListener((InvalidationListener) o -> drawMap());
+        AppController.getController().memeModeProperty().addListener((o) -> drawMap());
     }
 
     private void setupCanvas() {
@@ -88,7 +98,7 @@ public class MapCanvas extends StackPane {
         });
         resetBtn.setOnAction(e -> {
             autoFraming = true;
-            redraw();
+            drawMap();
         });
 
         VBox controls = new VBox(5, zoomInBtn, zoomOutBtn, resetBtn);
@@ -100,7 +110,7 @@ public class MapCanvas extends StackPane {
 
         // Mouse interactions
         addEventHandler(ScrollEvent.SCROLL, e -> {
-            if (controller.getCityMap() == null) return;
+            if (controller.getState() instanceof StateInitial) return;
             ensureManualFromAuto();
             double factor = e.getDeltaY() > 0 ? Math.pow(ZOOM_STEP, 0.15) : 1.0 / Math.pow(ZOOM_STEP, 0.15);
             zoomAt(e.getX(), e.getY(), factor);
@@ -108,7 +118,7 @@ public class MapCanvas extends StackPane {
         });
 
         addEventHandler(MouseEvent.MOUSE_PRESSED, e -> {
-            if (controller.getCityMap() == null) return;
+            if (controller.getState() instanceof StateInitial) return;
             if (e.isPrimaryButtonDown()) {
                 lastMouseX = e.getX();
                 lastMouseY = e.getY();
@@ -118,7 +128,7 @@ public class MapCanvas extends StackPane {
 
         addEventHandler(MouseEvent.MOUSE_DRAGGED, e -> {
             if (!dragging) return;
-            if (controller.getCityMap() == null) return;
+            if (controller.getState() instanceof StateInitial) return;
             ensureManualFromAuto();
             double dx = e.getX() - lastMouseX;
             double dy = e.getY() - lastMouseY;
@@ -135,8 +145,8 @@ public class MapCanvas extends StackPane {
         AppController controller = AppController.getController();
 
         if (!autoFraming) return;
-        if (controller.getCityMap() == null || getWidth() == 0 || getHeight() == 0) return;
-        AutoView v = computeAutoView(getWidth(), getHeight(), controller.getCityMap());
+        if (controller.getState() instanceof StateInitial || getWidth() == 0 || getHeight() == 0) return;
+        AutoView v = computeAutoView(getWidth(), getHeight(), controller.cityMapProperty().getValue());
         manualScale = v.scale;
         manualMinX = v.minX;
         manualMinY = v.minY;
@@ -147,7 +157,7 @@ public class MapCanvas extends StackPane {
         // Move the view so the content follows the cursor
         manualMinX -= dx / manualScale;
         manualMinY -= dy / manualScale;
-        redraw();
+        drawMap();
     }
 
     private void zoomAt(double canvasX, double canvasY, double factor) {
@@ -163,17 +173,7 @@ public class MapCanvas extends StackPane {
         manualMinX = worldX - canvasX / newScale;
         manualMinY = worldY - canvasY / newScale;
 
-        redraw();
-    }
-
-    private void redraw() {
-        if (getWidth() > 0 && getHeight() > 0) {
-            drawMap();
-        }
-    }
-
-    public void setAutoFraming(boolean autoFraming) {
-        this.autoFraming = autoFraming;
+        drawMap();
     }
 
     private AutoView computeAutoView(double width, double height, CityMap cityMap) {
@@ -210,7 +210,8 @@ public class MapCanvas extends StackPane {
     }
 
     public void drawMap() {
-        CityMap cityMap = AppController.getController().getCityMap();
+        if (getWidth() <= 0 || getHeight() <= 0) return;
+        CityMap cityMap = AppController.getController().cityMapProperty().getValue();
         controlsLayer.setVisible(cityMap != null);
         overlayLayer.setVisible(cityMap != null);
         tilesLayer.setVisible(cityMap != null);

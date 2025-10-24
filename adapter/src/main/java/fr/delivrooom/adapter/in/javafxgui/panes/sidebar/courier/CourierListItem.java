@@ -17,10 +17,12 @@ public class CourierListItem extends ListCell<Courier> {
 
     private final Consumer<Courier> onDelete;
     private final Consumer<Courier> onCalculate;
+    private final Consumer<Courier> onToggleVisibility;
 
-    public CourierListItem(Consumer<Courier> onDelete, Consumer<Courier> onCalculate) {
+    public CourierListItem(Consumer<Courier> onDelete, Consumer<Courier> onCalculate, Consumer<Courier> onToggleVisibility) {
         this.onDelete = onDelete;
         this.onCalculate = onCalculate;
+        this.onToggleVisibility = onToggleVisibility;
     }
 
     @Override
@@ -42,9 +44,26 @@ public class CourierListItem extends ListCell<Courier> {
             Label courierLabel = new Label("Courier " + courier.getId());
             courierLabel.getStyleClass().add("text");
 
+            // Toggle visibility button
+            Button toggleVisibilityBtn = new Button();
+            toggleVisibilityBtn.setMinHeight(0);
+            if (courier.isDisplayTourSolution()) {
+                toggleVisibilityBtn.setGraphic(new FontIcon(FontAwesomeSolid.EYE));
+            } else {
+                toggleVisibilityBtn.setGraphic(new FontIcon(FontAwesomeSolid.EYE_SLASH));
+            }
+            toggleVisibilityBtn.getStyleClass().addAll("button-icon");
+            toggleVisibilityBtn.setDisable(courier.getTourSolution() == null);
+            toggleVisibilityBtn.setOnAction(e -> {
+                onToggleVisibility.accept(courier);
+                updateItem(courier, false);
+            });
+            toggleVisibilityBtn.setTooltip(new javafx.scene.control.Tooltip("Toggle courier tour visibility on the map"));
+
             // Calculate button
             Button calculateBtn = new Button();
             calculateBtn.setMinHeight(0);
+            calculateBtn.setDisable(!courier.isDisplayTourSolution() || !courier.hasDeliveriesDemand());
             calculateBtn.setGraphic(new FontIcon(FontAwesomeSolid.PLAY));
             calculateBtn.getStyleClass().addAll("button-icon", "success");
             calculateBtn.setOnAction(e -> onCalculate.accept(courier));
@@ -60,7 +79,7 @@ public class CourierListItem extends ListCell<Courier> {
 
             box.setAlignment(Pos.CENTER_LEFT);
             box.setPrefHeight(CouriersList.COURIER_ITEM_HEIGHT - 4);
-            box.getChildren().addAll(courierLabel, new Spacer(), calculateBtn, deleteBtn);
+            box.getChildren().addAll(courierLabel, new Spacer(), toggleVisibilityBtn, calculateBtn, deleteBtn);
             setGraphic(box);
         }
     }

@@ -67,7 +67,7 @@ public class DeliveryTooltip extends Popover {
         deliveryBox.getChildren().addAll(deliveryTitle, deliveryGrid);
 
         if (showActionButtons) {
-            DeliveryActionButtons actionButtons = new DeliveryActionButtons(delivery);
+            DeliveryActionButtons actionButtons = new DeliveryActionButtons(delivery, this::hide);
             container.getChildren().add(actionButtons);
         }
         container.getChildren().addAll(takeoutBox, deliveryBox);

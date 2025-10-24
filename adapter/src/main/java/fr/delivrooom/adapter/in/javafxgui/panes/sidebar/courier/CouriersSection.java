@@ -92,18 +92,15 @@ public class CouriersSection extends VBox {
 
     private int getNextCourierId() {
         AtomicInteger firstAvailableId = new AtomicInteger(1);
-        while (AppController.getController().getCouriers().stream().anyMatch(courier -> courier.getId() == firstAvailableId.get())) {
+        while (AppController.getController().couriersProperty().stream().anyMatch(courier -> courier.getId() == firstAvailableId.get())) {
             firstAvailableId.incrementAndGet();
         }
         return firstAvailableId.get();
     }
 
     private void addCourier() {
-        AppController.getController().getCouriers().add(new Courier(getNextCourierId()));
-    }
-
-    private void removeCourier(int courierId) {
-        AppController.getController().getCouriers().removeIf(item -> item.getId() == courierId);
+        Courier newCourier = new Courier(getNextCourierId());
+        AppController.getController().requestAddCourier(newCourier);
     }
 
 

@@ -29,12 +29,16 @@ public class MapTiles extends Canvas {
 
     private final Map<String, Image> tileCache = new ConcurrentHashMap<>();
     private final Map<String, CompletableFuture<Image>> pendingTiles = new ConcurrentHashMap<>();
-    private List<String> memeFiles = new ArrayList<>();
-    private Random random = new Random();
+    private final List<String> memeFiles = new ArrayList<>();
+    private final Random random = new Random();
 
     public MapTiles() {
         ZOOM_SCALE_FACTOR = JavaFXApp.getConfigPropertyUseCase().getDoubleProperty("map.zoom.scaleFactor", 1.0);
         loadMemeFiles();
+
+        AppController.getController().memeModeProperty().addListener((obs, oldVal, newVal) -> {
+            tileCache.clear();
+        });
     }
 
     /**
@@ -70,6 +74,10 @@ public class MapTiles extends Canvas {
         }
         pendingTiles.clear();
         System.out.println("Tile cache cleared");
+    }
+
+    public void clear() {
+        getGraphicsContext2D().clearRect(0, 0, getWidth(), getHeight());
     }
 
 
@@ -123,9 +131,14 @@ public class MapTiles extends Canvas {
                 }
 
                 // Normal map tile loading
-                String urlStr = MAPTILER_URL + tileKey + ".jpg?key=" + MAPTILER_API_KEY;
-                URL url = new URI(urlStr).toURL();
-                System.out.println("Downloading tile " + tileKey);
+                URL url = MapTiles.class.getResource("/tiles-cache/" + tileKey.replace("/", "_") + ".jpg");
+                if (url == null) {
+                    String urlStr = MAPTILER_URL + tileKey + ".jpg?key=" + MAPTILER_API_KEY;
+                    url = new URI(urlStr).toURL();
+                    System.out.println("Downloading tile " + tileKey);
+                } else {
+                    System.out.println("Loading tile " + tileKey + " from file cache");
+                }
 
                 // Load image in a background thread
                 Image image = new Image(url.toString());
