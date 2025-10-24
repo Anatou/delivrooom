@@ -1,6 +1,5 @@
 module fr.delivrooom.application {
     requires java.desktop;
-    requires javafx.graphics;
     // Adapters should only see the model classes along with the port interfaces
     exports fr.delivrooom.application.model;
     exports fr.delivrooom.application.port.in;

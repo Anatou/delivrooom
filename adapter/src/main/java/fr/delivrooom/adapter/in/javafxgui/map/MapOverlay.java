@@ -182,7 +182,8 @@ public class MapOverlay extends StackPane {
 
         DeliveriesDemand deliveriesDemand = courier.getDeliveriesDemand();
         TourSolution tourSolution = courier.getTourSolution();
-        Color courierColor = courier.getColor();
+        Color courierColor = Color.hsb((courier.getId() * 137) % 360, 0.7, 0.9);
+
 
 
         // Draw the calculated tour if available (numbers only on store/pickup/delivery in visit order)

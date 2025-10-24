@@ -1,6 +1,5 @@
 package fr.delivrooom.application.model;
 
-import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
 
@@ -9,7 +8,6 @@ public class Courier {
     private final int id;
     private DeliveriesDemand deliveriesDemand;
     private TourSolution tourSolution;
-    private final Color color;
     private boolean displayTourSolution;
 
     public Courier(int id) {
@@ -17,7 +15,6 @@ public class Courier {
         this.deliveriesDemand = null;
         this.tourSolution = null;
 //        this.color = new Color(Math.random(), Math.random(), Math.random(), 1);
-        this.color = Color.hsb((id * 137) % 360, 0.7, 0.9);
         this.displayTourSolution = true;
     }
 
@@ -54,9 +51,6 @@ public class Courier {
         }
     }
 
-    public Color getColor() {
-        return color;
-    }
 
     public boolean isDisplayTourSolution() {
         return displayTourSolution;
