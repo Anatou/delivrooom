@@ -311,11 +311,7 @@ public class AppController {
 
         for (Courier courier : couriers) {
             DeliveriesDemand restoredDemand = snapshot.get(courier);
-            if (restoredDemand != null) {
-                courier.setDeliveriesDemand(restoredDemand);
-            } else {
-                courier.setDeliveriesDemand(null);
-            }
+            courier.setDeliveriesDemand(restoredDemand);
         }
         deliveriesDemand.invalidate();
     }
@@ -434,6 +430,7 @@ public class AppController {
                 TourSolution solution = JavaFXApp.getCalculateTourUseCase().getOptimalTour();
                 Platform.runLater(() -> {
                     this.tourCalculationProgress.set(1);
+                    courier.setTourSolution(solution);
                     this.tourSolution.set(solution);
                 });
             } catch (Exception e) {
@@ -612,6 +609,9 @@ public class AppController {
         for (Courier courier : couriers) {
             if (courier.getDeliveriesDemand() != null) {
                 courier.getDeliveriesDemand().deliveries().clear();
+            }
+            if (courier.getTourSolution() != null) {
+                courier.deleteTourSolution();
             }
         }
     }
