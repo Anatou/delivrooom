@@ -141,7 +141,7 @@ public class MapOverlay extends StackPane {
             List<Courier> allCouriers = controller.couriersProperty();
             for (Courier courier : allCouriers) {
                 TourSolution courierTour = courier.getTourSolution();
-                if (courierTour != null) {
+                if (courierTour != null && courier.isDisplayTourSolution()) {
                     // attribute a color to each courier path
                     System.out.println("Drawing tour for courier: " + courier.getId());
                     displayTourSolution(courier);

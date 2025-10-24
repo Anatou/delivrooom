@@ -10,6 +10,7 @@ public class Courier {
     private DeliveriesDemand deliveriesDemand;
     private TourSolution tourSolution;
     private final Color color;
+    private boolean displayTourSolution;
 
     public Courier(int id) {
         this.id = id;
@@ -17,6 +18,7 @@ public class Courier {
         this.tourSolution = null;
 //        this.color = new Color(Math.random(), Math.random(), Math.random(), 1);
         this.color = Color.hsb((id * 137) % 360, 0.7, 0.9);
+        this.displayTourSolution = true;
     }
 
     public TourSolution getTourSolution() {
@@ -54,6 +56,14 @@ public class Courier {
 
     public Color getColor() {
         return color;
+    }
+
+    public boolean isDisplayTourSolution() {
+        return displayTourSolution;
+    }
+
+    public void setDisplayTourSolution(boolean displayTourSolution) {
+        this.displayTourSolution = displayTourSolution;
     }
 
 
