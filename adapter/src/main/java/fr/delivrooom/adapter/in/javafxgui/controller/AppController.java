@@ -220,13 +220,8 @@ public class AppController {
         requestCommand(result);
     }
 
-    public void requestSaveTourFile(File file) {
-        Command command = getState().createSaveTourCommand(file);
-        if (command != null) {
-            commandManager.executeCommand(command);
-        } else {
-            showError("Invalid Action", "Saving the tour is not allowed in the current state.");
-        }
+    public void requestSaveTourFile() {
+        getState().saveTour("tour.bin");
     }
 
     // ============================================================================

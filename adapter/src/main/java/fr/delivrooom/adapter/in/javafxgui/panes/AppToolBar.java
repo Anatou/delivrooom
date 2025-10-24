@@ -61,7 +61,7 @@ public class AppToolBar extends ToolBar {
 
         Button saveTourBtn = new Button("", new FontIcon(FontAwesomeSolid.SAVE));
         saveTourBtn.setTooltip(new javafx.scene.control.Tooltip("Save Calculated Tour"));
-        //saveTourBtn.setOnAction(e -> controller.requestSaveTourFile());
+        saveTourBtn.setOnAction(e -> controller.requestSaveTourFile());
 
         Button importTourBtn = new Button("", new FontIcon(FontAwesomeSolid.FILE_IMPORT));
         importTourBtn.setTooltip(new javafx.scene.control.Tooltip("Import Calculated Tour"));

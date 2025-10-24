@@ -79,6 +79,7 @@ public record StateDeliveriesLoaded(AppController controller) implements State {
     public void saveTour(String filename) {
         // in this state, there might be tours calculated for some couriers
         boolean anyTourToSave = false;
+        System.out.println("Checking for tours to save...");
 
         List<Courier> courierList = controller.couriersProperty();
         for (Courier courier : courierList) {
@@ -88,6 +89,7 @@ public record StateDeliveriesLoaded(AppController controller) implements State {
             }
         }
         if (anyTourToSave) {
+            System.out.println("Check tour saved...");
             controller.saveTourSolution(filename);
         }
     }
