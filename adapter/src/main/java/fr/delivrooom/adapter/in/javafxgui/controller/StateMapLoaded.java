@@ -78,4 +78,8 @@ public record StateMapLoaded(AppController controller) implements State {
     public String getStateName() {
         return "MapLoadedState";
     }
+
+    public void saveTour(String filename) {
+        controller.showError("Unable to save tour", "No tour has been calculated yet.");
+    }
 }

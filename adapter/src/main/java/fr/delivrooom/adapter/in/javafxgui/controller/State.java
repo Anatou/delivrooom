@@ -118,4 +118,6 @@ public interface State {
      * @return The state name
      */
     String getStateName();
+
+    void saveTour(String filename);
 }
