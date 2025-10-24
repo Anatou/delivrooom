@@ -220,6 +220,11 @@ public class AppController {
         requestCommand(result);
     }
 
+    public void requestLoadTourSolution(File file) {
+        CommandResult result = getState().createLoadTourCommand(cityMap.get(), deliveriesDemand.get(), couriers.get(), file.getAbsolutePath());
+        requestCommand(result);
+    }
+
     /**
      * Request to save the current tour to a file.
      *
@@ -509,9 +514,6 @@ public class AppController {
         }
     }
 
-    protected void doLoadTourSolution(TourSolutionSerialiser tourSolutionSerialiser) {
-        // logique de chargement
-    }
 
     /**
      * Transition to a new state.

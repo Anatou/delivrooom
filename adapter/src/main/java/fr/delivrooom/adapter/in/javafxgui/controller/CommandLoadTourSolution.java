@@ -59,4 +59,6 @@ public class CommandLoadTourSolution implements Command{
         controller.couriersProperty().setAll(sourceCouriers);
         controller.transitionToState(sourceState);
     }
+
+    //TODO: redo
 }
