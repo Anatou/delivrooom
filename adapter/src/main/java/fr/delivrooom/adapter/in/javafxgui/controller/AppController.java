@@ -12,10 +12,12 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.Alert;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -572,6 +574,20 @@ public class AppController {
      */
     public void toggleMemeMode() {
         memeModeProperty.set(!memeModeProperty.get());
+    }
+
+    public void saveTourSolution(String filename) {
+        TourSolutionSerialiserIO tourSolutionSerialiserIO = new TourSolutionSerialiserIO();
+        List<TourSolution> tourList = new ArrayList<>();
+        for (Courier courier : couriers) {
+            tourList.add(courier.getTourSolution());
+        }
+        try {
+            tourSolutionSerialiserIO.saveList(tourList, filename);
+        }
+        catch (IOException e) {
+            showError("Tour saving error", "Unable to save Tour");
+        }
     }
 
     // ============================================================================

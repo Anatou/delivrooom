@@ -5,6 +5,7 @@ import fr.delivrooom.application.model.Delivery;
 import fr.delivrooom.application.model.Intersection;
 
 import java.net.URL;
+import java.util.List;
 
 /**
  * Deliveries loaded state - both map and deliveries have been loaded.
@@ -72,5 +73,22 @@ public record StateDeliveriesLoaded(AppController controller) implements State {
     @Override
     public String getStateName() {
         return "DeliveriesLoadedState";
+    }
+
+    @Override
+    public void saveTour(String filename) {
+        // in this state, there might be tours calculated for some couriers
+        boolean anyTourToSave = false;
+
+        List<Courier> courierList = controller.couriersProperty();
+        for (Courier courier : courierList) {
+            if (courier.getTourSolution() != null) {
+                anyTourToSave = true;
+                break;
+            }
+        }
+        if (anyTourToSave) {
+            controller.saveTourSolution(filename);
+        }
     }
 }

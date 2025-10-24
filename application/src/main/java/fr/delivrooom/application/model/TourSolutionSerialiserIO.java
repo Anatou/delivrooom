@@ -4,33 +4,23 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class TourSolutionSerialiserIO {
-    private TourSolutionSerialiserIO() { /* utilitaire */ }
+public class TourSolutionSerialiserIO {
+    public TourSolutionSerialiserIO() { /* utilitaire */ }
 
-    public static void saveObject(TourSolutionSerialiser obj, File file) throws IOException {
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file))) {
-            oos.writeObject(obj);
-        }
-    }
-
-    public static TourSolutionSerialiser loadObject(File file) throws IOException, ClassNotFoundException {
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
-            return (TourSolutionSerialiser) ois.readObject();
-        }
-    }
-
-    public static void saveList(List<TourSolutionSerialiser> list, File file) throws IOException {
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file))) {
+    public void saveList(List<TourSolution> list, String filename) throws IOException {
+        // Write
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("TourSolution.bin"))) {
             oos.writeObject(list);
         }
+        System.out.println("Successfully dumped TourSolution object");
     }
 
     @SuppressWarnings("unchecked")
-    public static List<TourSolutionSerialiser> loadList(File file) throws IOException, ClassNotFoundException {
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
+    public List<TourSolution> loadList(String filename) throws IOException, ClassNotFoundException {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filename))) {
             Object obj = ois.readObject();
             if (obj instanceof List) {
-                return (List<TourSolutionSerialiser>) obj;
+                return (List<TourSolution>) obj;
             } else {
                 return new ArrayList<>();
             }

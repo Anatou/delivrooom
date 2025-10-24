@@ -5,6 +5,7 @@ import fr.delivrooom.application.model.Delivery;
 import fr.delivrooom.application.model.Intersection;
 
 import java.net.URL;
+import java.util.List;
 
 /**
  * Initial state - no map or deliveries loaded yet.
@@ -78,5 +79,10 @@ public record StateInitial(AppController controller) implements State {
     @Override
     public String getStateName() {
         return "InitialState";
+    }
+
+    @Override
+    public void saveTour(String filename) {
+        controller.showError("Unable to save tour", "No tour has been calculated yet.");
     }
 }
