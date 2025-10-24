@@ -11,13 +11,22 @@ import fr.delivrooom.application.model.*;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
+import javafx.scene.Scene;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
+import javafx.scene.text.TextAlignment;
+import org.kordamp.ikonli.fontawesome6.FontAwesomeSolid;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,6 +37,9 @@ public class MapOverlay extends StackPane {
     private final Canvas canvasLayer;
     private final Pane deliveryLayer;
     private final Pane intersectionLayer;
+    private final Image storeImageIcon;
+    private final Image pickupImageIcon;
+    private final Image depositImageIcon;
     private final double unit_fixed = 5; // The unit size for roads and points dimensioning, fixed with the map
     private double unit_scalable = 5; // The unit size for roads and points dimensioning, scaling with the map
     private double width;
@@ -40,6 +52,12 @@ public class MapOverlay extends StackPane {
         this.canvasLayer = new Canvas();
         this.deliveryLayer = new Pane();
         this.intersectionLayer = new Pane();
+
+        final Pane dummyPane = new Pane();
+        final Scene dummyScene = new Scene(dummyPane);
+        storeImageIcon = getImageIcon(FontAwesomeSolid.WAREHOUSE, dummyPane, Color.GREEN);
+        pickupImageIcon = getImageIcon(FontAwesomeSolid.ARROW_CIRCLE_UP, dummyPane, Color.BLUE);
+        depositImageIcon = getImageIcon(FontAwesomeSolid.ARROW_CIRCLE_DOWN, dummyPane, Color.RED);
 
         getChildren().addAll(canvasLayer, deliveryLayer, intersectionLayer);
 
@@ -130,7 +148,7 @@ public class MapOverlay extends StackPane {
         gc.setFill(Color.WHITE);
         gc.setStroke(Color.rgb(220, 220, 220));
         for (Intersection intersection : cityMap.intersections().values()) {
-            drawIntersection(gc, scale, minX, minY, intersection, 1.3 * unit_scalable, true);
+            drawIntersection(gc, scale, minX, minY, intersection, 1.3 * unit_scalable, null, null);
         }
 
         // Draw deliveries demands
@@ -235,15 +253,21 @@ public class MapOverlay extends StackPane {
             }
         }
 
+            if (tourSolution != null) {
+                gc.setStroke(Color.LIMEGREEN);
+                gc.setLineWidth(2 * unit_scalable);
+
                 for (Path path : tourSolution.paths()) {
                     List<Road> roads = path.intersections();
-                    int i = 0;
+                    float deltaArrow = 0;
                     for (Road road : roads) {
-                        i++;
-                        boolean drawArrow = i%5 == 0;
+                        deltaArrow += road.getLength();
+                        boolean drawArrow = false;
+                        if (deltaArrow > 500) { drawArrow = true; deltaArrow = 0; }
                         drawRoad(gc, scale, minX, minY, road, drawArrow);
                     }
                 }
+            }
 
         gc.setTextAlign(javafx.scene.text.TextAlignment.CENTER);
         gc.setTextBaseline(javafx.geometry.VPos.CENTER);
@@ -277,12 +301,21 @@ public class MapOverlay extends StackPane {
                 textColor = Color.WHITE;
             }
 
+            // Draw warehouse point in green
+            drawIntersection(gc, scale, minX, minY, deliveriesDemand.store(), 4 * unit_scalable, storeImageIcon, null);
             gc.setFill(bgColor);
             gc.fillOval(x - numBgRadius, y - numBgRadius, numBgRadius * 2.0, numBgRadius * 2.0);
             gc.setStroke(strokeColor);
             gc.setLineWidth(1.0);
             gc.strokeOval(x - numBgRadius, y - numBgRadius, numBgRadius * 2.0, numBgRadius * 2.0);
 
+            // Takeout point is a red square, delivery point in a blue circle
+            int deliveryDisplayId = 1;
+            for (Delivery delivery : deliveriesDemand.deliveries()) {
+                drawIntersection(gc, scale, minX, minY, delivery.takeoutIntersection(), 4 * unit_scalable, pickupImageIcon, String.valueOf(deliveryDisplayId));
+                drawIntersection(gc, scale, minX, minY, delivery.deliveryIntersection(), 4 * unit_scalable, depositImageIcon, String.valueOf(deliveryDisplayId));
+                deliveryDisplayId++;
+            }
             gc.setFill(textColor);
             gc.setFont(javafx.scene.text.Font.font(fontSize));
             gc.fillText(label, x, y);
@@ -351,14 +384,56 @@ public class MapOverlay extends StackPane {
     }
 
 
-    private void drawIntersection(GraphicsContext gc, double scale, double minX, double minY, Intersection intersection, double radius, boolean circle) {
+    private void drawIntersection(GraphicsContext gc, double scale, double minX, double minY, Intersection intersection, double radius, Image icon, String text) {
         double x = (intersection.getNormalizedX() - minX) * scale;
         double y = (intersection.getNormalizedY() - minY) * scale;
 
-        if (circle)
+        if (icon!=null) {
+            Paint oldColor = gc.getFill();
+            gc.setFill(Color.WHITE);
+            gc.fillOval(x - icon.getHeight()/1.5, y - icon.getHeight()/1.5, 2 * icon.getHeight()/1.5, 2 * icon.getHeight()/1.5);
+            gc.setFill(oldColor);
+            if (icon == storeImageIcon) {
+                gc.drawImage(icon, x-icon.getWidth()/3, y-icon.getHeight()/2.5, icon.getWidth()/1.5, icon.getHeight()/1.5);
+            } else {
+                gc.drawImage(icon, x-icon.getWidth()/2*1.5, y-icon.getHeight()/2*1.5, icon.getWidth()*1.5, icon.getHeight()*1.5);
+            }
+        } else {
             gc.fillOval(x - radius, y - radius, 2 * radius, 2 * radius);
-        else
-            gc.fillRect(x - radius, y - radius, 2 * radius, 2 * radius);
+        }
+
+        if (text != null) {
+            gc.setTextAlign(TextAlignment.CENTER);
+            gc.setTextBaseline(VPos.BASELINE);
+            Paint oldColor = gc.getFill();
+            double fontSize = radius;
+            double circleRadius = radius;
+            double x_offset = 0;
+            double y_offset = 0;
+            if (icon!=null) {
+                fontSize = icon.getHeight()/1.5;
+                circleRadius = icon.getHeight();
+                x_offset = icon.getWidth()/2;
+                y_offset = icon.getHeight()/2;
+            }
+            gc.setFont(javafx.scene.text.Font.font(fontSize));
+            gc.setFill(Color.WHITE);
+            gc.fillOval(x, y, circleRadius, circleRadius);
+            gc.setFill(Color.BLACK);
+            gc.fillText(text, x+x_offset, y+y_offset+fontSize/3);
+            gc.setFill(oldColor);
+        }
+    }
+
+    private Image getImageIcon(FontAwesomeSolid icon, Pane dummyPane, Paint iconColor) {
+        FontIcon fontIcon = new FontIcon(icon);
+        fontIcon.setIconColor(iconColor);
+        dummyPane.getChildren().add(fontIcon);
+        SnapshotParameters snapshotParameters = new SnapshotParameters();
+        snapshotParameters.setFill(Color.TRANSPARENT);
+        Image fontImage = fontIcon.snapshot(snapshotParameters, null);
+        dummyPane.getChildren().remove(fontIcon);
+        return fontImage;
     }
 
     private void drawRoad(GraphicsContext gc, double scale, double minX, double minY, Road road, Boolean drawArrow) {
@@ -372,7 +447,7 @@ public class MapOverlay extends StackPane {
         double x2 = (destin.getNormalizedX() - minX) * scale;
         double y2 = (destin.getNormalizedY() - minY) * scale;
 
-        System.out.println("scale: "+scale);
+        gc.strokeLine(x1, y1, x2, y2);
 
         if (drawArrow) {
             double road_vector_x = x2-x1;
@@ -383,8 +458,7 @@ public class MapOverlay extends StackPane {
 
             double alpha = Math.atan2(road_vector_y, road_vector_x) - Math.PI/2;
 
-            double triangle_size = 0.0000005*scale;
-            System.out.println("size = " + 0.0000005*scale);
+            double triangle_size = 0.000001*scale;
 
             double[] xPoints = {
                     -triangle_size*Math.sin(alpha) + triangle_center_x,
@@ -397,10 +471,12 @@ public class MapOverlay extends StackPane {
                     triangle_size*Math.cos(alpha + 2*Math.PI/3) + triangle_center_y,
                     triangle_size*Math.cos(alpha + 4*Math.PI/3) + triangle_center_y,
             };
-
-            gc.strokePolygon(xPoints, yPoints, 3);
+            Color oldColor = (Color)gc.getFill();
+            Color toDarken = (Color)gc.getStroke();
+            gc.setFill(toDarken.brighter());
+            gc.fillPolygon(xPoints, yPoints, 3);
+            gc.setFill(oldColor);
         }
-        gc.strokeLine(x1, y1, x2, y2);
     }
 
 }
