@@ -28,7 +28,7 @@ public class DeliveryCreationSection extends VBox {
     private Intersection delivery;
 
     public DeliveryCreationSection() {
-        super(10);
+        super(0);
         //setPadding(new Insets(10));
         setAlignment(Pos.TOP_LEFT);
         this.controller = AppController.getController();
@@ -42,7 +42,7 @@ public class DeliveryCreationSection extends VBox {
         durationSpinnerTakeout.setMinWidth(175);
         durationSpinnerTakeout.setId("durationSpinnerTakeout");
         durationSpinnerTakeout.setPromptText("Duration in minutes");
-        HBox selectIntersectionTakeout = new HBox(buttonTakeout, durationSpinnerTakeout);
+        HBox selectIntersectionTakeout = new HBox(5,buttonTakeout, durationSpinnerTakeout);
 
         // Create button and Sprinner : select delivery intersection and its duration
         Button buttonDelivery = new Button("Select Delivery Intersection");
@@ -53,7 +53,7 @@ public class DeliveryCreationSection extends VBox {
         durationSpinnerDelivery.setMinWidth(175);
         durationSpinnerDelivery.setId("durationSpinnerDelivery");
         durationSpinnerDelivery.setPromptText("Duration in minutes");
-        HBox selectIntersectionDelivery = new HBox(buttonDelivery, durationSpinnerDelivery);
+        HBox selectIntersectionDelivery = new HBox(5,buttonDelivery, durationSpinnerDelivery);
 
         // Create button Confirm the choice of the selected Delivery
         Button buttonConfirmAddDelivery = new Button("Add Delivery");
@@ -88,7 +88,7 @@ public class DeliveryCreationSection extends VBox {
         });
 
 
-        this.addDeliveryBox = new VBox(8,
+        this.addDeliveryBox = new VBox(5,
                 selectIntersectionTakeout,
                 selectIntersectionDelivery,
                 buttonConfirmAddDelivery
