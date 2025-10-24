@@ -1,8 +1,6 @@
 package fr.delivrooom.adapter.in.javafxgui.controller;
 
-import fr.delivrooom.application.model.Courier;
-import fr.delivrooom.application.model.Delivery;
-import fr.delivrooom.application.model.Intersection;
+import fr.delivrooom.application.model.*;
 
 import java.net.URL;
 import java.util.List;
@@ -90,10 +88,14 @@ public record StateSelectIntersection(AppController controller) implements State
         }
         if (anyTourToSave) {
             System.out.println("Check tour saved...");
-            controller.saveTourSolution(filename);
+            controller.doSaveTourSolution(filename);
         }
         else {
             controller.showError("No tour calculated", "No tour to save from any courier");
         }
+    }
+
+    public CommandResult createLoadTourCommand(CityMap sourceCityMap, DeliveriesDemand sourceDeliveriesDemand, List<Courier> sourceCouriers, String filename) {
+        return CommandResult.success( new CommandLoadTourSolution(controller, this, sourceCityMap, sourceDeliveriesDemand, sourceCouriers, filename) );
     }
 }

@@ -1,10 +1,9 @@
 package fr.delivrooom.adapter.in.javafxgui.controller;
 
-import fr.delivrooom.application.model.Courier;
-import fr.delivrooom.application.model.Delivery;
-import fr.delivrooom.application.model.Intersection;
+import fr.delivrooom.application.model.*;
 
 import java.net.URL;
+import java.util.List;
 
 /**
  * Map loaded state - a map has been loaded.
@@ -81,5 +80,9 @@ public record StateMapLoaded(AppController controller) implements State {
 
     public void saveTour(String filename) {
         controller.showError("Unable to save tour", "No tour has been calculated yet.");
+    }
+
+    public CommandResult createLoadTourCommand(CityMap sourceCityMap, DeliveriesDemand sourceDeliveriesDemand, List<Courier> sourceCouriers, String filename) {
+        return CommandResult.success( new CommandLoadTourSolution(controller, this, sourceCityMap, sourceDeliveriesDemand, sourceCouriers, filename) );
     }
 }

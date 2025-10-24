@@ -1,10 +1,9 @@
 package fr.delivrooom.adapter.in.javafxgui.controller;
 
-import fr.delivrooom.application.model.Courier;
-import fr.delivrooom.application.model.Delivery;
-import fr.delivrooom.application.model.Intersection;
+import fr.delivrooom.application.model.*;
 
 import java.net.URL;
+import java.util.List;
 
 /**
  * State interface for the State design pattern implementing Command Factory pattern.
@@ -120,4 +119,6 @@ public interface State {
     String getStateName();
 
     void saveTour(String filename);
+
+    CommandResult createLoadTourCommand(CityMap sourceCityMap, DeliveriesDemand sourceDeliveriesDemand, List<Courier> sourceCouriers, String filename);
 }

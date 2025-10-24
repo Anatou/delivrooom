@@ -478,6 +478,25 @@ public class AppController {
         this.deliveriesDemand.invalidate();
     }
 
+    protected void doSaveTourSolution(String filename) {
+        TourSolutionSerialiserIO tourSolutionSerialiserIO = new TourSolutionSerialiserIO();
+        List<TourSolution> tourList = new ArrayList<>();
+        for (Courier courier : couriers) {
+            tourList.add(courier.getTourSolution());
+        }
+        try {
+            TourSolutionSerialiser serial = new TourSolutionSerialiser(cityMap.get(), deliveriesDemand.get(), tourList);
+            tourSolutionSerialiserIO.saveTourSolutionSerialization(serial, filename);
+        }
+        catch (IOException e) {
+            showError("Tour saving error", "Unable to save Tour");
+        }
+    }
+
+    protected void doLoadTourSolution(TourSolutionSerialiser tourSolutionSerialiser) {
+        // logique de chargement
+    }
+
     /**
      * Transition to a new state.
      * Called by commands and states.
@@ -568,19 +587,7 @@ public class AppController {
         memeModeProperty.set(!memeModeProperty.get());
     }
 
-    public void saveTourSolution(String filename) {
-        TourSolutionSerialiserIO tourSolutionSerialiserIO = new TourSolutionSerialiserIO();
-        List<TourSolution> tourList = new ArrayList<>();
-        for (Courier courier : couriers) {
-            tourList.add(courier.getTourSolution());
-        }
-        try {
-            tourSolutionSerialiserIO.saveList(tourList, filename);
-        }
-        catch (IOException e) {
-            showError("Tour saving error", "Unable to save Tour");
-        }
-    }
+
 
     // ============================================================================
     // PRIVATE/UTILITY METHODS

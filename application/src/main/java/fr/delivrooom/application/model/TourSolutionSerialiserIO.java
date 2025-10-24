@@ -7,23 +7,20 @@ import java.util.List;
 public class TourSolutionSerialiserIO {
     public TourSolutionSerialiserIO() { /* utilitaire */ }
 
-    public void saveList(List<TourSolution> list, String filename) throws IOException {
+    public void saveTourSolutionSerialization(TourSolutionSerialiser serial, String filename) throws IOException {
         // Write
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("TourSolution.bin"))) {
-            oos.writeObject(list);
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filename))) {
+            oos.writeObject(serial);
         }
-        System.out.println("Successfully dumped TourSolution object");
+        System.out.println("Successfully dumped Serialisation object");
     }
 
-    @SuppressWarnings("unchecked")
-    public List<TourSolution> loadList(String filename) throws IOException, ClassNotFoundException {
+    public TourSolutionSerialiser loadTourSolutionSerialization(String filename) throws IOException, ClassNotFoundException {
+        TourSolutionSerialiser obj;
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filename))) {
-            Object obj = ois.readObject();
-            if (obj instanceof List) {
-                return (List<TourSolution>) obj;
-            } else {
-                return new ArrayList<>();
-            }
+            obj = (TourSolutionSerialiser) ois.readObject();
         }
+
+        return obj;
     }
 }
