@@ -9,6 +9,7 @@ import fr.delivrooom.adapter.in.javafxgui.controller.StateSelectIntersection;
 import fr.delivrooom.adapter.in.javafxgui.panes.sidebar.delivery.DeliveryTooltip;
 import fr.delivrooom.application.model.*;
 import javafx.geometry.Point2D;
+import javafx.geometry.VPos;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -17,8 +18,6 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -163,26 +162,18 @@ public class MapOverlay extends StackPane {
                     // attribute a color to each courier path
                     System.out.println("Drawing tour for courier: " + courier.getId());
                     displayTourSolution(courier);
-                    isStoreDrawn = true;
                     // Remove delivered deliveries from deliveriesLeft
-                    DeliveriesDemand courierDemand = courier.getDeliveriesDemand();
-                    for (Delivery d : courierDemand.deliveries()) {
-                        deliveriesLeft.deliveries().remove(d);
-                    }
                 }
             }
             // Display the remaining deliveries in red for pickup and blue for delivery
             // Draw warehouse point in green
-            if (!isStoreDrawn) {
-                gc.setFill(Color.GREEN);
-                drawIntersection(gc, scale, minX, minY, deliveriesLeft.store(), 4 * unit_scalable, true);
-            }
+            drawIntersection(gc, scale, minX, minY, deliveriesLeft.store(), 4 * unit_scalable, storeImageIcon, null);
             // Takeout point is a red square, delivery point in a blue circle
-            for (Delivery delivery : deliveriesLeft.deliveries()) {
-                gc.setFill(Color.BLUE);
-                drawIntersection(gc, scale, minX, minY, delivery.takeoutIntersection(), 4 * unit_scalable, false);
-                gc.setFill(Color.RED);
-                drawIntersection(gc, scale, minX, minY, delivery.deliveryIntersection(), 4 * unit_scalable, true);
+            int deliveryDisplayId = 1;
+            for (Delivery delivery : deliveriesDemand.deliveries()) {
+                drawIntersection(gc, scale, minX, minY, delivery.takeoutIntersection(), 4 * unit_scalable, pickupImageIcon, String.valueOf(deliveryDisplayId));
+                drawIntersection(gc, scale, minX, minY, delivery.deliveryIntersection(), 4 * unit_scalable, depositImageIcon, String.valueOf(deliveryDisplayId));
+                deliveryDisplayId++;
             }
 
         }
@@ -202,126 +193,26 @@ public class MapOverlay extends StackPane {
         TourSolution tourSolution = courier.getTourSolution();
         Color courierColor = Color.hsb((courier.getId() * 137) % 360, 0.7, 0.9);
 
-
-
         // Draw the calculated tour if available (numbers only on store/pickup/delivery in visit order)
         gc.setStroke(courierColor);
+        gc.setFill(courierColor);
         gc.setLineWidth(4 * unit_scalable);
         // Build map of target intersection ids -> type ("store","pickup","delivery")
 
+        if (tourSolution != null) {
+            gc.setLineWidth(2 * unit_scalable);
 
-        HashMap<Long, String> targetTypes = new HashMap<>();
-        Intersection store = deliveriesDemand.store();
-        if (store != null) targetTypes.put(store.getId(), "store");
-        for (Delivery d : deliveriesDemand.deliveries()) {
-            if (d.takeoutIntersection() != null) {
-                targetTypes.putIfAbsent(d.takeoutIntersection().getId(), "pickup");
-            }
-            if (d.deliveryIntersection() != null) {
-                targetTypes.putIfAbsent(d.deliveryIntersection().getId(), "delivery");
-            }
-        }
-
-        // Build visit order position map (warehouse is 1, first pickup is 2, etc.)
-        List<Long> visitOrder = tourSolution.deliveryOrder();
-        HashMap<Long, Integer> visitPos = new HashMap<>();
-        int pos = 1;
-        for (Long id : visitOrder) {
-            visitPos.put(id, pos++);
-        }
-
-        // Build delivery to pickup map
-        HashMap<Long, Long> deliveryToPickup = new HashMap<>();
-        for (Delivery d : deliveriesDemand.deliveries()) {
-            if (d.deliveryIntersection() != null && d.takeoutIntersection() != null) {
-                deliveryToPickup.put(d.deliveryIntersection().getId(), d.takeoutIntersection().getId());
-            }
-        }
-
-        // Build labels for each visited target (for deliveries, show pickup and delivery positions with a dot)
-        HashMap<Long, String> labels = new HashMap<>();
-        for (Long id : visitOrder) {
-            String type = targetTypes.get(id);
-            Integer myPos = visitPos.get(id);
-            if ("delivery".equals(type)) {
-                Long pickupId = deliveryToPickup.get(id);
-                Integer pickupPos = pickupId != null ? visitPos.get(pickupId) : null;
-                String suffix = (pickupPos != null) ? String.valueOf(pickupPos) : "?";
-                labels.put(id, (myPos != null ? myPos : -1) + "." + suffix);
-            } else {
-                labels.put(id, myPos != null ? String.valueOf(myPos) : "?");
-            }
-        }
-
-            if (tourSolution != null) {
-                gc.setStroke(Color.LIMEGREEN);
-                gc.setLineWidth(2 * unit_scalable);
-
-                for (Path path : tourSolution.paths()) {
-                    List<Road> roads = path.intersections();
-                    float deltaArrow = 0;
-                    for (Road road : roads) {
-                        deltaArrow += road.getLength();
-                        boolean drawArrow = false;
-                        if (deltaArrow > 500) { drawArrow = true; deltaArrow = 0; }
-                        drawRoad(gc, scale, minX, minY, road, drawArrow);
-                    }
+            for (Path path : tourSolution.paths()) {
+                List<Road> roads = path.intersections();
+                float deltaArrow = 0;
+                for (Road road : roads) {
+                    deltaArrow += road.getLength();
+                    boolean drawArrow = false;
+                    if (deltaArrow > 500) { drawArrow = true; deltaArrow = 0; }
+                    drawRoad(gc, scale, minX, minY, road, drawArrow);
                 }
             }
-
-        gc.setTextAlign(javafx.scene.text.TextAlignment.CENTER);
-        gc.setTextBaseline(javafx.geometry.VPos.CENTER);
-
-        for (Long id : visitOrder) {
-            String label = labels.get(id);
-            if (label == null) continue;
-            Intersection inter = cityMap.intersections().get(id);
-            if (inter == null) continue;
-            double x = (inter.getNormalizedX() - minX) * scale;
-            double y = (inter.getNormalizedY() - minY) * scale;
-
-            double fontSize = Math.max(10.0, 6.0 * unit_scalable);
-            double numBgRadius = fontSize;
-
-            String type = targetTypes.get(id);
-            Color bgColor = Color.WHITE;
-            Color strokeColor = Color.DARKGREEN;
-            Color textColor = Color.DARKGREEN;
-            if ("store".equals(type)) {
-                bgColor = Color.GREEN;
-                strokeColor = Color.DARKGREEN;
-                textColor = Color.WHITE;
-            } else if ("pickup".equals(type)) {
-                bgColor = Color.BLUE;
-                strokeColor = Color.DARKBLUE;
-                textColor = Color.WHITE;
-            } else if ("delivery".equals(type)) {
-                bgColor = Color.RED;
-                strokeColor = Color.DARKRED;
-                textColor = Color.WHITE;
-            }
-
-            // Draw warehouse point in green
-            drawIntersection(gc, scale, minX, minY, deliveriesDemand.store(), 4 * unit_scalable, storeImageIcon, null);
-            gc.setFill(bgColor);
-            gc.fillOval(x - numBgRadius, y - numBgRadius, numBgRadius * 2.0, numBgRadius * 2.0);
-            gc.setStroke(strokeColor);
-            gc.setLineWidth(1.0);
-            gc.strokeOval(x - numBgRadius, y - numBgRadius, numBgRadius * 2.0, numBgRadius * 2.0);
-
-            // Takeout point is a red square, delivery point in a blue circle
-            int deliveryDisplayId = 1;
-            for (Delivery delivery : deliveriesDemand.deliveries()) {
-                drawIntersection(gc, scale, minX, minY, delivery.takeoutIntersection(), 4 * unit_scalable, pickupImageIcon, String.valueOf(deliveryDisplayId));
-                drawIntersection(gc, scale, minX, minY, delivery.deliveryIntersection(), 4 * unit_scalable, depositImageIcon, String.valueOf(deliveryDisplayId));
-                deliveryDisplayId++;
-            }
-            gc.setFill(textColor);
-            gc.setFont(javafx.scene.text.Font.font(fontSize));
-            gc.fillText(label, x, y);
         }
-
-
     }
 
     public void updateDeliveryLayer() {
@@ -478,5 +369,4 @@ public class MapOverlay extends StackPane {
             gc.setFill(oldColor);
         }
     }
-
 }
