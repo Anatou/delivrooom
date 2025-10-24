@@ -1,6 +1,10 @@
 package fr.delivrooom.application.model;
 
-public class Intersection {
+import java.io.*;
+
+public class Intersection implements Serializable{
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     protected final long id;
     protected final double latitude;

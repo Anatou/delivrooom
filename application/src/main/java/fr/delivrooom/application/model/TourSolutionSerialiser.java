@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 public class TourSolutionSerialiser implements Serializable {
-    public List<String> mapNodes
+    public List<String> mapNodes;
     public List<Long> verticesOrder;
     public List<Long> deliveryOrder;
     public List<Long> deliveryOrderTime;

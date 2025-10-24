@@ -13,7 +13,7 @@ import java.util.*;
 
 public class TourCalculatorService implements CalculateTourUseCase {
 
-    protected boolean useDynamicProgramming = false;
+    protected boolean useDynamicProgramming = true;
     protected boolean hasMapChangedSinceLastCompute;
     protected CityGraph graph;
     protected TourSolution tourSolution;
