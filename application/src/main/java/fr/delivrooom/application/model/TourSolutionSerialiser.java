@@ -22,4 +22,13 @@ public record TourSolutionSerialiser(CityMap cityMap, DeliveriesDemand demand, L
     public List<TourSolution> tourSolutionList() {
         return tourSolutionList;
     }
+
+    @Override
+    public String toString() {
+        return "TourSolutionSerialiser{" +
+                "cityMap=" + cityMap +
+                ", demand=" + demand +
+                ", tourSolutionList=" + tourSolutionList +
+                '}';
+    }
 }
