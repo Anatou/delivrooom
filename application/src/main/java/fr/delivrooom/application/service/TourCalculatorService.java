@@ -1,11 +1,13 @@
 package fr.delivrooom.application.service;
 
 import fr.delivrooom.application.model.*;
-import fr.delivrooom.application.model.tsp.DynamicProgrammingTSP;
-import fr.delivrooom.application.model.tsp.TSP;
-import fr.delivrooom.application.model.tsp.TSP3;
 import fr.delivrooom.application.port.in.CalculateTourUseCase;
 import fr.delivrooom.application.port.out.NotifyTSPProgressToGui;
+import fr.delivrooom.application.service.tourcalculator.CityGraph;
+import fr.delivrooom.application.service.tourcalculator.ShortestPathsGraph;
+import fr.delivrooom.application.service.tourcalculator.tsp.DynamicProgrammingTSP;
+import fr.delivrooom.application.service.tourcalculator.tsp.TSP;
+import fr.delivrooom.application.service.tourcalculator.tsp.TSP3;
 
 import java.util.*;
 
@@ -54,7 +56,8 @@ public class TourCalculatorService implements CalculateTourUseCase {
     public void findOptimalTour(DeliveriesDemand demand, boolean useTimeAsCost) throws RuntimeException {
         // first : find all shortest paths between any pair of nodes in the graph
         hasMapChangedSinceLastCompute = false;
-        calculatedDemand = demand;
+
+        calculatedDemand = new DeliveriesDemand(new ArrayList<>(demand.deliveries()), demand.store());
 
         if (graph == null) {
             throw new RuntimeException("CityGraph must be in TourCalculator before attempting to find optimal tour");

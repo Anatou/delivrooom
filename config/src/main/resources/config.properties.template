@@ -2,4 +2,4 @@
 # Copy this file to config.properties and fill in your actual API key
 maptiler.api.key=YOUR_MAPTILER_API_KEY_HERE
 maptiler.url=https://api.maptiler.com/tiles/satellite-v2/
-map.zoom.scaleFactor=1
+maptiler.zoom.level=13

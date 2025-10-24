@@ -48,7 +48,7 @@ public class JavaFXApp extends javafx.application.Application {
         setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
 
         stage.setTitle("Delivrooom");
-        stage.setScene(new Scene(mainPane, 800, 500));
+        stage.setScene(new Scene(mainPane, 1300, 750));
         mainPane.setStageAndScene(stage, stage.getScene());
         //stage.getIcons().add(new Image(Objects.requireNonNull(JavaFXApp.class.getResourceAsStream("/assets/logo_mini.png"))));
         stage.show();

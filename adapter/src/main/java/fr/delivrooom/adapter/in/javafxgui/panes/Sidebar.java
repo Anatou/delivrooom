@@ -1,6 +1,5 @@
 package fr.delivrooom.adapter.in.javafxgui.panes;
 
-import fr.delivrooom.adapter.in.javafxgui.controller.AppController;
 import fr.delivrooom.adapter.in.javafxgui.panes.sidebar.BottomSection;
 import fr.delivrooom.adapter.in.javafxgui.panes.sidebar.DeliveryCreationSection;
 import fr.delivrooom.adapter.in.javafxgui.panes.sidebar.TestSection;
@@ -68,52 +67,12 @@ public class Sidebar extends VBox {
 
         // Add all components to sidebar
         getChildren().addAll(scrollPane, getNoPaddingSeparator(), bottomSection);
-
-        // Listen to deliveries changes to refresh the list
-        AppController.getController().stateProperty().addListener((obs, oldState, newState) -> {
-            deliveriesSection.refreshDeliveries();
-        });
     }
 
     private Separator getNoPaddingSeparator() {
         Separator separator = new Separator();
         separator.setPadding(new Insets(0, 0, 0, 0));
         return separator;
-    }
-
-    /**
-     * Get the delivery creation section.
-     */
-    public DeliveryCreationSection getDeliveryCreationSection() {
-        return deliveryCreationSection;
-    }
-
-    /**
-     * Get the couriers section.
-     */
-    public CouriersSection getCouriersSection() {
-        return couriersSection;
-    }
-
-    /**
-     * Get the deliveries section.
-     */
-    public DeliveriesSection getDeliveriesSection() {
-        return deliveriesSection;
-    }
-
-    /**
-     * Get the test section.
-     */
-    public TestSection getTestSection() {
-        return testSection;
-    }
-
-    /**
-     * Get the bottom section.
-     */
-    public BottomSection getBottomSection() {
-        return bottomSection;
     }
 
 }

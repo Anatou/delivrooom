@@ -72,6 +72,10 @@ public class MapTiles extends Canvas {
         System.out.println("Tile cache cleared");
     }
 
+    public void clear() {
+        getGraphicsContext2D().clearRect(0, 0, getWidth(), getHeight());
+    }
+
 
     /**
      * Get the tile unique identifier (key) used in the cache
@@ -123,9 +127,14 @@ public class MapTiles extends Canvas {
                 }
 
                 // Normal map tile loading
-                String urlStr = MAPTILER_URL + tileKey + ".jpg?key=" + MAPTILER_API_KEY;
-                URL url = new URI(urlStr).toURL();
-                System.out.println("Downloading tile " + tileKey);
+                URL url = MapTiles.class.getResource("/tiles-cache/" + tileKey.replace("/", "_") + ".jpg");
+                if (url == null) {
+                    String urlStr = MAPTILER_URL + tileKey + ".jpg?key=" + MAPTILER_API_KEY;
+                    url = new URI(urlStr).toURL();
+                    System.out.println("Downloading tile " + tileKey);
+                } else {
+                    System.out.println("Loading tile " + tileKey + " from file cache");
+                }
 
                 // Load image in a background thread
                 Image image = new Image(url.toString());

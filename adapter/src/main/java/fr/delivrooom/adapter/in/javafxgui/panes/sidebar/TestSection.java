@@ -1,11 +1,8 @@
+
 package fr.delivrooom.adapter.in.javafxgui.panes.sidebar;
 
 import fr.delivrooom.adapter.in.javafxgui.JavaFXApp;
-import fr.delivrooom.adapter.in.javafxgui.command.AddDeliveryCommand;
-import fr.delivrooom.adapter.in.javafxgui.command.RemoveDeliveryCommand;
 import fr.delivrooom.adapter.in.javafxgui.controller.AppController;
-import fr.delivrooom.application.model.Delivery;
-import fr.delivrooom.application.model.Intersection;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -22,6 +19,7 @@ import org.kordamp.ikonli.javafx.FontIcon;
 public class TestSection extends VBox {
 
     private final TitledPane titledPane;
+    private AppController controller;
 
     public TestSection() {
         super(0);
@@ -57,7 +55,7 @@ public class TestSection extends VBox {
     }
 
     private VBox createTestContent() {
-        AppController controller = AppController.getController();
+        this.controller = AppController.getController();
 
         VBox container = new VBox(10);
         container.setPadding(new Insets(10, 0, 0, 0));
@@ -81,12 +79,54 @@ public class TestSection extends VBox {
             nameLabel.setText("Name: " + name);
         });
 
+        /*
         // Add test delivery button
         Button addDeliveryBtn = new Button("Add Test Delivery");
         addDeliveryBtn.setGraphic(new FontIcon(FontAwesomeSolid.PLUS));
         addDeliveryBtn.setMaxWidth(Double.MAX_VALUE);
         addDeliveryBtn.getStyleClass().add("success");
         addDeliveryBtn.setOnAction(e -> handleAddTestDelivery());
+
+        Label labelTakeout = new Label("Selected TakeOut Intersection: ");
+        labelTakeout.setId("labelTakeout");
+        Button buttonTakeout = new Button("Select TakeOut Intersection");
+        Label labelDelivery = new Label("Selected Delivery Intersection: ");
+        labelDelivery.setId("labelDelivery");
+        Button buttonDelivery = new Button("Select Delivery Intersection");
+        Button buttonConfirmAddDelivery = new Button("Confirm");
+
+        buttonTakeout.setOnAction(e -> {
+            handleTakeoutSelection("add");
+
+
+        });
+        buttonDelivery.setOnAction(e -> {
+            handleDeliverySelection("add");
+
+        });
+
+
+        Label addTitle = new Label("Add Delivery");
+        addTitle.setStyle("-fx-font-weight: bold; -fx-font-size: 14;");
+        VBox addDeliveryBox = new VBox(8, addTitle, addDeliveryBtn,
+                new Separator(),
+                labelTakeout, buttonTakeout,
+                labelDelivery, buttonDelivery,
+                buttonConfirmAddDelivery
+        );
+        addDeliveryBox.setPadding(new Insets(10));
+        addDeliveryBox.setId("addDeliveryBox");
+        addDeliveryBox.setAlignment(Pos.CENTER_LEFT);
+        addDeliveryBox.setStyle("-fx-background-color: #ffffff; -fx-border-color: #dddddd; -fx-border-radius: 5; -fx-background-radius: 5;");
+        addDeliveryBox.setVisible(false);
+        addDeliveryBox.setManaged(false);
+        buttonConfirmAddDelivery.setOnAction(e -> {
+            handleConfirmAddDelivery();
+            addDeliveryBox.setVisible(false);
+            addDeliveryBox.setManaged(false);
+
+        });
+
 
         // Remove test delivery button
         Button removeDeliveryBtn = new Button("Remove Test Delivery");
@@ -95,38 +135,142 @@ public class TestSection extends VBox {
         removeDeliveryBtn.getStyleClass().add("danger");
         removeDeliveryBtn.setOnAction(e -> handleRemoveTestDelivery());
 
-        container.getChildren().addAll(
+        Label labelTakeout2 = new Label("Selected TakeOut Intersection: ");
+        labelTakeout2.setId("labelTakeout2");
+        Button buttonTakeout2 = new Button("Select TakeOut Intersection");
+        Label labelDelivery2 = new Label("Selected Delivery Intersection: ");
+        labelDelivery2.setId("labelDelivery2");
+        Button buttonDelivery2 = new Button("Select Delivery Intersection");
+        Button buttonConfirmRemoveDelivery = new Button("Confirm");
+        Label removeTitle = new Label("Remove Delivery");
+        removeTitle.setStyle("-fx-font-weight: bold; -fx-font-size: 14;");
+        buttonTakeout2.setOnAction(e -> {
+            handleTakeoutSelection("remove");
+        });
+        buttonDelivery2.setOnAction(e -> {
+            handleDeliverySelection("remove");
+        });
+        VBox removeDeliveryBox = new VBox(8, removeTitle, removeDeliveryBtn,
+                new Separator(),
+                labelTakeout2, buttonTakeout2,
+                labelDelivery2, buttonDelivery2,
+                buttonConfirmRemoveDelivery
+        );
+        removeDeliveryBox.setPadding(new Insets(10));
+        removeDeliveryBox.setId("removeDeliveryBox");
+        removeDeliveryBox.setAlignment(Pos.CENTER_LEFT);
+        removeDeliveryBox.setStyle("-fx-background-color: #ffffff; -fx-border-color: #dddddd; -fx-border-radius: 5; -fx-background-radius: 5;");
+        removeDeliveryBox.setVisible(false);
+        removeDeliveryBox.setManaged(false);
+        buttonConfirmRemoveDelivery.setOnAction(e -> {
+            handleConfirmRemoveDelivery();
+            removeDeliveryBox.setVisible(false);
+            removeDeliveryBox.setManaged(false);
+
+        });
+
+         */
+
+
+        /*container.getChildren().addAll(
                 stateLabel,
                 nameLabel,
                 getNameBtn,
                 addDeliveryBtn,
-                removeDeliveryBtn
+                addDeliveryBox,
+                removeDeliveryBtn,
+                removeDeliveryBox
+        );*/
+        container.getChildren().addAll(
+                stateLabel,
+                nameLabel,
+                getNameBtn
         );
 
         return container;
+    }
+    /*
+
+    private void handleConfirmAddDelivery(){
+
+
+        Delivery addedDelivery = new Delivery(this.takeout, this.delivery, 5, 5);
+        AddDeliveryCommand addDeliveryCommand = new AddDeliveryCommand(controller, addedDelivery);
+        controller.getCommandManager().executeCommand(addDeliveryCommand);
+
+        //controller.updateMapCanvas();
+    }
+    private void handleConfirmRemoveDelivery(){
+        System.out.println("takeout : "+takeout.getId()+ " delivery : "+delivery.getId());
+        Delivery removedDelivery = controller.getDeliveriesDemand().getDeliveryByIds((int) takeout.getId(), (int) delivery.getId());
+        RemoveDeliveryCommand removeDeliveryCommand = new RemoveDeliveryCommand(controller, removedDelivery);
+        if (removedDelivery != null) {
+            controller.getCommandManager().executeCommand(removeDeliveryCommand);
+        }else{
+            System.out.println("Delivery n'existe pas");
+        }
+        //controller.updateMapCanvas();
+    }
+
+    private void handleTakeoutSelection(String mode){
+        this.intersectionIsSelected = false;
+        if ( mode == "add") {
+            controller.handleRequestIntersectionSelection();
+            controller.setSidebarWaitingFor("addTakeout", this);
+
+            //takeoutId = controller.getMapCanvas().updateAddLayer();
+        }else{
+            controller.handleRequestIntersectionSelection();
+            controller.setSidebarWaitingFor("removeTakeout", this);
+            //takeoutId = controller.getMapCanvas().updateRemoveLayer();
+        }
+    }
+    private void handleDeliverySelection(String mode){
+        if ( mode == "add") {
+            controller.handleRequestIntersectionSelection();
+            controller.setSidebarWaitingFor("addDelivery", this);
+            //deliveryId = controller.getMapCanvas().updateAddLayer();
+        }else{
+            controller.handleRequestIntersectionSelection();
+            controller.setSidebarWaitingFor("removeDelivery", this);
+            //deliveryId = controller.getMapCanvas().updateRemoveLayer();
+        }
+
+
     }
 
     private void handleAddTestDelivery() {
         AppController controller = AppController.getController();
 
-        Intersection takeoutIntersection = new Intersection(99, 45.550404, 4.8744674);
-        Intersection deliveryIntersection = new Intersection(100, 45.770404, 4.8744674);
-        Delivery addedDelivery = new Delivery(takeoutIntersection, deliveryIntersection, 5, 5);
-        AddDeliveryCommand addDeliveryCommand = new AddDeliveryCommand(controller, addedDelivery);
-        controller.getCommandManager().executeCommand(addDeliveryCommand);
+        VBox contentBox = (VBox) titledPane.getContent();
+        VBox addDeliveryBox = (VBox) contentBox.lookup("#addDeliveryBox");
+        addDeliveryBox.setVisible(true);
+        addDeliveryBox.setManaged(true);
+
+        Label labelDelivery = (Label) addDeliveryBox.lookup("#labelDelivery");
+        labelDelivery.setText("Selected Delivery Intersection: ");
+        Label labelTakeout = (Label) addDeliveryBox.lookup("#labelTakeout");
+        labelTakeout.setText("Selected TakeOut Intersection: ");
+
+
+
+
     }
 
     private void handleRemoveTestDelivery() {
         AppController controller = AppController.getController();
+        VBox contentBox = (VBox) titledPane.getContent();
+        VBox removeDeliveryBox = (VBox) contentBox.lookup("#removeDeliveryBox");
+        removeDeliveryBox.setVisible(true);
+        removeDeliveryBox.setManaged(true);
 
-        if (controller.getDeliveriesDemand() != null) {
-            Delivery delivery = controller.getDeliveriesDemand().getDeliveryByIds(99, 100);
-            if (delivery != null) {
-                RemoveDeliveryCommand removeDeliveryCommand = new RemoveDeliveryCommand(controller, delivery);
-                controller.getCommandManager().executeCommand(removeDeliveryCommand);
-            }
-        }
-    }
+        Label labelDelivery2 = (Label) removeDeliveryBox.lookup("#labelDelivery2");
+        labelDelivery2.setText("Selected Delivery Intersection: ");
+        Label labelTakeout2 = (Label) removeDeliveryBox.lookup("#labelTakeout2");
+        labelTakeout2.setText("Selected TakeOut Intersection: ");
+
+
+    }*/
 
     public boolean isExpanded() {
         return titledPane.isExpanded();
@@ -135,4 +279,48 @@ public class TestSection extends VBox {
     public void setExpanded(boolean expanded) {
         titledPane.setExpanded(expanded);
     }
+/*
+    public void selectIntersection(Intersection intersection) {
+        if (intersection == null) {
+            //selectedIntersectionLabel.setText("No intersection selected");
+        } else {
+            VBox contentBox = (VBox) titledPane.getContent();
+            VBox addDeliveryBox = (VBox) contentBox.lookup("#addDeliveryBox");
+            VBox removeDeliveryBox = (VBox) contentBox.lookup("#removeDeliveryBox");
+
+
+
+
+            if (controller.getSidebarWaitingFor().equals("addTakeout")){
+                addDeliveryBox.setVisible(true);
+                addDeliveryBox.setManaged(true);
+                this.takeout = intersection;
+                Label labelTakeout = (Label) addDeliveryBox.lookup("#labelTakeout");
+                labelTakeout.setText("Selected Takeout Intersection: "+ this.takeout.getId());
+            } else if (controller.getSidebarWaitingFor().equals("addDelivery")) {
+                addDeliveryBox.setVisible(true);
+                addDeliveryBox.setManaged(true);
+                this.delivery = intersection;
+                Label labelDelivery = (Label) addDeliveryBox.lookup("#labelDelivery");
+                labelDelivery.setText("Selected Delivery Intersection: "+ this.delivery.getId());
+            } else if (controller.getSidebarWaitingFor().equals("removeTakeout")) {
+                removeDeliveryBox.setVisible(true);
+                removeDeliveryBox.setManaged(true);
+                this.takeout = intersection;
+                Label labelTakeout = (Label) removeDeliveryBox.lookup("#labelTakeout2");
+                labelTakeout.setText("Selected Takeout Intersection: "+ this.takeout.getId());
+            }else {
+                removeDeliveryBox.setVisible(true);
+                removeDeliveryBox.setManaged(true);
+                this.delivery = intersection;
+                Label labelDelivery = (Label) removeDeliveryBox.lookup("#labelDelivery2");
+                labelDelivery.setText("Selected Delivery Intersection: "+ this.delivery.getId());
+            }
+            //selectedIntersectionLabel.setText("Selected: ID " + intersection.getId());
+
+
+            // Reset waiting state
+            controller.setSidebarWaitingFor(null, null);
+        }
+    }*/
 }

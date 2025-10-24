@@ -1,22 +1,23 @@
+
+
 package fr.delivrooom.adapter.in.javafxgui.map;
 
 import atlantafx.base.controls.Popover;
 import fr.delivrooom.adapter.in.javafxgui.controller.AppController;
-import fr.delivrooom.adapter.in.javafxgui.controller.DeliveriesLoadedState;
-import fr.delivrooom.adapter.in.javafxgui.controller.SelectIntersectionState;
+import fr.delivrooom.adapter.in.javafxgui.controller.StateDeliveriesLoaded;
+import fr.delivrooom.adapter.in.javafxgui.controller.StateSelectIntersection;
+import fr.delivrooom.adapter.in.javafxgui.panes.sidebar.delivery.DeliveryTooltip;
 import fr.delivrooom.application.model.*;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import org.controlsfx.control.PopOver;
 
 import java.util.HashMap;
 import java.util.List;
@@ -56,14 +57,20 @@ public class MapOverlay extends StackPane {
         });
 
         addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
-            if (controller.getState() instanceof SelectIntersectionState) {
+            if (controller.getState() instanceof StateSelectIntersection) {
                 if (event.getTarget() instanceof Node node) {
                     if (node.getUserData() != "selectIntersection") {
-                        controller.handleSelectIntersection(null);
+                        controller.requestSelectIntersection(null);
                     }
                 }
             }
         });
+    }
+
+    public void clear() {
+        canvasLayer.getGraphicsContext2D().clearRect(0, 0, canvasLayer.getWidth(), canvasLayer.getHeight());
+        intersectionLayer.getChildren().clear();
+        deliveryLayer.getChildren().clear();
     }
 
     public void updateOverlay(double width, double height, double scale, double minX, double minY) {
@@ -84,11 +91,11 @@ public class MapOverlay extends StackPane {
 
         updateCanvasLayer();
 
-        if (controller.getState() instanceof SelectIntersectionState) {
+        if (controller.getState() instanceof StateSelectIntersection) {
             intersectionLayer.setVisible(true);
             deliveryLayer.setVisible(false);
             updateIntersectionLayer();
-        } else if (controller.getState() instanceof DeliveriesLoadedState) {
+        } else if (controller.getState() instanceof StateDeliveriesLoaded) {
             intersectionLayer.setVisible(false);
             deliveryLayer.setVisible(true);
             updateDeliveryLayer();
@@ -102,9 +109,10 @@ public class MapOverlay extends StackPane {
         AppController controller = AppController.getController();
 
         GraphicsContext gc = canvasLayer.getGraphicsContext2D();
-        CityMap cityMap = controller.getCityMap();
-        DeliveriesDemand deliveriesDemand = controller.getDeliveriesDemand();
-        TourSolution tourSolution = controller.getTourSolution();
+        CityMap cityMap = controller.cityMapProperty().getValue();
+        if (cityMap == null) return;
+        DeliveriesDemand deliveriesDemand = controller.deliveriesDemandProperty().getValue();
+        TourSolution tourSolution = controller.tourSolutionProperty().getValue();
 
         // Draw roads
         gc.setStroke(Color.rgb(220, 220, 220));
@@ -241,7 +249,8 @@ public class MapOverlay extends StackPane {
     }
 
     public void updateDeliveryLayer() {
-        DeliveriesDemand deliveriesDemand = AppController.getController().getDeliveriesDemand();
+        DeliveriesDemand deliveriesDemand = AppController.getController().deliveriesDemandProperty().getValue();
+        if (deliveriesDemand == null) return;
 
         for (Delivery delivery : deliveriesDemand.deliveries()) {
             // Add interactive circle over delivery point
@@ -254,11 +263,10 @@ public class MapOverlay extends StackPane {
             deliveryCircle.setCursor(Cursor.HAND);
 
             deliveryCircle.setOnMouseClicked(event -> {
-                Label content = new Label("Delivery ID : " + deliveryIntersection.getId());
-                Popover popover = new Popover(content);
-                popover.setArrowLocation(Popover.ArrowLocation.TOP_CENTER);
+                DeliveryTooltip tooltip = new DeliveryTooltip(delivery, true);
+                tooltip.setArrowLocation(Popover.ArrowLocation.TOP_CENTER);
                 Point2D screen = deliveryLayer.localToScreen(deliveryX, deliveryY);
-                popover.show(deliveryCircle, screen.getX() - 10, screen.getY());
+                tooltip.show(deliveryCircle, screen.getX() - 10, screen.getY());
             });
             deliveryLayer.getChildren().add(deliveryCircle);
 
@@ -270,18 +278,18 @@ public class MapOverlay extends StackPane {
             pickupCircle.setCursor(Cursor.HAND);
 
             pickupCircle.setOnMouseClicked(event -> {
-                Label content = new Label("Pickup ID : " + pickupIntersection.getId());
-                PopOver popover = new PopOver(content);
-                popover.setArrowLocation(PopOver.ArrowLocation.TOP_CENTER);
+                DeliveryTooltip tooltip = new DeliveryTooltip(delivery, true);
+                tooltip.setArrowLocation(Popover.ArrowLocation.TOP_CENTER);
                 Point2D screen = deliveryLayer.localToScreen(pickupX, pickupY);
-                popover.show(pickupCircle, screen.getX() - 10, screen.getY());
+                tooltip.show(pickupCircle, screen.getX() - 10, screen.getY());
             });
             deliveryLayer.getChildren().add(pickupCircle);
         }
     }
 
     public void updateIntersectionLayer() {
-        CityMap cityMap = AppController.getController().getCityMap();
+        CityMap cityMap = AppController.getController().cityMapProperty().getValue();
+        if (cityMap == null) return;
 
         for (Intersection intersection : cityMap.intersections().values()) {
             double intersectionX = (intersection.getNormalizedX() - minX) * scale;
@@ -293,7 +301,7 @@ public class MapOverlay extends StackPane {
             intersectionCircle.setCursor(Cursor.HAND);
 
             intersectionCircle.setOnMouseClicked(event -> {
-                AppController.getController().handleSelectIntersection(intersection);
+                AppController.getController().requestSelectIntersection(intersection);
             });
             intersectionLayer.getChildren().add(intersectionCircle);
         }

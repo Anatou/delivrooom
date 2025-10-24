@@ -18,7 +18,7 @@ public class DeliveryTooltip extends Popover {
 
     private final Delivery delivery;
 
-    public DeliveryTooltip(Delivery delivery) {
+    public DeliveryTooltip(Delivery delivery, Boolean showActionButtons) {
         super();
         this.delivery = delivery;
 
@@ -26,11 +26,11 @@ public class DeliveryTooltip extends Popover {
         setHeaderAlwaysVisible(true);
         setArrowLocation(ArrowLocation.TOP_LEFT);
 
-        VBox content = createContent();
+        VBox content = createContent(showActionButtons);
         setContentNode(content);
     }
 
-    private VBox createContent() {
+    private VBox createContent(Boolean showActionButtons) {
         VBox container = new VBox(10);
         container.setPadding(new Insets(15));
         container.setAlignment(Pos.TOP_LEFT);
@@ -66,6 +66,10 @@ public class DeliveryTooltip extends Popover {
 
         deliveryBox.getChildren().addAll(deliveryTitle, deliveryGrid);
 
+        if (showActionButtons) {
+            DeliveryActionButtons actionButtons = new DeliveryActionButtons(delivery);
+            container.getChildren().add(actionButtons);
+        }
         container.getChildren().addAll(takeoutBox, deliveryBox);
 
         return container;

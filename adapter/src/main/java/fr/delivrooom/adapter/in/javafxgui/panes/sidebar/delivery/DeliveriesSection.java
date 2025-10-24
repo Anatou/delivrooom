@@ -1,6 +1,5 @@
 package fr.delivrooom.adapter.in.javafxgui.panes.sidebar.delivery;
 
-import fr.delivrooom.adapter.in.javafxgui.controller.AppController;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.TitledPane;
@@ -61,16 +60,4 @@ public class DeliveriesSection extends VBox {
         titledPane.setExpanded(expanded);
     }
 
-    /**
-     * Refresh the deliveries list from the controller's data.
-     */
-    public void refreshDeliveries() {
-        AppController controller = AppController.getController();
-
-        if (controller.getDeliveriesDemand() != null) {
-            deliveriesList.setDeliveries(controller.getDeliveriesDemand().deliveries());
-        } else {
-            deliveriesList.clearDeliveries();
-        }
-    }
 }
