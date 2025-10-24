@@ -23,4 +23,9 @@ public class CommandRequestIntersectionSelection implements Command {
     public void undo() {
         controller.transitionToState(sourceState);
     }
+
+    @Override
+    public String toString() {
+        return "Request intersection selection";
+    }
 }

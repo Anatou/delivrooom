@@ -28,4 +28,9 @@ public class CommandCalculateCourierTour implements Command {
     public void undo() {
         controller.doRestoreTourSolution(previousTourSolution);
     }
+
+    @Override
+    public String toString() {
+        return "Calculate tour for courier " + courier.getId();
+    }
 }

@@ -25,4 +25,9 @@ public class CommandRemoveCourier implements Command {
     public void undo() {
         controller.doAddCourier(courier);
     }
+
+    @Override
+    public String toString() {
+        return "Remove Courier " + courier.getId();
+    }
 }
