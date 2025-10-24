@@ -5,7 +5,6 @@ import fr.delivrooom.adapter.in.javafxgui.controller.StateInitial;
 import fr.delivrooom.application.model.CityMap;
 import fr.delivrooom.application.model.Intersection;
 import javafx.beans.InvalidationListener;
-import javafx.beans.value.ChangeListener;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -51,17 +50,10 @@ public class MapCanvas extends StackPane {
             this.autoFraming = true;
             drawMap();
         });
-        AppController.getController().deliveriesDemandProperty().addListener(o -> {
-            drawMap();
-        });
-        AppController.getController().tourSolutionProperty().addListener(o -> {
-            drawMap();
-        });AppController.getController().memeModeProperty().addListener((o) -> {
-            drawMap();
-        });
-        AppController.getController().memeModeProperty().addListener((o) -> {
-            drawMap();
-        });
+        AppController.getController().deliveriesDemandProperty().addListener(o -> drawMap());
+        AppController.getController().tourSolutionProperty().addListener(o -> drawMap());
+        AppController.getController().couriersProperty().addListener((InvalidationListener) o -> drawMap());
+        AppController.getController().memeModeProperty().addListener((o) -> drawMap());
     }
 
     private void setupCanvas() {
