@@ -19,6 +19,7 @@ import javafx.stage.Stage;
 import org.kordamp.ikonli.fontawesome6.FontAwesomeSolid;
 import org.kordamp.ikonli.javafx.FontIcon;
 
+
 import java.io.File;
 import java.util.Objects;
 
@@ -58,6 +59,15 @@ public class AppToolBar extends ToolBar {
         Button redoBtn = new Button("", new FontIcon(FontAwesomeSolid.REDO));
         redoBtn.setOnAction(e -> controller.redoCommand());
 
+        Button saveTourBtn = new Button("", new FontIcon(FontAwesomeSolid.SAVE));
+        saveTourBtn.setTooltip(new javafx.scene.control.Tooltip("Save Calculated Tour"));
+        //saveTourBtn.setOnAction(e -> controller.requestSaveTourFile());
+
+        Button importTourBtn = new Button("", new FontIcon(FontAwesomeSolid.FILE_IMPORT));
+        importTourBtn.setTooltip(new javafx.scene.control.Tooltip("Import Calculated Tour"));
+       //importTourBtn.setOnAction(e -> controller.requestImportTourFile());
+
+
         themeToggle = new ToggleSwitch("");
         themeToggle.setGraphic(new FontIcon(FontAwesomeSolid.MOON));
         themeToggle.selectedProperty().addListener(o -> handleThemeSwitch());
@@ -74,7 +84,7 @@ public class AppToolBar extends ToolBar {
         logo.setOnMouseClicked(e -> handleLogoClick());
         logo.setStyle("-fx-cursor: hand;"); // Show it's clickable
 
-        this.getItems().addAll(open, new Spacer(20), undoBtn, redoBtn, new Spacer(10), themeToggle, new Spacer(), logo, new Spacer(5));
+        this.getItems().addAll(open, new Spacer(20), undoBtn, redoBtn, new Spacer(10),saveTourBtn, new Spacer(10),importTourBtn, new Spacer(10), themeToggle, new Spacer(), logo, new Spacer(10));
     }
 
     /**
