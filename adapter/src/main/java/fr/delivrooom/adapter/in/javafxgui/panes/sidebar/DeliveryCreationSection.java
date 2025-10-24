@@ -29,7 +29,7 @@ public class DeliveryCreationSection extends VBox {
 
     public DeliveryCreationSection() {
         super(10);
-        setPadding(new Insets(10));
+        //setPadding(new Insets(10));
         setAlignment(Pos.TOP_LEFT);
         this.controller = AppController.getController();
 
@@ -68,19 +68,19 @@ public class DeliveryCreationSection extends VBox {
 
 
         Button buttonConfirmAddDelivery = new Button("Add Delivery");
-        buttonConfirmAddDelivery.setGraphic(new FontIcon(FontAwesomeSolid.USER_PLUS));
         buttonConfirmAddDelivery.setMaxWidth(Double.MAX_VALUE);
         buttonConfirmAddDelivery.setGraphic(new FontIcon(FontAwesomeSolid.PLUS));
-        buttonConfirmAddDelivery.setStyle("-fx-background-color:#A8E4A0");
+        buttonConfirmAddDelivery.getStyleClass().add("accent");
+        //buttonConfirmAddDelivery.setStyle("-fx-background-color:#A8E4A0");
 
         buttonTakeout.setOnAction(e -> {
             requestedIntersectionIsTakeout = true;
-            buttonTakeout.setStyle("-fx-background-color:#8FD6FA");
+            buttonTakeout.getStyleClass().add("accent");
             controller.requestIntersectionSelection();
         });
         buttonDelivery.setOnAction(e -> {
             requestedIntersectionIsTakeout = false;
-            buttonDelivery.setStyle("-fx-background-color:#8FD6FA");
+            buttonDelivery.getStyleClass().add("accent");
             controller.requestIntersectionSelection();
         });
 
@@ -106,8 +106,8 @@ public class DeliveryCreationSection extends VBox {
                 controller.requestAddDelivery(addedDelivery);
                 buttonTakeout.setText("Select TakeOut Intersection");
                 buttonDelivery.setText("Select Delivery Intersection");
-                buttonDelivery.setStyle(null);
-                buttonTakeout.setStyle(null);
+                buttonDelivery.getStyleClass().removeAll("success","accent");
+                buttonTakeout.getStyleClass().removeAll("success","accent");
             }
             //addDeliveryBox.setVisible(false);
             //addDeliveryBox.setManaged(false);
@@ -119,13 +119,13 @@ public class DeliveryCreationSection extends VBox {
                     /*addDeliveryBox.setVisible(true);
                     addDeliveryBox.setManaged(true);*/
                     this.takeout = newIntersection;
-                    buttonTakeout.setStyle("-fx-background-color: #CEE3A5");
+                    buttonTakeout.getStyleClass().add("success");
                     buttonTakeout.setText("Select Another TakeOut Intersection");
                 } else {
                     /*addDeliveryBox.setVisible(true);
                     addDeliveryBox.setManaged(true);*/
                     this.delivery = newIntersection;
-                    buttonDelivery.setStyle("-fx-background-color:#CEE3A5");
+                    buttonDelivery.getStyleClass().add("success");
                     buttonDelivery.setText("Select Another Delivery Intersection");
                 }
             }
