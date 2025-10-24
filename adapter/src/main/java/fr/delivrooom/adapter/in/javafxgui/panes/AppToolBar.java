@@ -101,6 +101,9 @@ public class AppToolBar extends ToolBar {
     private void handleSaveTourFileDialog() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save Calculated Tour File");
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Fichiers binaires", "*.bin")
+        );
 
         File file = fileChooser.showSaveDialog(stage);
         if (file != null) {
