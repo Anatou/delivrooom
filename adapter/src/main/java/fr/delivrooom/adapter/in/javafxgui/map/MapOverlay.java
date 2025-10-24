@@ -123,7 +123,7 @@ public class MapOverlay extends StackPane {
         gc.setLineWidth(unit_scalable);
         for (HashMap<Long, Road> subMap : cityMap.roads().values()) {
             for (Road road : subMap.values()) {
-                drawRoad(gc, scale, minX, minY, road);
+                drawRoad(gc, scale, minX, minY, road, false);
             }
         }
         // Draw intersections
@@ -235,12 +235,15 @@ public class MapOverlay extends StackPane {
             }
         }
 
-        for (Path path : tourSolution.paths()) {
-            List<Road> roads = path.intersections();
-            for (Road road : roads) {
-                drawRoad(gc, scale, minX, minY, road);
-            }
-        }
+                for (Path path : tourSolution.paths()) {
+                    List<Road> roads = path.intersections();
+                    int i = 0;
+                    for (Road road : roads) {
+                        i++;
+                        boolean drawArrow = i%5 == 0;
+                        drawRoad(gc, scale, minX, minY, road, drawArrow);
+                    }
+                }
 
         gc.setTextAlign(javafx.scene.text.TextAlignment.CENTER);
         gc.setTextBaseline(javafx.geometry.VPos.CENTER);
@@ -358,7 +361,9 @@ public class MapOverlay extends StackPane {
             gc.fillRect(x - radius, y - radius, 2 * radius, 2 * radius);
     }
 
-    private void drawRoad(GraphicsContext gc, double scale, double minX, double minY, Road road) {
+    private void drawRoad(GraphicsContext gc, double scale, double minX, double minY, Road road, Boolean drawArrow) {
+        if (drawArrow==null) { drawArrow = false; }
+
         Intersection origin = road.getOrigin();
         Intersection destin = road.getDestination();
 
@@ -367,6 +372,34 @@ public class MapOverlay extends StackPane {
         double x2 = (destin.getNormalizedX() - minX) * scale;
         double y2 = (destin.getNormalizedY() - minY) * scale;
 
+        System.out.println("scale: "+scale);
+
+        if (drawArrow) {
+            double road_vector_x = x2-x1;
+            double road_vector_y = y2-y1;
+
+            double triangle_center_x = (x1 + x2) / 2;
+            double triangle_center_y = (y1 + y2) / 2;
+
+            double alpha = Math.atan2(road_vector_y, road_vector_x) - Math.PI/2;
+
+            double triangle_size = 0.0000005*scale;
+            System.out.println("size = " + 0.0000005*scale);
+
+            double[] xPoints = {
+                    -triangle_size*Math.sin(alpha) + triangle_center_x,
+                    -triangle_size*Math.sin(alpha + 2*Math.PI/3) + triangle_center_x,
+                    -triangle_size*Math.sin(alpha + 4*Math.PI/3) + triangle_center_x,
+            };
+
+            double[] yPoints = {
+                    triangle_size*Math.cos(alpha) + triangle_center_y,
+                    triangle_size*Math.cos(alpha + 2*Math.PI/3) + triangle_center_y,
+                    triangle_size*Math.cos(alpha + 4*Math.PI/3) + triangle_center_y,
+            };
+
+            gc.strokePolygon(xPoints, yPoints, 3);
+        }
         gc.strokeLine(x1, y1, x2, y2);
     }
 
