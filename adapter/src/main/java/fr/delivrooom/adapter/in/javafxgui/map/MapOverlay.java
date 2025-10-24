@@ -113,10 +113,7 @@ public class MapOverlay extends StackPane {
         CityMap cityMap = controller.cityMapProperty().getValue();
         if (cityMap == null) return;
         DeliveriesDemand deliveriesDemand = controller.deliveriesDemandProperty().getValue();
-        DeliveriesDemand deliveriesLeft = new DeliveriesDemand(
-                new ArrayList<>(deliveriesDemand.deliveries()),
-                deliveriesDemand.store()
-        );
+
 
         // Draw roads
         gc.setStroke(Color.rgb(220, 220, 220));
@@ -136,6 +133,10 @@ public class MapOverlay extends StackPane {
         // Draw deliveries demands
         boolean isStoreDrawn = false;
         if (deliveriesDemand != null) {
+            DeliveriesDemand deliveriesLeft = new DeliveriesDemand(
+                    new ArrayList<>(deliveriesDemand.deliveries()),
+                    deliveriesDemand.store()
+            );
             System.out.println("Drawing deliveries demand on map overlay.");
             // iterate trough couriers to draw their paths if available
             List<Courier> allCouriers = controller.couriersProperty();

@@ -92,5 +92,8 @@ public record StateDeliveriesLoaded(AppController controller) implements State {
             System.out.println("Check tour saved...");
             controller.saveTourSolution(filename);
         }
+        else {
+            controller.showError("No tour calculated", "No tour to save from any courier");
+        }
     }
 }
