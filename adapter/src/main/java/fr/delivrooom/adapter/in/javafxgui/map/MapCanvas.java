@@ -47,14 +47,16 @@ public class MapCanvas extends StackPane {
         setupCanvas();
         setupControls();
 
-        ChangeListener<Object> listener = (obs, oldVal, newVal) -> {
+        AppController.getController().cityMapProperty().addListener(o -> {
             this.autoFraming = true;
             drawMap();
-        };
-
-        AppController.getController().cityMapProperty().addListener(listener);
-        AppController.getController().deliveriesDemandProperty().addListener(listener);
-        AppController.getController().tourSolutionProperty().addListener(listener);
+        });
+        AppController.getController().deliveriesDemandProperty().addListener(o -> {
+            drawMap();
+        });
+        AppController.getController().tourSolutionProperty().addListener(o -> {
+            drawMap();
+        });
     }
 
     private void setupCanvas() {
