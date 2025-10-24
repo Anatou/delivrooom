@@ -263,7 +263,6 @@ public class AppController {
      */
     protected void doLoadDeliveriesFile(URL url) throws Exception {
         this.deliveriesDemand.set(JavaFXApp.guiUseCase().getDeliveriesDemand(cityMap.get(), url));
-        this.tourSolution.set(null);
         deleteDeliveryDemandOfCourier();
     }
 
@@ -593,6 +592,9 @@ public class AppController {
         for (Courier courier : couriers) {
             if (courier.getDeliveriesDemand() != null) {
                 courier.getDeliveriesDemand().deliveries().clear();
+            }
+            if (courier.getTourSolution() != null) {
+                courier.deleteTourSolution();
             }
         }
     }
