@@ -48,4 +48,9 @@ public class CommandLoadDeliveries implements Command {
             e.printStackTrace();
         }
     }
+
+    @Override
+    public String toString() {
+        return "Load Deliveries " + deliveriesUrl.getFile();
+    }
 }

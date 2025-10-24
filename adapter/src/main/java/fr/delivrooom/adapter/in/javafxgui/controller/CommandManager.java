@@ -28,4 +28,18 @@ public class CommandManager {
             undoStack.push(command);
         }
     }
+
+    public Command getNextUndoCommand() {
+        if (!undoStack.isEmpty()) {
+            return undoStack.peek();
+        }
+        return null;
+    }
+
+    public Command getNextRedoCommand() {
+        if (!redoStack.isEmpty()) {
+            return redoStack.peek();
+        }
+        return null;
+    }
 }
