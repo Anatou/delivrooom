@@ -220,9 +220,25 @@ public class AppController {
         requestCommand(result);
     }
 
-    public void requestSaveTourFile() {
-        getState().saveTour("tour.bin");
+    /**
+     * Request to save the current tour to a file.
+     *
+     * @param file The file to save the tour to
+     */
+    public void requestSaveTourFile(File file) {
+        if (file == null) {
+            showError("Save Error", "No file specified for saving.");
+            return;
+        }
+        try {
+            getState().saveTour(file.getAbsolutePath());
+            System.out.println("Tour saved to " + file.getAbsolutePath());
+        } catch (Exception e) {
+            showError("Save Error", "Failed to save the tour: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
+
 
     // ============================================================================
     // PROTECTED API - Do Methods (for commands to modify data)

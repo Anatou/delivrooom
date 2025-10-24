@@ -61,7 +61,7 @@ public class AppToolBar extends ToolBar {
 
         Button saveTourBtn = new Button("", new FontIcon(FontAwesomeSolid.SAVE));
         saveTourBtn.setTooltip(new javafx.scene.control.Tooltip("Save Calculated Tour"));
-        saveTourBtn.setOnAction(e -> controller.requestSaveTourFile());
+        saveTourBtn.setOnAction(e -> handleSaveTourFileDialog());
 
         Button importTourBtn = new Button("", new FontIcon(FontAwesomeSolid.FILE_IMPORT));
         importTourBtn.setTooltip(new javafx.scene.control.Tooltip("Import Calculated Tour"));
@@ -96,6 +96,20 @@ public class AppToolBar extends ToolBar {
     public void setStageAndScene(Stage stage, Scene scene) {
         this.stage = stage;
         this.scene = scene;
+    }
+
+    private void handleSaveTourFileDialog() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save Calculated Tour File");
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Fichiers binaires", "*.bin")
+        );
+
+        File file = fileChooser.showSaveDialog(stage);
+        if (file != null) {
+            System.out.println("Fichier sélectionné : " + file.getAbsolutePath());
+            AppController.getController().requestSaveTourFile(file);
+        }
     }
 
     private void handleOpenMapFile() {
