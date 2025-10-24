@@ -42,9 +42,7 @@ public class CouriersList extends ListView<Courier> {
         AppController appController = AppController.getController();
         List<Courier> couriers = appController.couriersProperty();
         Courier courier_found = null;
-        System.out.println("Searching for courier with ID: " + courier.getId());
         for (Courier courier_ : couriers) {
-            System.out.println("Checking courier with ID: " + courier_.getId());
             if (courier_.getId() == courier.getId()) {
                 courier_found = courier_;
                 break;
@@ -52,11 +50,11 @@ public class CouriersList extends ListView<Courier> {
         }
 
         // affichage des deliveries demand du courrier
-        System.out.println("deliveries demand of :" + courier_found + " \n" + courier_found.getDeliveriesDemand());
-        System.out.println("Calculating route for courier " + courier_found);
-
-        System.out.println("deliveries demand of :" + courier + " \n" + courier.getDeliveriesDemand());
-        System.out.println("Calculating route for courier " + courier);
+//        System.out.println("deliveries demand of :" + courier_found + " \n" + courier_found.getDeliveriesDemand());
+//        System.out.println("Calculating route for courier " + courier_found);
+//
+//        System.out.println("deliveries demand of :" + courier + " \n" + courier.getDeliveriesDemand());
+//        System.out.println("Calculating route for courier " + courier);
 
 
         appController.requestCalculateCourierTour(courier_found);

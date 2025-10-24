@@ -93,7 +93,6 @@ public class TourCalculatorService implements CalculateTourUseCase {
 
             shortestPathsMatrix.put(intersectionId, pathsFromIntersection);
         }
-        System.out.println("Shortest paths matrix calculated");
 
         shortestPathsGraph = new ShortestPathsGraph(shortestPathsMatrix);
 
@@ -120,7 +119,6 @@ public class TourCalculatorService implements CalculateTourUseCase {
         for (int i = 0; i < tspSolution.length; i++) {
             long fromId = tspSolution[i];
             long toId = tspSolution[(i + 1) % tspSolution.length]; // wrap around to form a cycle
-            System.out.println(fromId + " -> " + toId);
             Path path = shortestPathsMatrix.get(fromId).get(toId);
             bestTime += path.totalTime();
             tourPaths.add(path);
@@ -135,7 +133,6 @@ public class TourCalculatorService implements CalculateTourUseCase {
 //        System.out.println("Total tour cost (distance): " + tspSolutionCost);
 //        System.out.println("Total tour cost (time): " + bestTime + " seconds | distance "+ tspSolutionCost/4.17 + " + waiting " + (bestTime - tspSolutionCost/4.17) + " seconds");
         long temps = System.currentTimeMillis() - tpsDebut;
-        System.out.println("Time used to calculate TSP (ms): " + temps);
 
 //
         tourSolution = new TourSolution(tourPaths, tspSolutionCost, solutionList);

@@ -25,4 +25,8 @@ public record DeliveriesDemand(List<Delivery> deliveries, Intersection store) {
         return count;
     }
 
+    public void deleteDelivery(Delivery delivery) {
+        this.deliveries.remove(delivery);
+    }
+
 }
