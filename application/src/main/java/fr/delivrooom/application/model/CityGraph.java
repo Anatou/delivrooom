@@ -1,30 +1,31 @@
 package fr.delivrooom.application.model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 
 public class CityGraph implements Graphe {
     //cost[i][j] = cost of the road from intersection i to intersection j
-    protected HashMap<Long, HashMap<Long, Float>> cost;
-    protected HashMap<Long, List<Long>> adjacencyList;
-    protected int intersectionsCount;
-    protected CityMap cityMap;
+    protected final HashMap<Long, HashMap<Long, Float>> cost;
+    protected final HashMap<Long, List<Long>> adjacencyList;
+    protected final int intersectionsCount;
+    protected final CityMap cityMap;
 
     public CityGraph(CityMap cityMap) {
         this.cityMap = cityMap;
-        this.intersectionsCount = cityMap.getIntersections().size();
+        this.intersectionsCount = cityMap.intersections().size();
         this.cost = new HashMap<>();
         this.adjacencyList = new HashMap<>();
 
-        for (HashMap<Long, Road> subMap : cityMap.getRoads().values()) {
+        for (HashMap<Long, Road> subMap : cityMap.roads().values()) {
             for (Road road : subMap.values()) {
                 long fromId = road.getOrigin().getId();
                 long toId = road.getDestination().getId();
                 // the cost of a road is its length
                 float roadCost = road.getLength();
 
-                // If the fromd or toId are not in the map, add them
+                // If the "from" or toId are not in the map, add them
                 this.cost.putIfAbsent(fromId, new HashMap<>());
                 // Add the cost of the road
                 this.cost.get(fromId).put(toId, roadCost);
@@ -56,7 +57,7 @@ public class CityGraph implements Graphe {
         if (this.adjacencyList.containsKey(i)) {
             return this.adjacencyList.get(i);
         }
-        return null;
+        return new ArrayList<>();
     }
 
     public CityMap getCityMap() {

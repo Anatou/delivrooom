@@ -1,0 +1,23 @@
+/* Sidebar TitledPane Styling - Remove borders and padding */
+
+.titled-pane {
+    -fx-border-width: 0;
+    -fx-border-color: transparent;
+}
+
+.titled-pane > .title {
+    -fx-background-color: transparent;
+    -fx-border-width: 0;
+    -fx-padding: 5 15;
+}
+
+.titled-pane > .content {
+    -fx-border-width: 0;
+    -fx-background-color: transparent;
+    -fx-padding: 5;
+}
+
+.titled-pane:focused {
+    -fx-background-color: transparent;
+    -fx-border-width: 0;
+}

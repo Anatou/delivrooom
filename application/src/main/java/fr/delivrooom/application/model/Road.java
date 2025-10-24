@@ -2,10 +2,10 @@ package fr.delivrooom.application.model;
 
 public class Road {
 
-    protected Intersection origin;
-    protected Intersection destination;
-    protected float length;
-    protected String name;
+    protected final Intersection origin;
+    protected final Intersection destination;
+    protected final float length;
+    protected final String name;
 
     public Road(Intersection origin, Intersection destination, float length, String name) {
         this.origin = origin;

@@ -1,47 +1,45 @@
 package fr.delivrooom.adapter.in.javafxgui.controller;
 
-import javafx.scene.control.Alert;
+import fr.delivrooom.application.model.Intersection;
 
-import java.io.File;
-import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * Map loaded state - a map has been loaded.
  * Allows opening a new map file or loading deliveries.
  */
-public class MapLoadedState implements State {
-
-    private final AppController controller;
-
-    public MapLoadedState(AppController controller) {
-        this.controller = controller;
-    }
+public record MapLoadedState(AppController controller) implements State {
 
     @Override
-    public void openMapFile(File file) {
-        if (file != null && file.exists()) {
-            try {
-                controller.loadMapFile(file.toURI().toURL());
-            } catch (MalformedURLException e) {
-                showError("Error loading map file", e.getMessage());
-            }
-        } else {
-            showError("Invalid map file", "Please select a valid map file.");
+    public void openMapFile(URL url) {
+        try {
+            controller.loadMapFile(url);
+            controller.setState(new MapLoadedState(controller));
+        } catch (Exception e) {
+            controller.showError("Error loading map", e.getMessage());
+            e.printStackTrace();
         }
     }
 
     @Override
-    public void openDeliveriesFile(File file) {
-        if (file != null && file.exists()) {
-            try {
-                controller.loadDeliveriesFile(file.toURI().toURL());
-                controller.setState(new DeliveriesLoadedState(controller));
-            } catch (MalformedURLException e) {
-                showError("Error loading deliveries file", e.getMessage());
-            }
-        } else {
-            showError("Invalid deliveries file", "Please select a valid deliveries file.");
+    public void openDeliveriesFile(URL url) {
+        try {
+            controller.loadDeliveriesFile(url);
+            controller.setState(new DeliveriesLoadedState(controller));
+        } catch (Exception e) {
+            controller.showError("Error loading deliveries", e.getMessage());
+            e.printStackTrace();
         }
+    }
+
+    @Override
+    public void selectIntersection(Intersection intersection) {
+        controller.showError("Can’t select intersection", "Unable to select intersection for now.");
+    }
+
+    @Override
+    public void requestIntersectionSelection() {
+        controller.showError("No deliveries loaded", "Please load deliveries first before selecting an intersection.");
     }
 
     @Override
@@ -49,11 +47,10 @@ public class MapLoadedState implements State {
         return "MapLoadedState";
     }
 
-    private void showError(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+    @Override
+    public void requestCalculateTour() {
+        controller.showError("No deliveries loaded", "Please load deliveries first before calculating the tour");
+
+
     }
 }

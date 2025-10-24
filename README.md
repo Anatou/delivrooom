@@ -28,3 +28,4 @@ cd config
 
 - When the app starts, it loads the intersection points from the xml map files and displays those on a real map.
 - Then, deliveries points are loaded from another xml file and are displayed on the map. Blue points are delivery points, red points are pickup points. Tne green point is the warehouse.
+- When both maps and delivery points are loaded, the route is computed and displayed on the map (for now only small maps works since we are using a fairly simple Dijkstra).

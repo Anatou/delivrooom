@@ -2,21 +2,17 @@ package fr.delivrooom.application.model;
 
 import java.util.List;
 
-public class TourSolution {
-    protected List<Path> paths;
-    protected float totalLength;
+/**
+ * @param deliveryOrder List of delivery IDs in the order they are served
+ */
+public record TourSolution(List<Path> paths, float totalLength, List<Long> deliveryOrder) {
 
-    public TourSolution(List<Path> paths, float totalLength) {
-        this.paths = paths;
-        this.totalLength = totalLength;
-    }
-
-    public List<Path> getPaths() {
-        return paths;
-    }
-
-    public float getTotalLength() {
-        return totalLength;
+    @Override
+    public String toString() {
+        return "TourSolution{" +
+                "paths=" + paths +
+                ", totalLength=" + totalLength +
+                '}';
     }
 }
 

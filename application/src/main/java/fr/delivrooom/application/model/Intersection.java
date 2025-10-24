@@ -2,11 +2,11 @@ package fr.delivrooom.application.model;
 
 public class Intersection {
 
-     protected long id;
-     protected double latitude;
-     protected double longitude;
-     protected double normalizedX;
-     protected double normalizedY;
+    protected final long id;
+    protected final double latitude;
+    protected final double longitude;
+    protected final double normalizedX;
+    protected final double normalizedY;
 
      public Intersection(long id, double latitude, double longitude) {
          this.id = id;
