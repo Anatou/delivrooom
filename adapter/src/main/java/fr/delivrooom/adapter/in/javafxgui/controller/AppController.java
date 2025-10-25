@@ -347,8 +347,18 @@ public class AppController {
         System.out.println("Removing delivery from intersection " + delivery.takeoutIntersection().getId()
                 + " to intersection " + delivery.deliveryIntersection().getId());
         deliveriesDemand.get().deliveries().remove(delivery);
+        // Also remove from any courier assigned to it (and invalidate their tour)
+        for (Courier courier : couriers) {
+            if (courier.getDeliveriesDemand() != null &&
+                    courier.getDeliveriesDemand().deliveries().contains(delivery)) {
+                courier.removeDelivery(delivery);
+                courier.deleteTourSolution();
+                break;
+            }
+        }
         deliveriesDemand.invalidate();
     }
+
 
     /**
      * Add a courier to the system.

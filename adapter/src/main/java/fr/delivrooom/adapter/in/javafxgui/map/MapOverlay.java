@@ -130,7 +130,7 @@ public class MapOverlay extends StackPane {
         CityMap cityMap = controller.cityMapProperty().getValue();
         if (cityMap == null) return;
         DeliveriesDemand deliveriesDemand = controller.deliveriesDemandProperty().getValue();
-
+        HashMap<Long, Boolean> isDeliveryInCourierTour = new HashMap<>();
 
         // Draw roads
         gc.setStroke(Color.rgb(220, 220, 220));
@@ -144,7 +144,7 @@ public class MapOverlay extends StackPane {
         gc.setFill(Color.WHITE);
         gc.setStroke(Color.rgb(220, 220, 220));
         for (Intersection intersection : cityMap.intersections().values()) {
-            drawIntersection(gc, scale, minX, minY, intersection, 1.3 * unit_scalable, null, null);
+            drawIntersection(gc, scale, minX, minY, intersection, 1.3 * unit_scalable, null, null, -1);
         }
 
         // Draw deliveries demands
@@ -154,27 +154,31 @@ public class MapOverlay extends StackPane {
                     new ArrayList<>(deliveriesDemand.deliveries()),
                     deliveriesDemand.store()
             );
-            System.out.println("Drawing deliveries demand on map overlay.");
             // iterate trough couriers to draw their paths if available
             List<Courier> allCouriers = controller.couriersProperty();
             for (Courier courier : allCouriers) {
                 TourSolution courierTour = courier.getTourSolution();
                 if (courierTour != null && courier.isDisplayTourSolution()) {
                     // attribute a color to each courier path
-                    System.out.println("Drawing tour for courier: " + courier.getId());
                     displayTourSolution(courier);
                     // Remove delivered deliveries from deliveriesLeft
+                    for (Delivery delivery : courier.getDeliveriesDemand().deliveries()) {
+                        isDeliveryInCourierTour.put(delivery.deliveryIntersection().getId(), true);
+                        isDeliveryInCourierTour.put(delivery.takeoutIntersection().getId(), true);
+
+                    }
                 }
             }
             // Display the remaining deliveries in red for pickup and blue for delivery
             // Draw warehouse point in green
-            drawIntersection(gc, scale, minX, minY, deliveriesLeft.store(), 4 * unit_scalable, storeImageIcon, null);
+            drawIntersection(gc, scale, minX, minY, deliveriesLeft.store(), 4 * unit_scalable, storeImageIcon, null, -1);
             // Takeout point is a red square, delivery point in a blue circle
-            int deliveryDisplayId = 1;
             for (Delivery delivery : deliveriesDemand.deliveries()) {
-                drawIntersection(gc, scale, minX, minY, delivery.takeoutIntersection(), 4 * unit_scalable, pickupImageIcon, String.valueOf(deliveryDisplayId));
-                drawIntersection(gc, scale, minX, minY, delivery.deliveryIntersection(), 4 * unit_scalable, depositImageIcon, String.valueOf(deliveryDisplayId));
-                deliveryDisplayId++;
+                if (isDeliveryInCourierTour.getOrDefault(delivery.deliveryIntersection().getId(), false)) {
+                    continue;
+                }
+                drawIntersection(gc, scale, minX, minY, delivery.takeoutIntersection(), 4 * unit_scalable, pickupImageIcon, null, -1);
+                drawIntersection(gc, scale, minX, minY, delivery.deliveryIntersection(), 4 * unit_scalable, depositImageIcon, null, -1);
             }
 
         }
@@ -212,6 +216,32 @@ public class MapOverlay extends StackPane {
                     if (deltaArrow > 500) { drawArrow = true; deltaArrow = 0; }
                     drawRoad(gc, scale, minX, minY, road, drawArrow);
                 }
+            }
+        }
+        // display numbers on store/pickup/delivery in visit order
+        int visitIndex = 1;
+        for (Long intersectionId : tourSolution.deliveryOrder()) {
+            Intersection intersection = cityMap.intersections().get(intersectionId);
+            if (intersection != null) {
+
+                if (intersectionId == deliveriesDemand.store().getId()) {
+                    continue;
+                }
+                // check if pickup or delivery
+                boolean isPickup = false;
+                for (Delivery delivery : deliveriesDemand.deliveries()) {
+                    if (delivery.takeoutIntersection().getId() == intersectionId) {
+                        isPickup = true;
+                        break;
+                    }
+                }
+                if (isPickup) {
+                    drawIntersection(gc, scale, minX, minY, intersection, 4 * unit_scalable, pickupImageIcon, Integer.toString(visitIndex), courier.getId());
+                } else {
+                    drawIntersection(gc, scale, minX, minY, intersection, 4 * unit_scalable, depositImageIcon, Integer.toString(visitIndex), courier.getId());
+                }
+
+                visitIndex += 1;
             }
         }
     }
@@ -276,7 +306,7 @@ public class MapOverlay extends StackPane {
     }
 
 
-    private void drawIntersection(GraphicsContext gc, double scale, double minX, double minY, Intersection intersection, double radius, Image icon, String text) {
+    private void drawIntersection(GraphicsContext gc, double scale, double minX, double minY, Intersection intersection, double radius, Image icon, String text, int courierId) {
         double x = (intersection.getNormalizedX() - minX) * scale;
         double y = (intersection.getNormalizedY() - minY) * scale;
 
@@ -309,7 +339,10 @@ public class MapOverlay extends StackPane {
                 y_offset = icon.getHeight()/2;
             }
             gc.setFont(javafx.scene.text.Font.font(fontSize));
-            gc.setFill(Color.WHITE);
+            // display color of the courier insted
+            Color courierColor = Color.hsb((courierId * 137) % 360, 0.7, 0.9);
+
+            gc.setFill(courierColor);
             gc.fillOval(x, y, circleRadius, circleRadius);
             gc.setFill(Color.BLACK);
             gc.fillText(text, x+x_offset, y+y_offset+fontSize/3);
