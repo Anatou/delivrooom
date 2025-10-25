@@ -2,10 +2,9 @@ package fr.delivrooom.adapter.in.javafxgui.panes.sidebar.courier;
 
 import fr.delivrooom.adapter.in.javafxgui.controller.AppController;
 import fr.delivrooom.application.model.Courier;
+import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.scene.control.ListView;
-
-import java.util.List;
 
 
 public class CouriersList extends ListView<Courier> {
@@ -18,6 +17,7 @@ public class CouriersList extends ListView<Courier> {
         prefHeightProperty().bind(Bindings.size(getItems()).multiply(COURIER_ITEM_HEIGHT));
         setBorder(null);
 
+        AppController.getController().couriersProperty().addListener((InvalidationListener) o -> refresh());
         AppController.getController().couriersProperty().addListener((javafx.collections.ListChangeListener.Change<? extends Courier> c) -> {
             while (c.next()) {
                 if (c.wasAdded()) {
@@ -30,7 +30,7 @@ public class CouriersList extends ListView<Courier> {
         });
 
         setCellFactory(listView ->
-                new CourierListItem(this::deleteCourier, this::calculateCourierRoute)
+                new CourierListItem(this::deleteCourier, this::calculateCourierRoute, this::toggleCourierVisibility)
         );
     }
 
@@ -38,25 +38,12 @@ public class CouriersList extends ListView<Courier> {
         AppController.getController().requestRemoveCourier(courier);
     }
 
+    private void toggleCourierVisibility(Courier courier) {
+        courier.setDisplayTourSolution(!courier.isDisplayTourSolution());
+        AppController.getController().invalidateCouriers();
+    }
+
     private void calculateCourierRoute(Courier courier) {
-        AppController appController = AppController.getController();
-        List<Courier> couriers = appController.couriersProperty();
-        Courier courier_found = null;
-        for (Courier courier_ : couriers) {
-            if (courier_.getId() == courier.getId()) {
-                courier_found = courier_;
-                break;
-            }
-        }
-
-        // affichage des deliveries demand du courrier
-//        System.out.println("deliveries demand of :" + courier_found + " \n" + courier_found.getDeliveriesDemand());
-//        System.out.println("Calculating route for courier " + courier_found);
-//
-//        System.out.println("deliveries demand of :" + courier + " \n" + courier.getDeliveriesDemand());
-//        System.out.println("Calculating route for courier " + courier);
-
-
-        appController.requestCalculateCourierTour(courier_found);
+        AppController.getController().requestCalculateCourierTour(courier);
     }
 }
