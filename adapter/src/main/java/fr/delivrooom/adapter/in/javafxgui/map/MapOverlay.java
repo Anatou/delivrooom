@@ -173,16 +173,30 @@ public class MapOverlay extends StackPane {
             // Draw warehouse point in green
             drawIntersection(gc, scale, minX, minY, deliveriesLeft.store(), 4 * unit_scalable, storeImageIcon, null, -1);
             // Takeout point is a red square, delivery point in a blue circle
+            int pairIndex = 0;
             for (Delivery delivery : deliveriesDemand.deliveries()) {
                 if (isDeliveryInCourierTour.getOrDefault(delivery.deliveryIntersection().getId(), false)) {
                     continue;
                 }
-                drawIntersection(gc, scale, minX, minY, delivery.takeoutIntersection(), 4 * unit_scalable, pickupImageIcon, null, -1);
-                drawIntersection(gc, scale, minX, minY, delivery.deliveryIntersection(), 4 * unit_scalable, depositImageIcon, null, -1);
+                String label = indexToLabel(pairIndex++);
+                drawIntersection(gc, scale, minX, minY, delivery.takeoutIntersection(), 4 * unit_scalable, pickupImageIcon, label, -1);
+                drawIntersection(gc, scale, minX, minY, delivery.deliveryIntersection(), 4 * unit_scalable, depositImageIcon, label, -1);
             }
 
         }
 
+    }
+
+    private String indexToLabel(int index) {
+        // Convertit 0 -> "A", 1 -> "B", ..., 25 -> "Z", 26 -> "AA", etc.
+        StringBuilder sb = new StringBuilder();
+        int n = index + 1; // rendre 1-based pour la conversion
+        while (n > 0) {
+            int rem = (n - 1) % 26;
+            sb.insert(0, (char) ('A' + rem));
+            n = (n - 1) / 26;
+        }
+        return sb.toString();
     }
 
     public void displayTourSolution(Courier courier) {
@@ -340,7 +354,7 @@ public class MapOverlay extends StackPane {
             }
             gc.setFont(javafx.scene.text.Font.font(fontSize));
             // display color of the courier insted
-            Color courierColor = Color.hsb((courierId * 137) % 360, 0.7, 0.9);
+            Color courierColor = (courierId == -1) ? Color.WHITE : Color.hsb((courierId * 137) % 360, 0.7, 0.9);
 
             gc.setFill(courierColor);
             gc.fillOval(x, y, circleRadius, circleRadius);
