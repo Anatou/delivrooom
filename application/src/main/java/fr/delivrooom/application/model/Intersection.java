@@ -1,3 +1,4 @@
+// java
 package fr.delivrooom.application.model;
 
 public class Intersection {
@@ -7,32 +8,26 @@ public class Intersection {
     protected final double longitude;
     protected final double normalizedX;
     protected final double normalizedY;
+    protected float timeArrivedSeconds;
 
-     public Intersection(long id, double latitude, double longitude) {
-         this.id = id;
-         this.latitude = latitude;
-         this.longitude = longitude;
-         // Calculate normalized coordinates once at initialization for performance
-         double mercatorX = Math.toRadians(longitude);
-         double mercatorY = Math.log(Math.tan(Math.toRadians(latitude)) + (1 / Math.cos(Math.toRadians(latitude))));
-         this.normalizedX = (1 + (mercatorX / Math.PI)) / 2;
-         this.normalizedY = (1 - (mercatorY / Math.PI)) / 2;
-     }
-     /**
-      * Get normalized X coordinate (0-1 range) for tile mapping
-      * Pre-calculated at initialization for performance
-      */
-     public double getNormalizedX() {
-         return normalizedX;
-     }
+    public Intersection(long id, double latitude, double longitude) {
+        this.id = id;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        double mercatorX = Math.toRadians(longitude);
+        double mercatorY = Math.log(Math.tan(Math.toRadians(latitude)) + (1 / Math.cos(Math.toRadians(latitude))));
+        this.normalizedX = (1 + (mercatorX / Math.PI)) / 2;
+        this.normalizedY = (1 - (mercatorY / Math.PI)) / 2;
+        this.timeArrivedSeconds = -1f;
+    }
 
-     /**
-      * Get normalized Y coordinate (0-1 range) for tile mapping
-      * Pre-calculated at initialization for performance
-      */
-     public double getNormalizedY() {
-         return normalizedY;
-     }
+    public double getNormalizedX() {
+        return normalizedX;
+    }
+
+    public double getNormalizedY() {
+        return normalizedY;
+    }
 
     public long getId() {
         return id;
@@ -46,13 +41,8 @@ public class Intersection {
         return longitude;
     }
 
-    /*
-     * Compute distance between two GPS points on Earth
-     * Result is in meters
-     */
     public double distanceTo(Intersection other) {
-        final double R = 6371000; // Earth's radius in meters
-
+        final double R = 6371000;
         double lat1Rad = Math.toRadians(this.latitude);
         double lat2Rad = Math.toRadians(other.latitude);
         double deltaLatRad = Math.toRadians(other.latitude - this.latitude);
@@ -63,8 +53,30 @@ public class Intersection {
                 * Math.sin(deltaLngRad / 2) * Math.sin(deltaLngRad / 2);
 
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
         return R * c;
+    }
+
+
+    public float getTimeArrivedSeconds() {
+        return timeArrivedSeconds;
+    }
+
+    public void setTimeArrivedSeconds(float timeArrivedSeconds) {
+        this.timeArrivedSeconds = timeArrivedSeconds;
+    }
+
+    public float getTimeArrivedMinutes() {
+        return timeArrivedSeconds < 0 ? -1f : timeArrivedSeconds / 60f;
+    }
+
+    public String getFormattedTimeArrived() {
+        if (timeArrivedSeconds < 0) {
+            return "N/A";
+        }
+        int totalMinutes = (int) (getTimeArrivedMinutes());
+        int hours = 17 + (totalMinutes / 60);
+        int minutes = totalMinutes % 60;
+        return String.format("%02d:%02d", hours, minutes);
     }
 
     @Override
@@ -75,4 +87,5 @@ public class Intersection {
                 ", latitude=" + latitude +
                 '}';
     }
+
 }
