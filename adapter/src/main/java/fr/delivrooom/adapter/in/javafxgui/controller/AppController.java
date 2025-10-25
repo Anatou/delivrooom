@@ -1,6 +1,7 @@
 package fr.delivrooom.adapter.in.javafxgui.controller;
 
 import fr.delivrooom.adapter.in.javafxgui.JavaFXApp;
+import fr.delivrooom.adapter.in.javafxgui.utils.InvalidableReadOnlyListWrapper;
 import fr.delivrooom.adapter.in.javafxgui.utils.InvalidableReadOnlyObjectWrapper;
 import fr.delivrooom.adapter.out.XMLCityMapLoader;
 import fr.delivrooom.application.model.*;
@@ -8,7 +9,6 @@ import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.scene.control.Alert;
 
 import java.io.File;
@@ -64,7 +64,7 @@ public class AppController {
     private final InvalidableReadOnlyObjectWrapper<CityMap> cityMap = new InvalidableReadOnlyObjectWrapper<>(null);
     private final InvalidableReadOnlyObjectWrapper<DeliveriesDemand> deliveriesDemand = new InvalidableReadOnlyObjectWrapper<>(null);
     private final InvalidableReadOnlyObjectWrapper<TourSolution> tourSolution = new InvalidableReadOnlyObjectWrapper<>(null);
-    private final ReadOnlyListWrapper<Courier> couriers = new ReadOnlyListWrapper<>(FXCollections.observableArrayList());
+    private final InvalidableReadOnlyListWrapper<Courier> couriers = new InvalidableReadOnlyListWrapper<>(FXCollections.observableArrayList());
     // 0 = not running, 0 < x < 1 = running, 1 = done
     private final DoubleProperty tourCalculationProgress = new SimpleDoubleProperty(0);
     private final InvalidableReadOnlyObjectWrapper<Intersection> selectedIntersection = new InvalidableReadOnlyObjectWrapper<>(null);
@@ -466,6 +466,7 @@ public class AppController {
                     this.tourCalculationProgress.set(1);
                     courier.setTourSolution(solution);
                     this.tourSolution.set(solution);
+                    this.couriers.invalidate();
                 });
             } catch (Exception e) {
                 Platform.runLater(() -> showError("Error while calculating tour",
@@ -507,6 +508,7 @@ public class AppController {
             courier.addDelivery(delivery, store);
         }
         this.deliveriesDemand.invalidate();
+        this.couriers.invalidate();
     }
 
     protected void doSaveTourSolution(String filename) {
@@ -561,8 +563,12 @@ public class AppController {
      *
      * @return The list of couriers in the system, as an observable list.
      */
-    public ObservableList<Courier> couriersProperty() {
-        return couriers;
+    public ReadOnlyListProperty<Courier> couriersProperty() {
+        return couriers.getReadOnlyProperty();
+    }
+
+    public void invalidateCouriers() {
+        couriers.invalidate();
     }
 
     public ReadOnlyProperty<CityMap> cityMapProperty() {

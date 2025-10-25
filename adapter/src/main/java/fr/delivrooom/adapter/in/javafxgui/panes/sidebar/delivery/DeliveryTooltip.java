@@ -42,12 +42,25 @@ public class DeliveryTooltip extends Popover {
         takeoutTitle.getStyleClass().addAll("title-4");
         takeoutTitle.setGraphic(new FontIcon(FontAwesomeSolid.SHOPPING_CART));
 
-        GridPane takeoutGrid = createInfoGrid(
-                "Intersection ID:", String.valueOf(delivery.takeoutIntersection().getId()),
-                "Latitude:", String.format("%.6f", delivery.takeoutIntersection().getLatitude()),
-                "Longitude:", String.format("%.6f", delivery.takeoutIntersection().getLongitude()),
-                "Duration:", delivery.takeoutDuration() + " min"
-        );
+        GridPane takeoutGrid;
+
+        // Vérifier l'intersection de takeout (prise) et afficher soit sans temps soit avec temps correctement formaté
+        if (delivery.takeoutIntersection().getTimeArrivedSeconds() == -1f) {
+            takeoutGrid = createInfoGrid(
+                    "Intersection ID:", String.valueOf(delivery.takeoutIntersection().getId()),
+                    "Latitude:", String.format("%.6f", delivery.takeoutIntersection().getLatitude()),
+                    "Longitude:", String.format("%.6f", delivery.takeoutIntersection().getLongitude()),
+                    "Duration:", delivery.takeoutDuration() / 60 + " min"
+            );
+        } else {
+            takeoutGrid = createInfoGrid(
+                    "Intersection ID:", String.valueOf(delivery.takeoutIntersection().getId()),
+                    "Latitude:", String.format("%.6f", delivery.takeoutIntersection().getLatitude()),
+                    "Longitude:", String.format("%.6f", delivery.takeoutIntersection().getLongitude()),
+                    "Duration:", delivery.takeoutDuration() / 60 + " min",
+                    "Time Arrived (HH:MM):", delivery.takeoutIntersection().getFormattedTimeArrived()
+            );
+        }
 
         takeoutBox.getChildren().addAll(takeoutTitle, takeoutGrid);
 
@@ -57,17 +70,29 @@ public class DeliveryTooltip extends Popover {
         deliveryTitle.getStyleClass().addAll("title-4");
         deliveryTitle.setGraphic(new FontIcon(FontAwesomeSolid.LOCATION_ARROW));
 
-        GridPane deliveryGrid = createInfoGrid(
-                "Intersection ID:", String.valueOf(delivery.deliveryIntersection().getId()),
-                "Latitude:", String.format("%.6f", delivery.deliveryIntersection().getLatitude()),
-                "Longitude:", String.format("%.6f", delivery.deliveryIntersection().getLongitude()),
-                "Duration:", delivery.deliveryDuration() + " min"
-        );
+        GridPane deliveryGrid;
+
+        if (delivery.deliveryIntersection().getTimeArrivedSeconds() == -1f) {
+            deliveryGrid = createInfoGrid(
+                    "Intersection ID:", String.valueOf(delivery.deliveryIntersection().getId()),
+                    "Latitude:", String.format("%.6f", delivery.deliveryIntersection().getLatitude()),
+                    "Longitude:", String.format("%.6f", delivery.deliveryIntersection().getLongitude()),
+                    "Duration:", delivery.deliveryDuration() / 60 + " min"
+            );
+        } else {
+            deliveryGrid = createInfoGrid(
+                    "Intersection ID:", String.valueOf(delivery.deliveryIntersection().getId()),
+                    "Latitude:", String.format("%.6f", delivery.deliveryIntersection().getLatitude()),
+                    "Longitude:", String.format("%.6f", delivery.deliveryIntersection().getLongitude()),
+                    "Duration:", delivery.deliveryDuration() / 60 + " min",
+                    "Time Arrived (HH:MM):", delivery.deliveryIntersection().getFormattedTimeArrived()
+            );
+        }
 
         deliveryBox.getChildren().addAll(deliveryTitle, deliveryGrid);
 
         if (showActionButtons) {
-            DeliveryActionButtons actionButtons = new DeliveryActionButtons(delivery);
+            DeliveryActionButtons actionButtons = new DeliveryActionButtons(delivery, this::hide);
             container.getChildren().add(actionButtons);
         }
         container.getChildren().addAll(takeoutBox, deliveryBox);
