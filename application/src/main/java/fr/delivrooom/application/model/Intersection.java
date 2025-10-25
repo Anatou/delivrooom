@@ -8,7 +8,6 @@ public class Intersection {
     protected final double longitude;
     protected final double normalizedX;
     protected final double normalizedY;
-    // stocke les secondes depuis le départ du tour (-1 si non défini)
     protected float timeArrivedSeconds;
 
     public Intersection(long id, double latitude, double longitude) {
@@ -57,32 +56,19 @@ public class Intersection {
         return R * c;
     }
 
-    // -- time handling (internally en secondes) --
 
-    /**
-     * Retourne le temps d'arrivée en secondes depuis le début du tour (-1 si inconnu).
-     */
     public float getTimeArrivedSeconds() {
         return timeArrivedSeconds;
     }
 
-    /**
-     * Définit le temps d'arrivée en secondes depuis le début du tour.
-     */
     public void setTimeArrivedSeconds(float timeArrivedSeconds) {
         this.timeArrivedSeconds = timeArrivedSeconds;
     }
 
-    /**
-     * Retourne le temps d'arrivée en minutes (float), ou -1 si inconnu.
-     */
     public float getTimeArrivedMinutes() {
         return timeArrivedSeconds < 0 ? -1f : timeArrivedSeconds / 60f;
     }
 
-    /**
-     * Retourne une chaîne formatée HH:MM (début du tour à 17:00) ou "N/A".
-     */
     public String getFormattedTimeArrived() {
         if (timeArrivedSeconds < 0) {
             return "N/A";
@@ -102,9 +88,4 @@ public class Intersection {
                 '}';
     }
 
-    // Exemple d'utilisation :
-    // pour afficher "12.34 min" :
-    // String s = String.format("%.2f min", intersection.getTimeArrivedMinutes());
-    // pour afficher "HH:MM" :
-    // String s2 = intersection.getFormattedTimeArrived();
 }

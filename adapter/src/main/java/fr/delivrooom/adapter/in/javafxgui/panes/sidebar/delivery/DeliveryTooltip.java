@@ -50,14 +50,14 @@ public class DeliveryTooltip extends Popover {
                     "Intersection ID:", String.valueOf(delivery.takeoutIntersection().getId()),
                     "Latitude:", String.format("%.6f", delivery.takeoutIntersection().getLatitude()),
                     "Longitude:", String.format("%.6f", delivery.takeoutIntersection().getLongitude()),
-                    "Duration:", delivery.takeoutDuration() + " min"
+                    "Duration:", delivery.takeoutDuration() / 60 + " min"
             );
         } else {
             takeoutGrid = createInfoGrid(
                     "Intersection ID:", String.valueOf(delivery.takeoutIntersection().getId()),
                     "Latitude:", String.format("%.6f", delivery.takeoutIntersection().getLatitude()),
                     "Longitude:", String.format("%.6f", delivery.takeoutIntersection().getLongitude()),
-                    "Duration:", delivery.takeoutDuration() + " min",
+                    "Duration:", delivery.takeoutDuration() / 60 + " min",
                     "Time Arrived (HH:MM):", delivery.takeoutIntersection().getFormattedTimeArrived()
             );
         }
@@ -77,14 +77,14 @@ public class DeliveryTooltip extends Popover {
                     "Intersection ID:", String.valueOf(delivery.deliveryIntersection().getId()),
                     "Latitude:", String.format("%.6f", delivery.deliveryIntersection().getLatitude()),
                     "Longitude:", String.format("%.6f", delivery.deliveryIntersection().getLongitude()),
-                    "Duration:", delivery.deliveryDuration() + " min"
+                    "Duration:", delivery.deliveryDuration() / 60 + " min"
             );
         } else {
             deliveryGrid = createInfoGrid(
                     "Intersection ID:", String.valueOf(delivery.deliveryIntersection().getId()),
                     "Latitude:", String.format("%.6f", delivery.deliveryIntersection().getLatitude()),
                     "Longitude:", String.format("%.6f", delivery.deliveryIntersection().getLongitude()),
-                    "Duration:", delivery.deliveryDuration() + " min",
+                    "Duration:", delivery.deliveryDuration() / 60 + " min",
                     "Time Arrived (HH:MM):", delivery.deliveryIntersection().getFormattedTimeArrived()
             );
         }
