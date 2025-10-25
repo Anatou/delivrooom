@@ -105,7 +105,7 @@ public class AppToolBar extends ToolBar {
         logo.setOnMouseClicked(e -> AppController.getController().toggleMemeMode());
 
         // Easter egg: clicking the logo toggles meme mode
-        logo.setOnMouseClicked(e -> handleLogoClick());
+        logo.setOnMouseClicked(e -> AppController.getController().toggleMemeMode());
         logo.setStyle("-fx-cursor: hand;"); // Show it's clickable
 
         this.getItems().addAll(open, edit, new Spacer(10),saveTourBtn, new Spacer(10),importTourBtn, new Spacer(10), themeToggle, new Spacer(), logo, new Spacer(10));
