@@ -220,8 +220,8 @@ public class AppController {
         requestCommand(result);
     }
 
-    public void requestLoadTourSolution(File file) {
-        CommandResult result = getState().createLoadTourCommand(cityMap.get(), deliveriesDemand.get(), couriers.get(), file.getAbsolutePath());
+    public void requestLoadTourSolution(String filename) {
+        CommandResult result = getState().createLoadTourCommand(cityMap.get(), deliveriesDemand.get(), couriers.get(), filename);
         requestCommand(result);
     }
 

@@ -65,7 +65,7 @@ public class AppToolBar extends ToolBar {
 
         Button importTourBtn = new Button("", new FontIcon(FontAwesomeSolid.FILE_IMPORT));
         importTourBtn.setTooltip(new javafx.scene.control.Tooltip("Import Calculated Tour"));
-       //importTourBtn.setOnAction(e -> controller.requestImportTourFile());
+        importTourBtn.setOnAction(e -> controller.requestLoadTourSolution());
 
 
         themeToggle = new ToggleSwitch("");
