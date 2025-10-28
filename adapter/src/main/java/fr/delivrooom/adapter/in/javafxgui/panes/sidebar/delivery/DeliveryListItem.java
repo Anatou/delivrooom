@@ -23,7 +23,8 @@ public class DeliveryListItem extends HBox {
     public DeliveryListItem(Delivery delivery) {
         super(5);
         this.tooltip = new DeliveryTooltip(delivery, false);
-        this.actionButtons = new DeliveryActionButtons(delivery);
+        this.actionButtons = new DeliveryActionButtons(delivery, () -> {
+        });
 
         setPadding(new Insets(8));
         setAlignment(Pos.CENTER_LEFT);

@@ -14,6 +14,9 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.kordamp.ikonli.fontawesome6.FontAwesomeSolid;
@@ -29,9 +32,9 @@ public class AppToolBar extends ToolBar {
     private Stage stage;
     private Scene scene;
 
-    private Image logoImgLight;
-    private Image logoImgDark;
-    private ImageView logo;
+    private final Image logoImgLight;
+    private final Image logoImgDark;
+    private final ImageView logo;
 
     public AppToolBar() {
         super();
@@ -52,21 +55,41 @@ public class AppToolBar extends ToolBar {
             open.getItems().add(defaultBtn);
         }
 
+        MenuButton edit = new MenuButton("Edit");
 
-        Button undoBtn = new Button("", new FontIcon(FontAwesomeSolid.UNDO));
+        MenuItem undoBtn = new MenuItem("Undo", new FontIcon(FontAwesomeSolid.UNDO));
+        undoBtn.setAccelerator(new KeyCodeCombination(KeyCode.Z, KeyCombination.META_DOWN));
         undoBtn.setOnAction(e -> controller.undoCommand());
 
-        Button redoBtn = new Button("", new FontIcon(FontAwesomeSolid.REDO));
+        MenuItem redoBtn = new MenuItem("Redo", new FontIcon(FontAwesomeSolid.REDO));
+        redoBtn.setAccelerator(new KeyCodeCombination(KeyCode.Y, KeyCombination.META_DOWN));
         redoBtn.setOnAction(e -> controller.redoCommand());
 
+        edit.setOnShowing(e -> {
+            String undoName = controller.getNextUndoCommandName();
+            undoBtn.setDisable(undoName == null);
+            if (undoName == null) {
+                undoBtn.setText("Undo");
+            } else {
+                undoBtn.setText("Undo (" + undoName + ")");
+            }
+            String redoName = controller.getNextRedoCommandName();
+            redoBtn.setDisable(redoName == null);
+            if (redoName == null) {
+                redoBtn.setText("Redo");
+            } else {
+                redoBtn.setText("Redo (" + redoName + ")");
+            }
+        });
         Button saveTourBtn = new Button("", new FontIcon(FontAwesomeSolid.SAVE));
         saveTourBtn.setTooltip(new javafx.scene.control.Tooltip("Save Calculated Tour"));
         saveTourBtn.setOnAction(e -> handleSaveTourFileDialog());
 
         Button importTourBtn = new Button("", new FontIcon(FontAwesomeSolid.FILE_IMPORT));
         importTourBtn.setTooltip(new javafx.scene.control.Tooltip("Import Calculated Tour"));
-        importTourBtn.setOnAction(e -> controller.requestLoadTourSolution());
+       //importTourBtn.setOnAction(e -> controller.requestImportTourFile());
 
+        edit.getItems().addAll(undoBtn, redoBtn);
 
         themeToggle = new ToggleSwitch("");
         themeToggle.setGraphic(new FontIcon(FontAwesomeSolid.MOON));
@@ -79,12 +102,13 @@ public class AppToolBar extends ToolBar {
         logo.setFitHeight(25);
         logo.setSmooth(true);
         logo.setPreserveRatio(true);
+        logo.setOnMouseClicked(e -> AppController.getController().toggleMemeMode());
 
         // Easter egg: clicking the logo toggles meme mode
-        logo.setOnMouseClicked(e -> handleLogoClick());
+        logo.setOnMouseClicked(e -> AppController.getController().toggleMemeMode());
         logo.setStyle("-fx-cursor: hand;"); // Show it's clickable
 
-        this.getItems().addAll(open, new Spacer(20), undoBtn, redoBtn, new Spacer(10),saveTourBtn, new Spacer(10),importTourBtn, new Spacer(10), themeToggle, new Spacer(), logo, new Spacer(10));
+        this.getItems().addAll(open, edit, new Spacer(10),saveTourBtn, new Spacer(10),importTourBtn, new Spacer(10), themeToggle, new Spacer(), logo, new Spacer(10));
     }
 
     /**

@@ -15,6 +15,7 @@ public record TourSolution(List<Path> paths, float totalLength, List<Long> deliv
         return "TourSolution{" +
                 //"paths=" + paths +
                 ", totalLength=" + totalLength +
+                ", deliveryOrder=" + deliveryOrder +
                 '}';
     }
 

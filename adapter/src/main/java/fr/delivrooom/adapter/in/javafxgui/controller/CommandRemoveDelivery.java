@@ -17,5 +17,10 @@ public record CommandRemoveDelivery(AppController controller, Delivery delivery)
     public void undo() {
         controller.doAddDelivery(delivery);
     }
+
+    @Override
+    public String toString() {
+        return "Remove Delivery " + delivery.takeoutIntersection().getId() + " > " + delivery.deliveryIntersection().getId();
+    }
 }
 

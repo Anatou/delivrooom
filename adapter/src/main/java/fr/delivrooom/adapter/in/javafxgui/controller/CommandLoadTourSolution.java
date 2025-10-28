@@ -60,5 +60,7 @@ public class CommandLoadTourSolution implements Command{
         controller.transitionToState(sourceState);
     }
 
-    //TODO: redo
+    public void redo() {
+        execute();
+    }
 }

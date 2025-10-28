@@ -1,14 +1,14 @@
 package fr.delivrooom.adapter.in.javafxgui.panes.sidebar;
 
+import atlantafx.base.controls.Spacer;
 import fr.delivrooom.adapter.in.javafxgui.controller.AppController;
 import fr.delivrooom.application.model.Delivery;
 import fr.delivrooom.application.model.Intersection;
 import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.Separator;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import org.kordamp.ikonli.fontawesome6.FontAwesomeSolid;
 import org.kordamp.ikonli.javafx.FontIcon;
@@ -21,102 +21,123 @@ public class DeliveryCreationSection extends VBox {
 
     private final VBox addDeliveryBox;
     private final AppController controller;
+    private final TitledPane titledPane;
 
     private boolean requestedIntersectionIsTakeout = true;
     private Intersection takeout;
     private Intersection delivery;
 
     public DeliveryCreationSection() {
-        super(10);
-        setPadding(new Insets(10));
-        setAlignment(Pos.TOP_LEFT);
+        super(0);
+        //setPadding(new Insets(10));
+        //setAlignment(Pos.TOP_LEFT);
         this.controller = AppController.getController();
 
-        // Section title
-        Label titleLabel = new Label("New Delivery");
-        titleLabel.getStyleClass().addAll("title-4");
-
-        // State display
-        Label stateLabel = new Label("State: " + controller.getState().getClass().getSimpleName());
-        stateLabel.getStyleClass().add("text-muted");
-        controller.stateProperty().addListener((obs, oldState, newState) -> {
-            stateLabel.setText("State: " + newState.getClass().getSimpleName());
-        });
-
-        Label labelTakeout = new Label("Selected TakeOut Intersection: ");
+        // Create button and Sprinner : select takeout intersection and its duration
         Button buttonTakeout = new Button("Select TakeOut Intersection");
         buttonTakeout.setGraphic(new FontIcon(FontAwesomeSolid.LOCATION_ARROW));
-        TextField durationFieldTakeout = new TextField();
-        durationFieldTakeout.setId("durationFieldTakeout");
-        durationFieldTakeout.setPromptText("Enter duration in minutes");
+        buttonTakeout.setMaxWidth(Double.MAX_VALUE);
+        Spinner<Integer> durationSpinnerTakeout = new Spinner<>(1,20,5);
+        durationSpinnerTakeout.setEditable(true);
+        durationSpinnerTakeout.setMinWidth(175);
+        durationSpinnerTakeout.setId("durationSpinnerTakeout");
+        durationSpinnerTakeout.setPromptText("Duration in minutes");
+        HBox selectIntersectionTakeout = new HBox(5,buttonTakeout, durationSpinnerTakeout);
 
-        Label labelDelivery = new Label("Selected Delivery Intersection: ");
+        // Create button and Sprinner : select delivery intersection and its duration
         Button buttonDelivery = new Button("Select Delivery Intersection");
         buttonDelivery.setGraphic(new FontIcon(FontAwesomeSolid.LOCATION_ARROW));
-        TextField durationFieldDelivery = new TextField();
-        durationFieldDelivery.setId("durationFieldDelivery");
-        durationFieldDelivery.setPromptText("Enter duration in minutes");
+        buttonDelivery.setMaxWidth(Double.MAX_VALUE);
+        Spinner<Integer> durationSpinnerDelivery = new Spinner<>(1,20,5);
+        durationSpinnerDelivery.setEditable(true);
+        durationSpinnerDelivery.setMinWidth(175);
+        durationSpinnerDelivery.setId("durationSpinnerDelivery");
+        durationSpinnerDelivery.setPromptText("Duration in minutes");
+        HBox selectIntersectionDelivery = new HBox(5,buttonDelivery, durationSpinnerDelivery);
 
 
-        Button buttonConfirmAddDelivery = new Button("Confirm");
+        // Create button Confirm the choice of the selected Delivery
+        Button buttonConfirmAddDelivery = new Button("Add Delivery");
+        buttonConfirmAddDelivery.setMaxWidth(Double.MAX_VALUE);
+        buttonConfirmAddDelivery.setGraphic(new FontIcon(FontAwesomeSolid.PLUS));
+        buttonConfirmAddDelivery.getStyleClass().add("accent");
 
         buttonTakeout.setOnAction(e -> {
             requestedIntersectionIsTakeout = true;
+            buttonTakeout.getStyleClass().add("accent");
             controller.requestIntersectionSelection();
         });
         buttonDelivery.setOnAction(e -> {
             requestedIntersectionIsTakeout = false;
+            buttonDelivery.getStyleClass().add("accent");
             controller.requestIntersectionSelection();
         });
-
-
-        Label addTitle = new Label("Add Delivery");
-        addTitle.setStyle("-fx-font-weight: bold; -fx-font-size: 14;");
-        this.addDeliveryBox = new VBox(8, addTitle,
-                new Separator(),
-                labelTakeout, buttonTakeout, durationFieldTakeout,
-                labelDelivery, buttonDelivery, durationFieldDelivery,
-                buttonConfirmAddDelivery
-        );
-        addDeliveryBox.setPadding(new Insets(10));
-        addDeliveryBox.setAlignment(Pos.CENTER_LEFT);
-
         buttonConfirmAddDelivery.setOnAction(e -> {
             int tDuration;
             int dDuration;
+            tDuration = durationSpinnerTakeout.getValue();
+            dDuration = durationSpinnerDelivery.getValue();
             if (takeout != null && delivery != null) {
-                try {
-                    tDuration = Integer.parseInt(durationFieldTakeout.getText());
-                    dDuration = Integer.parseInt(durationFieldDelivery.getText());
-                } catch (NumberFormatException ex) {
-                    // TODO: use spinners instead of text fields
-                    System.err.println("Invalid duration format for delivery creation");
-                    return;
-                }
+                // Add the delivery by calling the controller and reset style of buttons
                 Delivery addedDelivery = new Delivery(this.takeout, this.delivery, tDuration, dDuration);
                 controller.requestAddDelivery(addedDelivery);
+                buttonTakeout.setText("Select TakeOut Intersection");
+                buttonDelivery.setText("Select Delivery Intersection");
+                buttonDelivery.getStyleClass().removeAll("success","accent");
+                buttonTakeout.getStyleClass().removeAll("success","accent");
             }
-            addDeliveryBox.setVisible(false);
-            addDeliveryBox.setManaged(false);
         });
+
+
+        this.addDeliveryBox = new VBox(5,
+                selectIntersectionTakeout,
+                selectIntersectionDelivery,
+                buttonConfirmAddDelivery
+        );
+        addDeliveryBox.setAlignment(Pos.CENTER_LEFT);
+
 
         controller.selectedIntersectionProperty().addListener((obs, oldIntersection, newIntersection) -> {
             if (newIntersection != null) {
                 if (requestedIntersectionIsTakeout) {
-                    addDeliveryBox.setVisible(true);
-                    addDeliveryBox.setManaged(true);
                     this.takeout = newIntersection;
-                    labelTakeout.setText("Selected Takeout Intersection: " + this.takeout.getId());
+                    buttonTakeout.getStyleClass().add("success");
+                    buttonTakeout.setText("Select Another TakeOut Intersection");
                 } else {
-                    addDeliveryBox.setVisible(true);
-                    addDeliveryBox.setManaged(true);
                     this.delivery = newIntersection;
-                    labelDelivery.setText("Selected Delivery Intersection: " + this.delivery.getId());
+                    buttonDelivery.getStyleClass().add("success");
+                    buttonDelivery.setText("Select Another Delivery Intersection");
                 }
             }
         });
 
-        getChildren().addAll(titleLabel, addDeliveryBox);
+        // Create custom title with icon and description
+        HBox titleBox = new HBox(6);
+        titleBox.setAlignment(Pos.CENTER_LEFT);
+
+        FontIcon icon = new FontIcon(FontAwesomeSolid.PLUS);
+        icon.getStyleClass().add("title-icon");
+
+        VBox textBox = new VBox(0);
+        Label titleLabel = new Label("Deliveries");
+        titleLabel.getStyleClass().add("title-text");
+        Label descLabel = new Label("Add New Deliveries");
+        descLabel.getStyleClass().addAll("description-text", "text-muted");
+        textBox.getChildren().addAll(titleLabel, descLabel);
+
+        titleBox.getChildren().addAll(icon, textBox);
+
+        // Create collapsible TitledPane
+        titledPane = new TitledPane();
+        titledPane.setGraphic(titleBox);
+        titledPane.setText(null);
+        titledPane.setContent(addDeliveryBox);
+        titledPane.setExpanded(true);
+        titledPane.setCollapsible(true);
+
+        getChildren().add(titledPane);
+
+        getChildren().addAll(addDeliveryBox);
     }
 
 }

@@ -6,7 +6,9 @@ import fr.delivrooom.application.service.TourCalculatorService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 class NotifyTSPProgressMock implements NotifyTSPProgressToGui {
     Double lastPercentage;
@@ -75,9 +77,7 @@ public class TourCalculatorUnitTests {
     static CityMap removeRoadFromCityMap(CityMap c, long fromInter, long toInter) {
         HashMap<Long, Intersection> intersections = c.intersections();
         HashMap<Long, HashMap<Long, Road>> roadsFromInters = c.roads();
-        System.out.println(roadsFromInters);
         roadsFromInters.get(fromInter).remove(toInter);
-        System.out.println(roadsFromInters);
         return new CityMap(intersections, roadsFromInters);
     }
     static CityMap removeBidirectionalRoadFromCityMap(CityMap c, long interA, long interB) {
