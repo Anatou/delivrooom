@@ -69,6 +69,7 @@ public class AppController {
     private final DoubleProperty tourCalculationProgress = new SimpleDoubleProperty(0);
     private final InvalidableReadOnlyObjectWrapper<Intersection> selectedIntersection = new InvalidableReadOnlyObjectWrapper<>(null);
     private final BooleanProperty memeModeProperty = new SimpleBooleanProperty(false);
+    private final BooleanProperty tourCalculatedProperty = new SimpleBooleanProperty(false);
 
     private AppController() {
     }
@@ -230,8 +231,8 @@ public class AppController {
         requestCommand(result);
     }
 
-    public void requestLoadTourSolution(String filename) {
-        CommandResult result = getState().createLoadTourCommand(cityMap.get(), deliveriesDemand.get(), couriers.get(), filename);
+    public void requestLoadTourSolution(File file) {
+        CommandResult result = getState().createLoadTourCommand(cityMap.get(), deliveriesDemand.get(), couriers.get(), file.getAbsolutePath());
         requestCommand(result);
     }
 
@@ -427,6 +428,7 @@ public class AppController {
                 Platform.runLater(() -> {
                     this.tourCalculationProgress.set(1);
                     this.tourSolution.set(solution);
+                    setTourCalculated(true);
                 });
             } catch (Exception e) {
                 Platform.runLater(() -> showError("Error while calculating tour",
@@ -613,15 +615,27 @@ public class AppController {
     public BooleanProperty memeModeProperty() {
         return memeModeProperty;
     }
-
     /**
      * Toggle the meme mode on/off and clear the tile cache.
      */
     public void toggleMemeMode() {
         memeModeProperty.set(!memeModeProperty.get());
     }
+    /**
+     * Get the tour calculated property.
+     *
+     * @return The tour calculated property
+     */
+    public BooleanProperty tourCalculatedProperty() {
+        return tourCalculatedProperty;
+    }
+    public boolean isTourCalculated() {
+        return tourCalculatedProperty.get();
+    }
 
-
+    public void setTourCalculated(boolean calculated) {
+        this.tourCalculatedProperty.set(calculated);
+    }
 
     // ============================================================================
     // PRIVATE/UTILITY METHODS
