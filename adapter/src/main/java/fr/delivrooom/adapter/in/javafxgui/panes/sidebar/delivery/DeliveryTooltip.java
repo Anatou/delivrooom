@@ -58,7 +58,7 @@ public class DeliveryTooltip extends Popover {
                     "Latitude:", String.format("%.6f", delivery.takeoutIntersection().getLatitude()),
                     "Longitude:", String.format("%.6f", delivery.takeoutIntersection().getLongitude()),
                     "Duration:", delivery.takeoutDuration() / 60 + " min",
-                    "Time Arrived (HH:MM):", delivery.takeoutIntersection().getFormattedTimeArrived()
+                    "Time Arrived:", delivery.takeoutIntersection().getFormattedTimeArrived()
             );
         }
 
@@ -85,7 +85,7 @@ public class DeliveryTooltip extends Popover {
                     "Latitude:", String.format("%.6f", delivery.deliveryIntersection().getLatitude()),
                     "Longitude:", String.format("%.6f", delivery.deliveryIntersection().getLongitude()),
                     "Duration:", delivery.deliveryDuration() / 60 + " min",
-                    "Time Arrived (HH:MM):", delivery.deliveryIntersection().getFormattedTimeArrived()
+                    "Time Arrived:", delivery.deliveryIntersection().getFormattedTimeArrived()
             );
         }
 

@@ -148,11 +148,8 @@ public class TourCalculatorService implements CalculateTourUseCase {
             }
 
             if (prevIntersection != null && intersection != null) {
-                System.out.println("Distance from " + prevIntersection.getId() + " to " + intersection.getId());
-                System.out.println("distance : " + shortestPathsGraph.getCout(prevIntersection.getId(), intersection.getId()) + " meters");
                 totalTime += shortestPathsGraph.getCout(prevIntersection.getId(), intersection.getId()) / 4.17;
             }
-            System.out.println("time arrived at intersection " + d + " : " + totalTime + " seconds");
 //
             prevIntersection = intersection;
             intersection.setTimeArrivedSeconds(totalTime);
