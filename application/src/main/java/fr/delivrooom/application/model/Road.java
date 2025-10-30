@@ -1,6 +1,11 @@
 package fr.delivrooom.application.model;
 
-public class Road {
+import java.io.Serial;
+import java.io.Serializable;
+
+public class Road implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     protected final Intersection origin;
     protected final Intersection destination;

@@ -1,9 +1,13 @@
 package fr.delivrooom.application.model;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
-public record DeliveriesDemand(List<Delivery> deliveries, Intersection store) {
+public record DeliveriesDemand(List<Delivery> deliveries, Intersection store) implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     public Delivery getDeliveryByIds(int idTakeOutIntersection, int idDeliveryIntersection) {
         for (Delivery d : this.deliveries) {
