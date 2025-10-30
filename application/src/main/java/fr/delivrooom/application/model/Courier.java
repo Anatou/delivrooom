@@ -1,10 +1,15 @@
 package fr.delivrooom.application.model;
 
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.ArrayList;
 
 
-public class Courier {
+public class Courier implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     private final int id;
     private DeliveriesDemand deliveriesDemand;
     private TourSolution tourSolution;

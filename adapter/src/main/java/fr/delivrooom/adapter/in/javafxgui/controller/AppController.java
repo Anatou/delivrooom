@@ -432,6 +432,7 @@ public class AppController {
                         if (doCalculateTourForCourierSync(courier)) {
                             isThereAtLeastOneCourierWithTourNotAlreadyCalculated = true;
                             System.out.println("Tour recalculated for courier " + courier.getId());
+                            setTourCalculated(true);
                         }
                         isThereAtLeastOneCourierWithDeliveries = true;
                     } else {
@@ -525,6 +526,7 @@ public class AppController {
                     this.tourSolution.set(new CouriersTourSolution(map));
                     this.couriers.invalidate();
                 });
+                setTourCalculated(true);
             } catch (Exception e) {
                 Platform.runLater(() -> showError("Error while calculating tour",
                         e.getMessage() == null ? e.toString() : e.getMessage()));
@@ -578,12 +580,12 @@ public class AppController {
 
     protected void doSaveTourSolution(String filename) {
         TourSolutionSerialiserIO tourSolutionSerialiserIO = new TourSolutionSerialiserIO();
-        List<TourSolution> tourList = new ArrayList<>();
-        for (Courier courier : couriers) {
-            tourList.add(courier.getTourSolution());
+        List<Courier> courierList = new ArrayList<>();
+        for (Courier c : couriers.get()) {
+            courierList.add(c);
         }
         try {
-            TourSolutionSerialiser serial = new TourSolutionSerialiser(cityMap.get(), deliveriesDemand.get(), tourList);
+            TourSolutionSerialiser serial = new TourSolutionSerialiser(cityMap.get(), deliveriesDemand.get(), courierList);
             tourSolutionSerialiserIO.saveTourSolutionSerialization(serial, filename);
         }
         catch (IOException e) {

@@ -37,18 +37,8 @@ public class CommandLoadTourSolution implements Command{
 
         controller.doRestoreCityMap(tourSolutionSerialiser.cityMap());
         controller.doRestoreDeliveriesDemand(tourSolutionSerialiser.demand());
+        controller.couriersProperty().setAll(tourSolutionSerialiser.couriersAndSolutions());
 
-        // create as many couriers as necessary
-        int couriersNumber = tourSolutionSerialiser.tourSolutionList().size();
-        List<Courier> newCouriers = new ArrayList<>();
-        for (int i = 0; i < couriersNumber; ++i){
-            newCouriers.add(new Courier(i));
-        }
-        controller.couriersProperty().setAll(newCouriers);
-
-        for (int i = 0; i < couriersNumber; ++i){
-            controller.couriersProperty().get(i).setTourSolution(tourSolutionSerialiser.tourSolutionList().get(i));
-        }
     }
 
     @Override

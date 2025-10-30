@@ -4,7 +4,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
-public record TourSolutionSerialiser(CityMap cityMap, DeliveriesDemand demand, List<TourSolution> tourSolutionList) implements Serializable {
+public record TourSolutionSerialiser(CityMap cityMap, DeliveriesDemand demand, List<Courier> couriersAndSolutions) implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -19,8 +19,8 @@ public record TourSolutionSerialiser(CityMap cityMap, DeliveriesDemand demand, L
     }
 
     @Override
-    public List<TourSolution> tourSolutionList() {
-        return tourSolutionList;
+    public List<Courier> couriersAndSolutions() {
+        return couriersAndSolutions;
     }
 
     @Override
@@ -28,7 +28,8 @@ public record TourSolutionSerialiser(CityMap cityMap, DeliveriesDemand demand, L
         return "TourSolutionSerialiser{" +
                 "cityMap=" + cityMap +
                 ", demand=" + demand +
-                ", tourSolutionList=" + tourSolutionList +
+                ", couriersAndSolutions=" + couriersAndSolutions +
                 '}';
     }
 }
+
