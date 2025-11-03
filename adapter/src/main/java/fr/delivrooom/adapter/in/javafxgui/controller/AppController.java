@@ -12,10 +12,12 @@ import javafx.collections.FXCollections;
 import javafx.scene.control.Alert;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -67,6 +69,7 @@ public class AppController {
     private final DoubleProperty tourCalculationProgress = new SimpleDoubleProperty(0);
     private final InvalidableReadOnlyObjectWrapper<Intersection> selectedIntersection = new InvalidableReadOnlyObjectWrapper<>(null);
     private final BooleanProperty memeModeProperty = new SimpleBooleanProperty(false);
+    private final BooleanProperty tourCalculatedProperty = new SimpleBooleanProperty(false);
 
     private AppController() {
     }
@@ -226,6 +229,30 @@ public class AppController {
     public void requestAddCourier(Courier courier) {
         CommandResult result = getState().createAddCourierCommand(courier);
         requestCommand(result);
+    }
+
+    public void requestLoadTourSolution(File file) {
+        CommandResult result = getState().createLoadTourCommand(cityMap.get(), deliveriesDemand.get(), couriers.get(), file.getAbsolutePath());
+        requestCommand(result);
+    }
+
+    /**
+     * Request to save the current tour to a file.
+     *
+     * @param file The file to save the tour to
+     */
+    public void requestSaveTourFile(File file) {
+        if (file == null) {
+            showError("Save Error", "No file specified for saving.");
+            return;
+        }
+        try {
+            getState().saveTour(file.getAbsolutePath());
+            System.out.println("Tour saved to " + file.getAbsolutePath());
+        } catch (Exception e) {
+            showError("Save Error", "Failed to save the tour: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
 
@@ -405,6 +432,7 @@ public class AppController {
                         if (doCalculateTourForCourierSync(courier)) {
                             isThereAtLeastOneCourierWithTourNotAlreadyCalculated = true;
                             System.out.println("Tour recalculated for courier " + courier.getId());
+                            setTourCalculated(true);
                         }
                         isThereAtLeastOneCourierWithDeliveries = true;
                     } else {
@@ -498,6 +526,7 @@ public class AppController {
                     this.tourSolution.set(new CouriersTourSolution(map));
                     this.couriers.invalidate();
                 });
+                setTourCalculated(true);
             } catch (Exception e) {
                 Platform.runLater(() -> showError("Error while calculating tour",
                         e.getMessage() == null ? e.toString() : e.getMessage()));
@@ -548,6 +577,22 @@ public class AppController {
         this.deliveriesDemand.invalidate();
         this.couriers.invalidate();
     }
+
+    protected void doSaveTourSolution(String filename) {
+        TourSolutionSerialiserIO tourSolutionSerialiserIO = new TourSolutionSerialiserIO();
+        List<Courier> courierList = new ArrayList<>();
+        for (Courier c : couriers.get()) {
+            courierList.add(c);
+        }
+        try {
+            TourSolutionSerialiser serial = new TourSolutionSerialiser(cityMap.get(), deliveriesDemand.get(), courierList);
+            tourSolutionSerialiserIO.saveTourSolutionSerialization(serial, filename);
+        }
+        catch (IOException e) {
+            showError("Tour saving error", "Unable to save Tour");
+        }
+    }
+
 
     /**
      * Transition to a new state.
@@ -635,12 +680,26 @@ public class AppController {
     public BooleanProperty memeModeProperty() {
         return memeModeProperty;
     }
-
     /**
      * Toggle the meme mode on/off and clear the tile cache.
      */
     public void toggleMemeMode() {
         memeModeProperty.set(!memeModeProperty.get());
+    }
+    /**
+     * Get the tour calculated property.
+     *
+     * @return The tour calculated property
+     */
+    public BooleanProperty tourCalculatedProperty() {
+        return tourCalculatedProperty;
+    }
+    public boolean isTourCalculated() {
+        return tourCalculatedProperty.get();
+    }
+
+    public void setTourCalculated(boolean calculated) {
+        this.tourCalculatedProperty.set(calculated);
     }
 
     // ============================================================================
