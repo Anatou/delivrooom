@@ -441,8 +441,14 @@ public class AppController {
 
                     }
                 }
+                if (couriers.isEmpty()) {
+                    // No courier has deliveries assigned, and all tours are already up to date
+                    Platform.runLater(() -> showError("Cannot calculate tour", "No couriers available"));
+                    return;
+                }
                 if (!isThereAtLeastOneCourierWithDeliveries) {
                     Platform.runLater(() -> showError("Cannot calculate tour", "No couriers have deliveries assigned"));
+                    return;
                 }
                 if (!isThereAtLeastOneCourierWithTourNotAlreadyCalculated) {
                     Platform.runLater(() -> showError("Doesn't calculate tour", "All couriers' tours are already up to date"));
