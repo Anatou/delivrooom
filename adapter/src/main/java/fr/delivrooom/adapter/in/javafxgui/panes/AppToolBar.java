@@ -22,7 +22,6 @@ import javafx.stage.Stage;
 import org.kordamp.ikonli.fontawesome6.FontAwesomeSolid;
 import org.kordamp.ikonli.javafx.FontIcon;
 
-
 import java.io.File;
 import java.util.Objects;
 
@@ -105,10 +104,6 @@ public class AppToolBar extends ToolBar {
         logo.setSmooth(true);
         logo.setPreserveRatio(true);
         logo.setOnMouseClicked(e -> AppController.getController().toggleMemeMode());
-
-        // Easter egg: clicking the logo toggles meme mode
-        logo.setOnMouseClicked(e -> AppController.getController().toggleMemeMode());
-        logo.setStyle("-fx-cursor: hand;"); // Show it's clickable
 
         this.getItems().addAll(open, edit, new Spacer(10),saveTourBtn, new Spacer(10),importTourBtn, new Spacer(10), themeToggle, new Spacer(), logo, new Spacer(10));
     }
@@ -193,13 +188,5 @@ public class AppToolBar extends ToolBar {
             themeToggle.setGraphic(new FontIcon(FontAwesomeSolid.MOON));
             logo.setImage(logoImgLight);
         }
-    }
-
-    /**
-     * Handle logo click - toggles meme mode (easter egg)
-     */
-    private void handleLogoClick() {
-        AppController controller = AppController.getController();
-        controller.toggleMemeMode();
     }
 }
