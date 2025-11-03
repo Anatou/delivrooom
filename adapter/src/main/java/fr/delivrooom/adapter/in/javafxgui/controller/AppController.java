@@ -380,6 +380,8 @@ public class AppController {
                     courier.getDeliveriesDemand().deliveries().contains(delivery)) {
                 courier.removeDelivery(delivery);
                 courier.deleteTourSolution();
+                this.couriers.invalidate();
+
                 break;
             }
         }
@@ -573,7 +575,10 @@ public class AppController {
             if (!assignedCourier.equals(courier)) {
                 assignedCourier.removeDelivery(delivery);
                 assignedCourier.deleteTourSolution();
-                if (courier != null) courier.addDelivery(delivery, store);
+                if (courier != null) {
+                    courier.addDelivery(delivery, store);
+                    courier.deleteTourSolution();
+                }
             }
         } else if (courier != null) {
             courier.addDelivery(delivery, store);
