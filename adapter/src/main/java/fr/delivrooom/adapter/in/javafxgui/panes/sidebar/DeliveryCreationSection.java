@@ -38,7 +38,7 @@ public class DeliveryCreationSection extends VBox {
 
 
         // Create button and Sprinner : select takeout intersection and its duration
-        Button buttonTakeout = new Button("Select TakeOut Intersection");
+        Button buttonTakeout = new Button("Select Pickup Intersection");
         buttonTakeout.setGraphic(new FontIcon(FontAwesomeSolid.LOCATION_ARROW));
         buttonTakeout.setMaxWidth(Double.MAX_VALUE);
         buttonTakeout.setMinWidth(250);
@@ -50,7 +50,7 @@ public class DeliveryCreationSection extends VBox {
         HBox selectIntersectionTakeout = new HBox(5,buttonTakeout, durationSpinnerTakeout);
 
         // Create button and Sprinner : select delivery intersection and its duration
-        Button buttonDelivery = new Button("Select Delivery Intersection");
+        Button buttonDelivery = new Button("Select Deposit Intersection");
         buttonDelivery.setGraphic(new FontIcon(FontAwesomeSolid.LOCATION_ARROW));
         buttonDelivery.setMaxWidth(Double.MAX_VALUE);
         buttonDelivery.setMinWidth(250);
@@ -94,16 +94,16 @@ public class DeliveryCreationSection extends VBox {
                     // Add the delivery by calling the controller and reset style of buttons
                     Delivery addedDelivery = new Delivery(this.takeout, this.delivery, tDuration, dDuration);
                     controller.requestAddDelivery(addedDelivery);
-                    buttonTakeout.setText("Select TakeOut Intersection");
-                    buttonDelivery.setText("Select Delivery Intersection");
+                    buttonTakeout.setText("Select Pickup Intersection");
+                    buttonDelivery.setText("Select Deposit Intersection");
                     buttonDelivery.getStyleClass().removeAll("success", "accent");
                     buttonTakeout.getStyleClass().removeAll("success", "accent");
                     this.takeout = null;
                     this.delivery = null;
                 }else{
-                controller.showError("Takeout and/or delivery Intersections null", "Select both takeout and delivery Intersections");
-                buttonTakeout.setText("Select TakeOut Intersection");
-                buttonDelivery.setText("Select Delivery Intersection");
+                controller.showError("Pickup and/or deposit Intersections null", "Select both takeout and delivery Intersections");
+                buttonTakeout.setText("Select Pickup Intersection");
+                buttonDelivery.setText("Select Deposit Intersection");
                 buttonDelivery.getStyleClass().removeAll("success", "accent");
                 buttonTakeout.getStyleClass().removeAll("success", "accent");
                 this.takeout = null;
@@ -121,25 +121,26 @@ public class DeliveryCreationSection extends VBox {
         addDeliveryBox.setAlignment(Pos.CENTER_LEFT);
 
 
-        controller.selectedIntersectionProperty().addListener((obs, oldIntersection, newIntersection) -> {
+        controller.selectedIntersectionProperty().addListener((obs) -> {
+            Intersection newIntersection = controller.selectedIntersectionProperty().getValue();
             if (newIntersection != null) {
                 if (requestedIntersectionIsTakeout) {
-                    System.out.println("selected intersection takeout : "+newIntersection.getId());
+                    System.out.println("selected intersection pickup : "+newIntersection.getId());
                     this.takeout = newIntersection;
                     buttonTakeout.getStyleClass().add("success");
-                    buttonTakeout.setText("Select Another TakeOut Intersection");
+                    buttonTakeout.setText("Select Another Pickup Intersection");
                 } else {
-                    System.out.println("selected intersection deliv : "+newIntersection.getId());
+                    System.out.println("selected intersection deposit : "+newIntersection.getId());
                     this.delivery = newIntersection;
                     buttonDelivery.getStyleClass().add("success");
-                    buttonDelivery.setText("Select Another Delivery Intersection");
+                    buttonDelivery.setText("Select Another Deposit Intersection");
                 }
             }else{
                 if (requestedIntersectionIsTakeout) {
-                    buttonTakeout.setText("Select TakeOut Intersection");
+                    buttonTakeout.setText("Select Pickup Intersection");
                     buttonTakeout.getStyleClass().removeAll("success","accent");
                 } else {
-                    buttonDelivery.setText("Select Delivery Intersection");
+                    buttonDelivery.setText("Select Deposit Intersection");
                     buttonDelivery.getStyleClass().removeAll("success","accent");
                 }
             }
