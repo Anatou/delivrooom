@@ -11,27 +11,58 @@ import fr.delivrooom.application.model.Intersection;
 public class CommandAssignCourier implements Command {
 
     private final AppController controller;
+
     private final Delivery delivery;
     private final Intersection store;
     private final Courier newCourier;
-    private Courier previousCourier;
+    private final Courier oldCourier;
 
     public CommandAssignCourier(AppController controller, Delivery delivery, Intersection store, Courier newCourier) {
         this.controller = controller;
         this.store = store;
         this.delivery = delivery;
+        this.oldCourier = controller.getCourierForDelivery(delivery);
         this.newCourier = newCourier;
     }
 
     @Override
     public void execute() {
-        previousCourier = controller.getCourierForDelivery(delivery);
-        controller.doAssignCourier(delivery, store, newCourier);
+        Courier assignedCourier = controller.getCourierForDelivery(delivery);
+        if (assignedCourier != null) {
+            if (!assignedCourier.equals(newCourier)) {
+                assignedCourier.removeDelivery(delivery);
+                assignedCourier.deleteTourSolution();
+                if (newCourier != null) {
+                    newCourier.addDelivery(delivery, store);
+                    newCourier.deleteTourSolution();
+                }
+            }
+        } else if (newCourier != null) {
+            newCourier.addDelivery(delivery, store);
+            newCourier.deleteTourSolution();
+        }
+        controller.deliveriesDemand.invalidate();
+        controller.couriers.invalidate();
     }
 
     @Override
     public void undo() {
-        controller.doAssignCourier(delivery, store, previousCourier);
+        Courier assignedCourier = controller.getCourierForDelivery(delivery);
+        if (assignedCourier != null) {
+            if (!assignedCourier.equals(oldCourier)) {
+                assignedCourier.removeDelivery(delivery);
+                assignedCourier.deleteTourSolution();
+                if (oldCourier != null) {
+                    oldCourier.addDelivery(delivery, store);
+                    oldCourier.deleteTourSolution();
+                }
+            }
+        } else if (oldCourier != null) {
+            oldCourier.addDelivery(delivery, store);
+            oldCourier.deleteTourSolution();
+        }
+        controller.deliveriesDemand.invalidate();
+        controller.couriers.invalidate();
     }
 
     @Override

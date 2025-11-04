@@ -14,6 +14,12 @@ public record ReverseCommand(Command command) implements Command {
 
     @Override
     public String toString() {
-        return "ReverseCommand{" + command + '}';
+        return command.reverseToString();
     }
+
+    @Override
+    public String reverseToString() {
+        return command.toString();
+    }
+
 }

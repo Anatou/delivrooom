@@ -8,4 +8,6 @@ public interface Command {
     void undo();
 
     String toString();
+
+    String reverseToString();
 }

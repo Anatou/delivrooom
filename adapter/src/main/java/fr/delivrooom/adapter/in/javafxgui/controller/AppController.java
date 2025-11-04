@@ -363,26 +363,6 @@ public class AppController {
     }
 
     /**
-     * Add a courier to the system.
-     * Called by commands.
-     *
-     * @param courier The courier to add
-     */
-    protected void doAddCourier(Courier courier) {
-        couriers.add(courier);
-    }
-
-    /**
-     * Remove a courier from the system.
-     * Called by commands.
-     *
-     * @param courier The courier to remove
-     */
-    protected void doRemoveCourier(Courier courier) {
-        couriers.remove(courier);
-    }
-
-    /**
      * Select an intersection and update the UI.
      * Called by commands.
      *
@@ -531,36 +511,6 @@ public class AppController {
         }
     }
 
-    // ============================================================================
-    // PACKAGE-PRIVATE API - State Management (for states and commands)
-    // ============================================================================
-
-    /**
-     * Assign a courier to a delivery.
-     * Called by commands.
-     *
-     * @param delivery The delivery to assign
-     * @param courier  The courier to assign to the delivery
-     */
-    protected void doAssignCourier(Delivery delivery, Intersection store, Courier courier) {
-        Courier assignedCourier = getCourierForDelivery(delivery);
-        if (assignedCourier != null) {
-            if (!assignedCourier.equals(courier)) {
-                assignedCourier.removeDelivery(delivery);
-                assignedCourier.deleteTourSolution();
-                if (courier != null) {
-                    courier.addDelivery(delivery, store);
-                    courier.deleteTourSolution();
-                }
-            }
-        } else if (courier != null) {
-            courier.addDelivery(delivery, store);
-            courier.deleteTourSolution();
-        }
-        this.deliveriesDemand.invalidate();
-        this.couriers.invalidate();
-    }
-
     protected void doSaveTourSolution(String filename) {
         TourSolutionSerialiserIO tourSolutionSerialiserIO = new TourSolutionSerialiserIO();
         List<Courier> courierList = new ArrayList<>();
@@ -570,12 +520,15 @@ public class AppController {
         try {
             TourSolutionSerialiser serial = new TourSolutionSerialiser(cityMap.get(), deliveriesDemand.get(), courierList);
             tourSolutionSerialiserIO.saveTourSolutionSerialization(serial, filename);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             showError("Tour saving error", "Unable to save Tour");
         }
     }
 
+
+    // ============================================================================
+    // PACKAGE-PRIVATE API - State Management (for states and commands)
+    // ============================================================================
 
     /**
      * Transition to a new state.

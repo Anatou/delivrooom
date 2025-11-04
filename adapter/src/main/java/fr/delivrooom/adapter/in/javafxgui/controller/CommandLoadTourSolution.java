@@ -56,5 +56,8 @@ public class CommandLoadTourSolution implements Command{
         execute();
     }
 
-
+    @Override
+    public String reverseToString() {
+        return "";
+    }
 }
