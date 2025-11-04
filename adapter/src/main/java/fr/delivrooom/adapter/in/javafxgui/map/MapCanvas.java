@@ -34,7 +34,6 @@ public class MapCanvas extends StackPane {
 
 
     public MapCanvas() {
-
         this.tilesLayer = new MapTiles();
         this.overlayLayer = new MapOverlay();
         this.controlsLayer = new Pane();
@@ -53,7 +52,10 @@ public class MapCanvas extends StackPane {
         AppController.getController().deliveriesDemandProperty().addListener(o -> drawMap());
         AppController.getController().tourSolutionProperty().addListener(o -> drawMap());
         AppController.getController().couriersProperty().addListener((InvalidationListener) o -> drawMap());
-        AppController.getController().memeModeProperty().addListener((o) -> drawMap());
+        AppController.getController().memeModeProperty().addListener((o) -> {
+            this.tilesLayer.clearCache();
+            drawMap();
+        });
     }
 
     private void setupCanvas() {
