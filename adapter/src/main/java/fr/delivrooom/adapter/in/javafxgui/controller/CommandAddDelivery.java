@@ -12,7 +12,7 @@ public class CommandAddDelivery implements Command {
 
     private final AppController controller;
     private final Delivery delivery;
-    private Courier associatedCourier;
+    private Courier associatedCourier = null;
     private TourSolution associatedTourSolution = null;
     private int deliveryIndex;
 
@@ -22,9 +22,12 @@ public class CommandAddDelivery implements Command {
 
         // In case the delivery already exists (in case of ReverseCommand(this), we store the delivery index and associated courier)
         deliveryIndex = controller.deliveriesDemand.get().deliveries().indexOf(delivery);
-        associatedCourier = controller.getCourierForDelivery(delivery);
-        if (associatedCourier != null) {
-            associatedTourSolution = associatedCourier.getTourSolution();
+        for (Courier courier : controller.couriers) {
+            if (courier.getDeliveriesDemand() != null && courier.getDeliveriesDemand().deliveries().contains(delivery)) {
+                associatedCourier = courier;
+                associatedTourSolution = courier.getTourSolution();
+                break;
+            }
         }
     }
 
@@ -57,13 +60,8 @@ public class CommandAddDelivery implements Command {
     }
 
     @Override
-    public String getStringDescription() {
+    public String toString() {
         return "Add Delivery " + delivery.takeoutIntersection().getId() + " > " + delivery.deliveryIntersection().getId();
-    }
-
-    @Override
-    public String getStringReversedDescription() {
-        return "Remove Delivery " + delivery.takeoutIntersection().getId() + " > " + delivery.deliveryIntersection().getId();
     }
 }
 

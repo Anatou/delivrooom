@@ -22,5 +22,4 @@ module fr.delivrooom.adapter {
     requires org.controlsfx.controls;
     requires org.kordamp.ikonli.javafx;
     requires org.kordamp.ikonli.fontawesome6;
-
 }

@@ -35,10 +35,6 @@ public class DeliveryActionButtons extends HBox {
 
 
         courierComboBox.setOnAction(e -> {
-            if (!courierComboBox.isFocused()) {
-                // If combobox is changed programmatically, it shouldn’t trigger
-                return;
-            }
             appController.requestAssignCourier(delivery, courierComboBox.getValue());
         });
 

@@ -301,33 +301,20 @@ public class MapOverlay extends StackPane {
 
     public void updateIntersectionLayer() {
         CityMap cityMap = AppController.getController().cityMapProperty().getValue();
-        DeliveriesDemand deliveriesDemand = AppController.getController().deliveriesDemandProperty().getValue();
-
         if (cityMap == null) return;
 
         for (Intersection intersection : cityMap.intersections().values()) {
             double intersectionX = (intersection.getNormalizedX() - minX) * scale;
             double intersectionY = (intersection.getNormalizedY() - minY) * scale;
             double radius = 6 * unit_scalable;
-            boolean isPickupOrDeposit = false;
 
             Circle intersectionCircle = new Circle(intersectionX, intersectionY, radius, Color.TRANSPARENT);
-          /* for (Delivery delivery : deliveriesDemand.deliveries()){
-               if ((intersection.getNormalizedX()== delivery.takeoutIntersection().getNormalizedX() && intersection.getNormalizedY() == delivery.takeoutIntersection().getNormalizedY())
-                   ||(intersection.getNormalizedX()== delivery.deliveryIntersection().getNormalizedX() && intersection.getNormalizedY() == delivery.deliveryIntersection().getNormalizedY())){
-                   isPickupOrDeposit = true;
-                   break;
-               }
-           }*/
-           if (!isPickupOrDeposit) {
-               intersectionCircle.setUserData("selectIntersection");
-               intersectionCircle.setCursor(Cursor.HAND);
-               intersectionCircle.setOnMouseClicked(event -> {
-                   AppController.getController().requestSelectIntersection(intersection);
-               });
-           }
+            intersectionCircle.setUserData("selectIntersection");
+            intersectionCircle.setCursor(Cursor.HAND);
 
-
+            intersectionCircle.setOnMouseClicked(event -> {
+                AppController.getController().requestSelectIntersection(intersection);
+            });
             intersectionLayer.getChildren().add(intersectionCircle);
         }
     }

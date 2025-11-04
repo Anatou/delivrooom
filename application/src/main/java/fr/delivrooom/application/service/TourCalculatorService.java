@@ -81,18 +81,14 @@ public class TourCalculatorService implements CalculateTourUseCase {
             // remove self from targets
             HashSet<Long> targetWithoutIntersectionId = new HashSet<>(targets);
             targetWithoutIntersectionId.remove(intersectionId);
-            HashMap<Long, Path> pathsFromIntersection = null;
+            HashMap<Long, Path> pathsFromIntersection;
+            if (useTimeAsCost) {
+                pathsFromIntersection = targetedDijkstraSearchTime(intersectionId, targetWithoutIntersectionId);
 
-            try {
-                if (useTimeAsCost) {
-                    pathsFromIntersection = targetedDijkstraSearchTime(intersectionId, targetWithoutIntersectionId);
-                } else {
-                    pathsFromIntersection = findShortestPaths(intersectionId, targetWithoutIntersectionId, useTimeAsCost);
-                }
             }
-            catch (RuntimeException e) {
-                // dijkstra search failed, probably because of a non-connex graph
-                throw e;
+            else {
+                pathsFromIntersection = findShortestPaths(intersectionId, targetWithoutIntersectionId, useTimeAsCost);
+
             }
 
             shortestPathsMatrix.put(intersectionId, pathsFromIntersection);
