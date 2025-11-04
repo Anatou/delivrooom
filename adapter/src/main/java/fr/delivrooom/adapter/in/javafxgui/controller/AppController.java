@@ -61,15 +61,15 @@ public class AppController {
     private final CommandManager commandManager = new CommandManager();
     private final InvalidableReadOnlyObjectWrapper<State> currentState = new InvalidableReadOnlyObjectWrapper<>(new StateInitial(this));
     // Loaded data
-    private final InvalidableReadOnlyObjectWrapper<CityMap> cityMap = new InvalidableReadOnlyObjectWrapper<>(null);
-    private final InvalidableReadOnlyObjectWrapper<DeliveriesDemand> deliveriesDemand = new InvalidableReadOnlyObjectWrapper<>(null);
-    private final InvalidableReadOnlyObjectWrapper<CouriersTourSolution> tourSolution = new InvalidableReadOnlyObjectWrapper<>(null);
-    private final InvalidableReadOnlyListWrapper<Courier> couriers = new InvalidableReadOnlyListWrapper<>(FXCollections.observableArrayList());
+    protected final InvalidableReadOnlyObjectWrapper<CityMap> cityMap = new InvalidableReadOnlyObjectWrapper<>(null);
+    protected final InvalidableReadOnlyObjectWrapper<DeliveriesDemand> deliveriesDemand = new InvalidableReadOnlyObjectWrapper<>(null);
+    protected final InvalidableReadOnlyObjectWrapper<CouriersTourSolution> tourSolution = new InvalidableReadOnlyObjectWrapper<>(null);
+    protected final InvalidableReadOnlyListWrapper<Courier> couriers = new InvalidableReadOnlyListWrapper<>(FXCollections.observableArrayList());
     // 0 = not running, 0 < x < 1 = running, 1 = done
-    private final DoubleProperty tourCalculationProgress = new SimpleDoubleProperty(0);
-    private final InvalidableReadOnlyObjectWrapper<Intersection> selectedIntersection = new InvalidableReadOnlyObjectWrapper<>(null);
-    private final BooleanProperty memeModeProperty = new SimpleBooleanProperty(false);
-    private final BooleanProperty tourCalculatedProperty = new SimpleBooleanProperty(false);
+    protected final DoubleProperty tourCalculationProgress = new SimpleDoubleProperty(0);
+    protected final InvalidableReadOnlyObjectWrapper<Intersection> selectedIntersection = new InvalidableReadOnlyObjectWrapper<>(null);
+    protected final BooleanProperty memeModeProperty = new SimpleBooleanProperty(false);
+    protected final BooleanProperty tourCalculatedProperty = new SimpleBooleanProperty(false);
 
     private AppController() {
     }
@@ -356,44 +356,6 @@ public class AppController {
         }
         deliveriesDemand.invalidate();
     }
-
-    /**
-     * Add a delivery to the deliveries demand.
-     * Called by commands.
-     *
-     * @param delivery The delivery to add
-     */
-    protected void doAddDelivery(Delivery delivery) {
-        System.out.println("Adding delivery from intersection " + delivery.takeoutIntersection().getId()
-                + " to intersection " + delivery.deliveryIntersection().getId());
-        deliveriesDemand.get().deliveries().add(delivery);
-        deliveriesDemand.invalidate();
-    }
-
-    /**
-     * Remove a delivery from the deliveries demand.
-     * Called by commands.
-     *
-     * @param delivery The delivery to remove
-     */
-    protected void doRemoveDelivery(Delivery delivery) {
-        System.out.println("Removing delivery from intersection " + delivery.takeoutIntersection().getId()
-                + " to intersection " + delivery.deliveryIntersection().getId());
-        deliveriesDemand.get().deliveries().remove(delivery);
-        // Also remove from any courier assigned to it (and invalidate their tour)
-        for (Courier courier : couriers) {
-            if (courier.getDeliveriesDemand() != null &&
-                    courier.getDeliveriesDemand().deliveries().contains(delivery)) {
-                courier.removeDelivery(delivery);
-                courier.deleteTourSolution();
-                this.couriers.invalidate();
-
-                break;
-            }
-        }
-        deliveriesDemand.invalidate();
-    }
-
 
     /**
      * Add a courier to the system.
