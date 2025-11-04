@@ -15,12 +15,23 @@ public class CommandLoadMap implements Command {
     private final State sourceState;
     private CityMap previousMap;
 
+    /**
+     * Creates a command to load a city map file.
+     *
+     * @param controller  The main application controller.
+     * @param mapUrl      The URL of the map file to load.
+     * @param sourceState The state from which the command was created, for undo purposes.
+     */
     public CommandLoadMap(AppController controller, URL mapUrl, State sourceState) {
         this.controller = controller;
         this.mapUrl = mapUrl;
         this.sourceState = sourceState;
     }
 
+    /**
+     * Executes the command, loading the city map from the specified URL.
+     * It saves the previous map state for undo and transitions to the `StateMapLoaded`.
+     */
     @Override
     public void execute() {
         try {
@@ -33,6 +44,10 @@ public class CommandLoadMap implements Command {
         }
     }
 
+    /**
+     * Undoes the command, restoring the previous city map.
+     * It also reverts the application state to the source state.
+     */
     @Override
     public void undo() {
         try {

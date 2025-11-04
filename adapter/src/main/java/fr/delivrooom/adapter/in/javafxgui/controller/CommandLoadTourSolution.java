@@ -5,7 +5,12 @@ import fr.delivrooom.application.model.*;
 import java.io.IOException;
 import java.util.List;
 
-public class CommandLoadTourSolution implements Command{
+/**
+ * Command to load a tour solution from a file.
+ * This command restores a previously saved application state, including the city map,
+ * deliveries, couriers, and their calculated tours.
+ */
+public class CommandLoadTourSolution implements Command {
 
     private final AppController controller;
     private final State sourceState;
@@ -14,6 +19,16 @@ public class CommandLoadTourSolution implements Command{
     private final List<Courier> sourceCouriers;
     private final String filename;
 
+    /**
+     * Creates a command to load a tour solution.
+     *
+     * @param controller             The main application controller.
+     * @param sourceState            The state before loading, for undo.
+     * @param sourceCityMap          The city map before loading, for undo.
+     * @param sourceDeliveriesDemand The deliveries demand before loading, for undo.
+     * @param sourceCouriers         The list of couriers before loading, for undo.
+     * @param filename               The path to the file to load the tour solution from.
+     */
     public CommandLoadTourSolution(AppController controller, State sourceState, CityMap sourceCityMap, DeliveriesDemand sourceDeliveriesDemand, List<Courier> sourceCouriers, String filename) {
         this.controller = controller;
         this.sourceState = sourceState;
@@ -23,6 +38,9 @@ public class CommandLoadTourSolution implements Command{
         this.filename = filename;
     }
 
+    /**
+     * Executes the command, loading the tour solution from the file and restoring the application state.
+     */
     @Override
     public void execute() {
         TourSolutionSerialiserIO tourSolutionSerialiserIO = new TourSolutionSerialiserIO();
@@ -43,6 +61,9 @@ public class CommandLoadTourSolution implements Command{
 
     }
 
+    /**
+     * Undoes the command, restoring the application state to how it was before the tour solution was loaded.
+     */
     @Override
     public void undo() {
 
@@ -52,6 +73,9 @@ public class CommandLoadTourSolution implements Command{
         controller.transitionToState(sourceState);
     }
 
+    /**
+     * Re-executes the command.
+     */
     public void redo() {
         execute();
     }

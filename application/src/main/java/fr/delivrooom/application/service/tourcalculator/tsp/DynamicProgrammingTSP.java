@@ -8,6 +8,12 @@ import java.util.*;
 
 // TODO : add progress bar updates in the computeD method
 
+/**
+ * An implementation of the Traveling Salesperson Problem (TSP) using dynamic programming
+ * with memoization (Held-Karp algorithm). This approach finds the optimal solution but has
+ * an exponential time complexity of O(n^2 * 2^n).
+ * It handles precedence constraints (pickup before delivery).
+ */
 public class DynamicProgrammingTSP extends TemplateTSP {
     protected Long[] meilleureSolution;
     protected Graphe g;
@@ -67,11 +73,25 @@ public class DynamicProgrammingTSP extends TemplateTSP {
         meilleureSolution = order.toArray(new Long[0]);
     }
 
+    /**
+     * This method is not used in the dynamic programming approach.
+     *
+     * @param sommetCourant The current vertex.
+     * @param nonVus        The collection of unvisited vertices.
+     * @return 0
+     */
     @Override
     protected float bound(Long sommetCourant, Collection<Long> nonVus) {
         return 0;
     }
 
+    /**
+     * This method is not used in the dynamic programming approach.
+     * @param sommetCrt The current vertex.
+     * @param nonVus The collection of unvisited vertices.
+     * @param g The graph.
+     * @return null
+     */
     @Override
     protected Iterator<Long> iterator(Long sommetCrt, Collection<Long> nonVus, Graphe g) {
         return null;

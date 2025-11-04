@@ -8,6 +8,10 @@ import java.util.HashMap;
 import java.util.List;
 
 
+/**
+ * Represents the city map as a graph, where intersections are vertices and roads are edges.
+ * This class implements the {@link Graphe} interface.
+ */
 public class CityGraph implements Graphe {
     //cost[i][j] = cost of the road from intersection i to intersection j
     protected final HashMap<Long, HashMap<Long, Float>> cost;
@@ -15,6 +19,11 @@ public class CityGraph implements Graphe {
     protected final int intersectionsCount;
     protected final CityMap cityMap;
 
+    /**
+     * Constructs a CityGraph from a {@link CityMap} object.
+     *
+     * @param cityMap The city map to represent as a graph.
+     */
     public CityGraph(CityMap cityMap) {
         this.cityMap = cityMap;
         this.intersectionsCount = cityMap.intersections().size();

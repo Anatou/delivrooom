@@ -31,6 +31,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * A sophisticated overlay for the map, responsible for drawing vector data such as roads,
+ * intersections, delivery points, and calculated tour routes. This component is layered
+ * on top of the map tiles and handles the rendering of dynamic, data-driven elements.
+ * <p>
+ * The overlay consists of three layers:
+ * <ul>
+ *   <li><b>Canvas Layer:</b> For drawing static or less frequently updated elements like roads and tours.</li>
+ *   <li><b>Delivery Layer:</b> For interactive delivery-related elements.</li>
+ *   <li><b>Intersection Layer:</b> For interactive intersection elements, visible during selection mode.</li>
+ * </ul>
+ */
 public class MapOverlay extends StackPane {
 
     private final Canvas canvasLayer;
@@ -47,6 +59,10 @@ public class MapOverlay extends StackPane {
     private double minX;
     private double minY;
 
+    /**
+     * Constructs a MapOverlay, initializing its layers and setting up listeners
+     * to react to changes in the application state.
+     */
     public MapOverlay() {
         this.canvasLayer = new Canvas();
         this.deliveryLayer = new Pane();
@@ -85,12 +101,24 @@ public class MapOverlay extends StackPane {
         });
     }
 
+    /**
+     * Clears all drawings from the overlay layers.
+     */
     public void clear() {
         canvasLayer.getGraphicsContext2D().clearRect(0, 0, canvasLayer.getWidth(), canvasLayer.getHeight());
         intersectionLayer.getChildren().clear();
         deliveryLayer.getChildren().clear();
     }
 
+    /**
+     * Updates and redraws the entire overlay based on the current viewport and application data.
+     *
+     * @param width  The current width of the map canvas.
+     * @param height The current height of the map canvas.
+     * @param scale  The current zoom scale of the map.
+     * @param minX   The minimum normalized X coordinate of the visible area.
+     * @param minY   The minimum normalized Y coordinate of the visible area.
+     */
     public void updateOverlay(double width, double height, double scale, double minX, double minY) {
         AppController controller = AppController.getController();
         unit_scalable = 2e-7 * scale;

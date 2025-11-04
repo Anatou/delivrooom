@@ -7,6 +7,11 @@ import fr.delivrooom.application.service.tourcalculator.Graphe;
 
 import java.util.*;
 
+/**
+ * An abstract template for Traveling Salesperson Problem (TSP) solvers.
+ * This class provides the basic structure for branch and bound algorithms.
+ * Subclasses must implement the {@code bound} and {@code iterator} methods.
+ */
 public abstract class TemplateTSP implements TSP {
 
     protected Long[] meilleureSolution;
@@ -32,7 +37,7 @@ public abstract class TemplateTSP implements TSP {
         this.lastProgress = 0.;
     }
 
-    public void searchSolution(int tpsLimite, Graphe g, DeliveriesDemand demand, NotifyTSPProgressToGui notifyTSPProgressToGui){
+    public void searchSolution(int tpsLimite, Graphe g, DeliveriesDemand demand, NotifyTSPProgressToGui notifyTSPProgressToGui) {
         if (tpsLimite <= 0) return;
         tpsDebut = System.currentTimeMillis();
         this.notifyTSPProgressToGui = notifyTSPProgressToGui;
@@ -41,7 +46,7 @@ public abstract class TemplateTSP implements TSP {
         this.g = g;
         this.calls = 0;
         this.consideredPossibilities = 0;
-        this.maxPossibilities = this.orderedPermutationCount(g.getNbSommets()-1, demand.deliveries().size());
+        this.maxPossibilities = this.orderedPermutationCount(g.getNbSommets() - 1, demand.deliveries().size());
         System.out.println("Calculated max possibilities : " + maxPossibilities);
 
         meilleureSolution = new Long[g.getNbSommets()];
@@ -62,11 +67,11 @@ public abstract class TemplateTSP implements TSP {
         System.out.println("Number of calls: " + calls);
 
         System.out.println("Total number of possibilities considered : " + this.consideredPossibilities);
-        System.out.println("Final Progress " + (float) (this.consideredPossibilities/this.maxPossibilities*100) + "%");
+        System.out.println("Final Progress " + (float) (this.consideredPossibilities / this.maxPossibilities * 100) + "%");
     }
 
 
-    private void branchAndBound(long currentNode, HashSet<Long> reachableNodes, List<Long> visitedNodes, float visitedCost){
+    private void branchAndBound(long currentNode, HashSet<Long> reachableNodes, List<Long> visitedNodes, float visitedCost) {
 
         ++calls;
         //System.out.println("branchAndBound call " + calls + " (" + (double)consideredPossibilities/maxPossibilities*100 + "%) : \n - currentNode : " + currentNode + "\n - reachableNodes : "+ reachableNodes + "\n - visitedNodes : " + visitedNodes + "\n - visitedCost : " + visitedCost + "\n - bestCost : " + bestCost);
@@ -75,14 +80,14 @@ public abstract class TemplateTSP implements TSP {
             System.out.println("Timeout reached after " + tpsLimite + " ms and " + calls + " calls.");
             return; //TODO: throw a timeout exception so we know whether or not we have a perfect solution
         }
-        if (reachableNodes.isEmpty()){ // every delivery point has been visited
+        if (reachableNodes.isEmpty()) { // every delivery point has been visited
             ++consideredPossibilities;
             notifyProgress(notifyTSPProgressToGui);
             long warehouseId = demand.store().getId();
-            if (g.estArc(currentNode, warehouseId)){ // return to warehouse
-                if (visitedCost + g.getCout(currentNode, warehouseId) < bestCost){ // we found a solution better  than the best one
+            if (g.estArc(currentNode, warehouseId)) { // return to warehouse
+                if (visitedCost + g.getCout(currentNode, warehouseId) < bestCost) { // we found a solution better  than the best one
                     visitedNodes.toArray(meilleureSolution);
-                    bestCost = (float) (visitedCost + g.getCout(currentNode, warehouseId));
+                    bestCost = (visitedCost + g.getCout(currentNode, warehouseId));
                 }
             }
         } else if (visitedCost + bound(currentNode, reachableNodes) < bestCost){
@@ -110,7 +115,7 @@ public abstract class TemplateTSP implements TSP {
             // we need to count how many constraints are left, i.e. how many pickups are not done
             int leftToVisit = g.getNbSommets() - visitedNodes.size();
             int pickupsDone = demand.arePickups(visitedNodes);
-            int constraints = (g.getNbSommets()-1)/2 - pickupsDone;
+            int constraints = (g.getNbSommets() - 1) / 2 - pickupsDone;
             this.consideredPossibilities += this.orderedPermutationCount(leftToVisit, constraints);
 
             notifyProgress(notifyTSPProgressToGui);
@@ -119,33 +124,32 @@ public abstract class TemplateTSP implements TSP {
 
 
     /**
-     * Methode devant etre redefinie par les sous-classes de TemplateTSP
      * @param sommetCourant
      * @param nonVus
-     * @return une borne inferieure du cout des chemins de <code>g</code> partant de <code>sommetCourant</code>, visitant
-     * tous les sommets de <code>nonVus</code> exactement une fois, puis retournant sur le sommet <code>0</code>.
+     * @return a lower bound of the cost of paths in <code>g</code> starting from <code>sommetCourant</code>, visiting
+     * all the vertices of <code>nonVus</code> exactly once, and returning to the vertex <code>0</code>.
      */
     protected abstract float bound(Long sommetCourant, Collection<Long> nonVus);
 
     /**
-     * Methode devant etre redefinie par les sous-classes de TemplateTSP
+     * Abstract method to be defined by subclasses of TemplateTSP.
      * @param sommetCrt
      * @param nonVus
      * @param g
-     * @return un iterateur permettant d'iterer sur tous les sommets de <code>nonVus</code> qui sont successeurs de <code>sommetCourant</code>
+     * @return an iterator allowing to iterate over all the vertices of <code>nonVus</code> which are successors of <code>sommetCourant</code>
      */
     protected abstract Iterator<Long> iterator(Long sommetCrt, Collection<Long> nonVus, Graphe g);
 
-    public Long[] getBestSolution(){
+    public Long[] getBestSolution() {
         return meilleureSolution;
     }
 
-    public float getBestCost(){
+    public float getBestCost() {
         if (meilleureSolution == null) return -1;
         return bestCost;
     }
 
-    protected double factorial (long n) {
+    protected double factorial(long n) {
         long res = 1;
         for (long i = 2; i <= n; ++i) {
             res *= i;
@@ -155,12 +159,12 @@ public abstract class TemplateTSP implements TSP {
 
     protected double orderedPermutationCount(long n, long k) {
         // returns the number of possible permutations of n elements with k constraints of precedence in a pair
-        return (double) (this.factorial(n) / Math.pow(2, k ));
+        return (this.factorial(n) / Math.pow(2, k));
     }
 
     protected void notifyProgress(NotifyTSPProgressToGui notifyTSPProgressToGui) {
-        float progress = (float) (int) (this.consideredPossibilities/this.maxPossibilities*100);
-        if ( (int) progress != (int) this.lastProgress ) {
+        float progress = (float) (int) (this.consideredPossibilities / this.maxPossibilities * 100);
+        if ((int) progress != (int) this.lastProgress) {
             notifyTSPProgressToGui.notifyTSPProgressToGui(progress / 100);
             this.lastProgress = progress;
         }

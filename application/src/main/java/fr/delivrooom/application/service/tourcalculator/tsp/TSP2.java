@@ -5,19 +5,16 @@ import fr.delivrooom.application.service.tourcalculator.Graphe;
 import java.util.Collection;
 import java.util.Iterator;
 
+/**
+ * A TSP solver that improves upon {@link TSP1} by using a more effective lower bound calculation.
+ * The bound is the sum of the shortest arc from the current vertex to an unvisited vertex,
+ * and for each unvisited vertex, the shortest arc from it to another unvisited vertex or the depot.
+ * This allows for more effective pruning of the search tree.
+ */
 public class TSP2 extends TemplateTSP {
 
     @Override
     protected float bound(Long currentVertex, Collection<Long> unseen) {
-        /**
-         * Returns the sum, for each unseen vertex, of the length of the shortest arc that
-         * connects it to the circuit. More precisely:
-         * - let l be the length of the shortest arc leaving the last visited vertex and
-         *   arriving at one of the unseen vertices;
-         * - for each unseen vertex i, let li be the length of the shortest arc leaving i
-         *   and arriving either at 0 or at one of the unseen vertices (other than i).
-         * The function returns l + ∑_i li.
-         */
         float bound = 0.F;
         float minOutgoing = Float.MAX_VALUE;
         for (Long unseenVertex : unseen) {

@@ -19,6 +19,11 @@ import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * A canvas that displays map tiles from a provider like MapTiler.
+ * It handles tile loading, caching, and rendering based on the current
+ * viewport (zoom and position). It also includes a "meme mode" for fun.
+ */
 public class MapTiles extends Canvas {
 
     private static final double TILE_SIZE_PX = 256.0;
@@ -32,6 +37,9 @@ public class MapTiles extends Canvas {
     private final List<String> memeFiles = new ArrayList<>();
     private final Random random = new Random();
 
+    /**
+     * Constructs a new MapTiles canvas.
+     */
     public MapTiles() {
         ZOOM_SCALE_FACTOR = JavaFXApp.getConfigPropertyUseCase().getDoubleProperty("map.zoom.scaleFactor", 1.0);
         loadMemeFiles();
@@ -72,6 +80,9 @@ public class MapTiles extends Canvas {
         System.out.println("Tile cache cleared");
     }
 
+    /**
+     * Clears the canvas.
+     */
     public void clear() {
         getGraphicsContext2D().clearRect(0, 0, getWidth(), getHeight());
     }
@@ -183,6 +194,17 @@ public class MapTiles extends Canvas {
         return zi;
     }
 
+    /**
+     * Draws the visible map tiles onto the canvas.
+     * This method calculates which tiles are needed based on the current viewport,
+     * fetches them from the cache or downloads them, and then renders them.
+     *
+     * @param scale The current zoom scale.
+     * @param minX  The minimum normalized X coordinate of the visible area.
+     * @param maxX  The maximum normalized X coordinate of the visible area.
+     * @param minY  The minimum normalized Y coordinate of the visible area.
+     * @param maxY  The maximum normalized Y coordinate of the visible area.
+     */
     public void drawTiles(double scale, double minX, double maxX, double minY, double maxY) {
         GraphicsContext gc = getGraphicsContext2D();
         gc.clearRect(0, 0, getWidth(), getHeight());

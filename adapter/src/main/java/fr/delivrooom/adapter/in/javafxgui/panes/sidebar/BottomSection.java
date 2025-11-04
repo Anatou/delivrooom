@@ -22,6 +22,11 @@ public class BottomSection extends VBox {
     private final Label progressLabel; // Label to show progress percentage
     private final Button goButton;
 
+    /**
+     * Constructs the BottomSection, initializing the progress bar, progress label,
+     * and the "GO" button, and binding their visibility and properties to the
+     * application controller's state.
+     */
     public BottomSection() {
         super(10);
         setPadding(new Insets(10));

@@ -72,6 +72,12 @@ public class AppController {
     private AppController() {
     }
 
+    /**
+     * Returns the singleton instance of the AppController.
+     *
+     * @return The singleton AppController instance.
+     * d
+     */
     public static AppController getController() {
         if (instance == null) {
             instance = new AppController();
@@ -98,16 +104,32 @@ public class AppController {
         commandManager.redo();
     }
 
+    /**
+     * Gets the description of the next command to be undone.
+     *
+     * @return The description of the next undoable command, or null if the undo stack is empty.
+     */
     public String getNextUndoCommandName() {
         Command cmd = commandManager.getNextUndoCommand();
         return cmd != null ? cmd.getStringDescription() : null;
     }
 
+    /**
+     * Gets the description of the next command to be redone.
+     *
+     * @return The description of the next redoable command, or null if the redo stack is empty.
+     */
     public String getNextRedoCommandName() {
         Command cmd = commandManager.getNextRedoCommand();
         return cmd != null ? cmd.getStringDescription() : null;
     }
 
+    /**
+     * Returns an observable that is invalidated when the command manager's state changes.
+     * This is used to trigger UI updates when commands are executed, undone, or redone.
+     *
+     * @return An observable that tracks command manager changes.
+     */
     public Observable getCommandManagerTriggerChanges() {
         return commandManager.getTriggerChanges();
     }
@@ -231,6 +253,16 @@ public class AppController {
         requestCommand(result);
     }
 
+    /**
+     * Request to load a tour solution from a file.
+     *
+     * @param file The file containing the tour solution.
+     */
+    /**
+     * Request to load a tour solution from a file.
+     *
+     * @param file The file containing the tour solution.
+     */
     public void requestLoadTourSolution(File file) {
         CommandResult result = getState().createLoadTourCommand(cityMap.get(), deliveriesDemand.get(), couriers.get(), file.getAbsolutePath());
         requestCommand(result);
@@ -503,43 +535,91 @@ public class AppController {
      *
      * @return The list of couriers in the system, as an observable list.
      */
+    /**
+     * Provides read-only access to the list of couriers.
+     * This list should not be modified directly by the UI.
+     *
+     * @return The read-only list property for couriers.
+     */
     public ReadOnlyListProperty<Courier> couriersProperty() {
         return couriers.getReadOnlyProperty();
     }
 
+    /**
+     * Invalidates the couriers list, forcing a refresh in the UI.
+     */
     public void invalidateCouriers() {
         couriers.invalidate();
     }
 
+    /**
+     * Provides read-only access to the current city map.
+     *
+     * @return The read-only property for the city map.
+     */
     public ReadOnlyProperty<CityMap> cityMapProperty() {
         return cityMap.getReadOnlyProperty();
     }
 
+    /**
+     * Provides read-only access to the current deliveries demand.
+     *
+     * @return The read-only property for the deliveries demand.
+     */
     public ReadOnlyProperty<DeliveriesDemand> deliveriesDemandProperty() {
         return deliveriesDemand.getReadOnlyProperty();
     }
 
+    /**
+     * Provides read-only access to the currently selected intersection.
+     *
+     * @return The read-only property for the selected intersection.
+     */
     public ReadOnlyProperty<Intersection> selectedIntersectionProperty() {
         return selectedIntersection.getReadOnlyProperty();
     }
 
+    /**
+     * Gets the current state of the application.
+     *
+     * @return The current state.
+     */
     public State getState() {
         return currentState.get();
     }
 
+    /**
+     * Provides read-only access to the application's current state.
+     *
+     * @return The read-only property for the current state.
+     */
     public ReadOnlyProperty<State> stateProperty() {
         return currentState.getReadOnlyProperty();
     }
 
-
+    /**
+     * Provides access to the tour calculation progress property.
+     *
+     * @return The double property representing tour calculation progress (0.0 to 1.0).
+     */
     public DoubleProperty tourCalculationProgressProperty() {
         return tourCalculationProgress;
     }
 
+    /**
+     * A boolean binding that is true when a tour is currently being calculated.
+     *
+     * @return A boolean binding for the tour calculation status.
+     */
     public BooleanBinding tourBeingCalculatedBinding() {
         return tourCalculationProgress.greaterThan(0.0).and(tourCalculationProgress.lessThan(1.0));
     }
 
+    /**
+     * A boolean binding that is true when a tour has been calculated.
+     *
+     * @return A boolean binding for the tour calculated status.
+     */
     public BooleanBinding tourCalculatedBinding() {
         return tourCalculationProgress.greaterThanOrEqualTo(1.0);
     }
@@ -565,6 +645,12 @@ public class AppController {
     // PRIVATE/UTILITY METHODS
     // ============================================================================
 
+    /**
+     * Displays an error dialog with a specified title and message.
+     *
+     * @param title   The title of the error dialog.
+     * @param message The error message to display.
+     */
     public void showError(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(title);
@@ -598,16 +684,46 @@ public class AppController {
         }
     }
 
+    /**
+     * Enum representing the default map and delivery files available for loading.
+     */
     public enum DefaultMapFilesType {
+        /**
+         * Small map 1.
+         */
         SMALL_1("Small 1", "petitPlan", "demandePetit1"),
+        /**
+         * Small map 2.
+         */
         SMALL_2("Small 2", "petitPlan", "demandePetit2"),
+        /**
+         * Medium map 1.
+         */
         MEDIUM_1("Medium 1", "moyenPlan", "demandeMoyen3"),
+        /**
+         * Medium map 2.
+         */
         MEDIUM_2("Medium 2", "moyenPlan", "demandeMoyen5"),
+        /**
+         * Large map 1.
+         */
         LARGE_1("Large 1", "grandPlan", "demandeGrand7"),
+        /**
+         * Large map 2.
+         */
         LARGE_2("Large 2", "grandPlan", "demandeGrand9");
 
+        /**
+         * The display name of the file set.
+         */
         public final String name;
+        /**
+         * The map filename (without extension).
+         */
         public final String map;
+        /**
+         * The deliveries filename (without extension).
+         */
         public final String deliveries;
 
         DefaultMapFilesType(String name, String map, String deliveries) {

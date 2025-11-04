@@ -22,6 +22,10 @@ import org.kordamp.ikonli.javafx.FontIcon;
 import java.io.File;
 import java.util.Objects;
 
+/**
+ * The main application toolbar, providing access to file operations, undo/redo,
+ * theme switching, and other global actions.
+ */
 public class AppToolBar extends ToolBar {
 
     private final ToggleSwitch themeToggle;
@@ -35,6 +39,9 @@ public class AppToolBar extends ToolBar {
     private final Button undoBtn = new Button("", new FontIcon(FontAwesomeSolid.UNDO));
     private final Button redoBtn = new Button("", new FontIcon(FontAwesomeSolid.REDO));
 
+    /**
+     * Constructs the AppToolBar and initializes its components and event handlers.
+     */
     public AppToolBar() {
         super();
         AppController controller = AppController.getController();
