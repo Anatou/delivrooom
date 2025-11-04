@@ -34,29 +34,25 @@ public class DeliveryTooltip extends Popover {
         VBox container = new VBox(10);
         container.setPadding(new Insets(15));
         container.setAlignment(Pos.TOP_LEFT);
-        container.setPrefWidth(300);
+        container.setPrefWidth(350);
 
         // Takeout information
         VBox takeoutBox = new VBox(5);
-        Label takeoutTitle = new Label("Takeout Location");
+        Label takeoutTitle = new Label("Pickup Location");
         takeoutTitle.getStyleClass().addAll("title-4");
         takeoutTitle.setGraphic(new FontIcon(FontAwesomeSolid.SHOPPING_CART));
 
         GridPane takeoutGrid;
 
-        // Vérifier l'intersection de takeout (prise) et afficher soit sans temps soit avec temps correctement formaté
+        // Vérifier l'intersection de takeout (prise) et afficher soit sans temps, soit avec temps correctement formaté
         if (delivery.takeoutIntersection().getTimeArrivedSeconds() == -1f) {
             takeoutGrid = createInfoGrid(
-                    "Intersection ID:", String.valueOf(delivery.takeoutIntersection().getId()),
-                    "Latitude:", String.format("%.6f", delivery.takeoutIntersection().getLatitude()),
-                    "Longitude:", String.format("%.6f", delivery.takeoutIntersection().getLongitude()),
+                    "Coordinates:", String.format("lat: %.6f°, long: %.6f°", delivery.takeoutIntersection().getLatitude(), delivery.takeoutIntersection().getLongitude()),
                     "Duration:", delivery.takeoutDuration() / 60 + " min"
             );
         } else {
             takeoutGrid = createInfoGrid(
-                    "Intersection ID:", String.valueOf(delivery.takeoutIntersection().getId()),
-                    "Latitude:", String.format("%.6f", delivery.takeoutIntersection().getLatitude()),
-                    "Longitude:", String.format("%.6f", delivery.takeoutIntersection().getLongitude()),
+                    "Coordinates:", String.format("lat: %.6f°, long: %.6f°", delivery.takeoutIntersection().getLatitude(), delivery.takeoutIntersection().getLongitude()),
                     "Duration:", delivery.takeoutDuration() / 60 + " min",
                     "Time Arrived:", delivery.takeoutIntersection().getFormattedTimeArrived()
             );
@@ -66,7 +62,7 @@ public class DeliveryTooltip extends Popover {
 
         // Delivery information
         VBox deliveryBox = new VBox(5);
-        Label deliveryTitle = new Label("Delivery Location");
+        Label deliveryTitle = new Label("Deposit Location");
         deliveryTitle.getStyleClass().addAll("title-4");
         deliveryTitle.setGraphic(new FontIcon(FontAwesomeSolid.LOCATION_ARROW));
 
@@ -74,16 +70,12 @@ public class DeliveryTooltip extends Popover {
 
         if (delivery.deliveryIntersection().getTimeArrivedSeconds() == -1f) {
             deliveryGrid = createInfoGrid(
-                    "Intersection ID:", String.valueOf(delivery.deliveryIntersection().getId()),
-                    "Latitude:", String.format("%.6f", delivery.deliveryIntersection().getLatitude()),
-                    "Longitude:", String.format("%.6f", delivery.deliveryIntersection().getLongitude()),
+                    "Coordinates:", String.format("lat: %.6f°, long: %.6f°", delivery.takeoutIntersection().getLatitude(), delivery.takeoutIntersection().getLongitude()),
                     "Duration:", delivery.deliveryDuration() / 60 + " min"
             );
         } else {
             deliveryGrid = createInfoGrid(
-                    "Intersection ID:", String.valueOf(delivery.deliveryIntersection().getId()),
-                    "Latitude:", String.format("%.6f", delivery.deliveryIntersection().getLatitude()),
-                    "Longitude:", String.format("%.6f", delivery.deliveryIntersection().getLongitude()),
+                    "Coordinates:", String.format("lat: %.6f°, long: %.6f°", delivery.takeoutIntersection().getLatitude(), delivery.takeoutIntersection().getLongitude()),
                     "Duration:", delivery.deliveryDuration() / 60 + " min",
                     "Time Arrived:", delivery.deliveryIntersection().getFormattedTimeArrived()
             );
