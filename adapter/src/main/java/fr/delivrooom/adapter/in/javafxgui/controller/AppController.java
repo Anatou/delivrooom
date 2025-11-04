@@ -6,6 +6,7 @@ import fr.delivrooom.adapter.in.javafxgui.utils.InvalidableReadOnlyObjectWrapper
 import fr.delivrooom.adapter.out.XMLCityMapLoader;
 import fr.delivrooom.application.model.*;
 import javafx.application.Platform;
+import javafx.beans.Observable;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
@@ -108,6 +109,10 @@ public class AppController {
     public String getNextRedoCommandName() {
         Command cmd = commandManager.getNextRedoCommand();
         return cmd != null ? cmd.toString() : null;
+    }
+
+    public Observable getCommandManagerTriggerChanges() {
+        return commandManager.getTriggerChanges();
     }
 
     /**

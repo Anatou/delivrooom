@@ -8,10 +8,7 @@ import fr.delivrooom.adapter.in.javafxgui.JavaFXApp;
 import fr.delivrooom.adapter.in.javafxgui.controller.AppController;
 import fr.delivrooom.adapter.in.javafxgui.controller.StateInitial;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.MenuButton;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.ToolBar;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -35,6 +32,9 @@ public class AppToolBar extends ToolBar {
     private final Image logoImgDark;
     private final ImageView logo;
 
+    private final Button undoBtn = new Button("", new FontIcon(FontAwesomeSolid.UNDO));
+    private final Button redoBtn = new Button("", new FontIcon(FontAwesomeSolid.REDO));
+
     public AppToolBar() {
         super();
         AppController controller = AppController.getController();
@@ -54,32 +54,9 @@ public class AppToolBar extends ToolBar {
             open.getItems().add(defaultBtn);
         }
 
-        MenuButton edit = new MenuButton("Edit");
-
-        MenuItem undoBtn = new MenuItem("Undo", new FontIcon(FontAwesomeSolid.UNDO));
-        undoBtn.setAccelerator(new KeyCodeCombination(KeyCode.Z, KeyCombination.META_DOWN));
         undoBtn.setOnAction(e -> controller.undoCommand());
-
-        MenuItem redoBtn = new MenuItem("Redo", new FontIcon(FontAwesomeSolid.REDO));
-        redoBtn.setAccelerator(new KeyCodeCombination(KeyCode.Y, KeyCombination.META_DOWN));
         redoBtn.setOnAction(e -> controller.redoCommand());
 
-        edit.setOnShowing(e -> {
-            String undoName = controller.getNextUndoCommandName();
-            undoBtn.setDisable(undoName == null);
-            if (undoName == null) {
-                undoBtn.setText("Undo");
-            } else {
-                undoBtn.setText("Undo (" + undoName + ")");
-            }
-            String redoName = controller.getNextRedoCommandName();
-            redoBtn.setDisable(redoName == null);
-            if (redoName == null) {
-                redoBtn.setText("Redo");
-            } else {
-                redoBtn.setText("Redo (" + redoName + ")");
-            }
-        });
         Button saveTourBtn = new Button("", new FontIcon(FontAwesomeSolid.SAVE));
         saveTourBtn.setTooltip(new javafx.scene.control.Tooltip("Save Calculated Tour"));
         saveTourBtn.setOnAction(e -> handleSaveTourFileDialog());
@@ -90,7 +67,6 @@ public class AppToolBar extends ToolBar {
         importTourBtn.setTooltip(new javafx.scene.control.Tooltip("Import Calculated Tour"));
         importTourBtn.setOnAction(e -> handleLoadTourFileDialog());
 
-        edit.getItems().addAll(undoBtn, redoBtn);
 
         themeToggle = new ToggleSwitch("");
         themeToggle.setGraphic(new FontIcon(FontAwesomeSolid.MOON));
@@ -105,7 +81,33 @@ public class AppToolBar extends ToolBar {
         logo.setPreserveRatio(true);
         logo.setOnMouseClicked(e -> AppController.getController().toggleMemeMode());
 
-        this.getItems().addAll(open, edit, new Spacer(10),saveTourBtn, new Spacer(10),importTourBtn, new Spacer(10), themeToggle, new Spacer(), logo, new Spacer(10));
+        this.getItems().addAll(open, undoBtn, redoBtn, new Spacer(10), saveTourBtn, new Spacer(10), importTourBtn, new Spacer(10), themeToggle, new Spacer(), logo, new Spacer(10));
+        updateUndoRedoButtons();
+        controller.getCommandManagerTriggerChanges().addListener(o -> updateUndoRedoButtons());
+    }
+
+    private void updateUndoRedoButtons() {
+        AppController controller = AppController.getController();
+        String undoName = controller.getNextUndoCommandName();
+        if (undoName == null) {
+            undoBtn.setTooltip(getInstantTooltip("Nothing to Undo"));
+        } else {
+            undoBtn.setTooltip(getInstantTooltip("Undo (" + undoName + ")"));
+        }
+        String redoName = controller.getNextRedoCommandName();
+        if (redoName == null) {
+            redoBtn.setTooltip(getInstantTooltip("Nothing to Redo"));
+        } else {
+            redoBtn.setTooltip(getInstantTooltip("Redo (" + redoName + ")"));
+        }
+        undoBtn.setDisable(controller.getNextUndoCommandName() == null);
+        redoBtn.setDisable(controller.getNextRedoCommandName() == null);
+    }
+
+    private Tooltip getInstantTooltip(String text) {
+        Tooltip tooltip = new Tooltip(text);
+        tooltip.setShowDelay(javafx.util.Duration.millis(0));
+        return tooltip;
     }
 
     /**
@@ -117,6 +119,16 @@ public class AppToolBar extends ToolBar {
     public void setStageAndScene(Stage stage, Scene scene) {
         this.stage = stage;
         this.scene = scene;
+
+        scene.getAccelerators().put(new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN), () -> {
+            AppController.getController().undoCommand();
+        });
+        scene.getAccelerators().put(new KeyCodeCombination(KeyCode.Y, KeyCombination.SHORTCUT_DOWN), () -> {
+            AppController.getController().undoCommand();
+        });
+        scene.getAccelerators().put(new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN), () -> {
+            AppController.getController().undoCommand();
+        });
     }
 
     private void handleSaveTourFileDialog() {
