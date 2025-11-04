@@ -11,6 +11,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.kordamp.ikonli.fontawesome6.FontAwesomeSolid;
@@ -116,6 +119,16 @@ public class AppToolBar extends ToolBar {
     public void setStageAndScene(Stage stage, Scene scene) {
         this.stage = stage;
         this.scene = scene;
+
+        scene.getAccelerators().put(new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN), () -> {
+            AppController.getController().undoCommand();
+        });
+        scene.getAccelerators().put(new KeyCodeCombination(KeyCode.Y, KeyCombination.SHORTCUT_DOWN), () -> {
+            AppController.getController().undoCommand();
+        });
+        scene.getAccelerators().put(new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN), () -> {
+            AppController.getController().undoCommand();
+        });
     }
 
     private void handleSaveTourFileDialog() {
