@@ -57,10 +57,6 @@ public class AppController {
 
     // Singleton implementation
     private static AppController instance;
-
-    // State management
-    private final CommandManager commandManager = new CommandManager();
-    private final InvalidableReadOnlyObjectWrapper<State> currentState = new InvalidableReadOnlyObjectWrapper<>(new StateInitial(this));
     // Loaded data
     protected final InvalidableReadOnlyObjectWrapper<CityMap> cityMap = new InvalidableReadOnlyObjectWrapper<>(null);
     protected final InvalidableReadOnlyObjectWrapper<DeliveriesDemand> deliveriesDemand = new InvalidableReadOnlyObjectWrapper<>(null);
@@ -69,7 +65,9 @@ public class AppController {
     protected final DoubleProperty tourCalculationProgress = new SimpleDoubleProperty(0);
     protected final InvalidableReadOnlyObjectWrapper<Intersection> selectedIntersection = new InvalidableReadOnlyObjectWrapper<>(null);
     protected final BooleanProperty memeModeProperty = new SimpleBooleanProperty(false);
-    protected final BooleanProperty tourCalculatedProperty = new SimpleBooleanProperty(false);
+    // State management
+    private final CommandManager commandManager = new CommandManager();
+    private final InvalidableReadOnlyObjectWrapper<State> currentState = new InvalidableReadOnlyObjectWrapper<>(new StateInitial(this));
 
     private AppController() {
     }
@@ -200,8 +198,7 @@ public class AppController {
      * Request to calculate the tour for all deliveries.
      */
     public void requestCalculateTour() {
-        CommandResult result = getState().createCalculateTourCommand();
-        requestCommand(result);
+        getState().requestCalculateTour(null);
     }
 
     /**
@@ -210,8 +207,7 @@ public class AppController {
      * @param courier The courier to calculate the tour for
      */
     public void requestCalculateCourierTour(Courier courier) {
-        CommandResult result = getState().createCalculateCourierTourCommand(courier);
-        requestCommand(result);
+        getState().requestCalculateTour(courier);
     }
 
     /**
@@ -282,6 +278,7 @@ public class AppController {
      */
     protected void doLoadMapFile(URL url) throws Exception {
         this.cityMap.set(JavaFXApp.guiUseCase().getCityMap(url));
+        JavaFXApp.getCalculateTourUseCase().provideCityMap(cityMap.get());
         deleteDeliveryDemandOfCourier();
     }
 
@@ -293,6 +290,7 @@ public class AppController {
      */
     protected void doRestoreCityMap(CityMap cityMap) {
         this.cityMap.set(cityMap);
+        JavaFXApp.getCalculateTourUseCase().provideCityMap(cityMap);
     }
 
     /**
@@ -374,109 +372,77 @@ public class AppController {
      * Called by commands.
      */
     protected void doCalculateTour() {
-        new Thread(() -> {
-            try {
-                boolean isThereAtLeastOneCourierWithDeliveries = false;
-                boolean isThereAtLeastOneCourierWithTourNotAlreadyCalculated = false;
-                for (Courier courier : couriers) {
-                    if (courier.getDeliveriesDemand() != null && !courier.getDeliveriesDemand().deliveries().isEmpty()) {
-                        System.out.println("Calculating tour for courier " + courier.getId());
-                        if (doCalculateTourForCourierSync(courier)) {
-                            isThereAtLeastOneCourierWithTourNotAlreadyCalculated = true;
-                            System.out.println("Tour recalculated for courier " + courier.getId());
-                            setTourCalculated(true);
-                        }
-                        isThereAtLeastOneCourierWithDeliveries = true;
-                    } else {
-                        // No deliveries assigned, remove any existing tour
-                        courier.deleteTourSolution();
-                    }
-                }
-                if (couriers.isEmpty()) {
-                    Platform.runLater(() -> showError("Cannot calculate tour", "No couriers available"));
-                    return;
-                }
-                if (!isThereAtLeastOneCourierWithDeliveries) {
-                    Platform.runLater(() -> showError("Cannot calculate tour", "No couriers have deliveries assigned"));
-                    return;
-                }
-                if (!isThereAtLeastOneCourierWithTourNotAlreadyCalculated) {
-                    Platform.runLater(() -> showError("Doesn't calculate tour", "All couriers' tours are already up to date"));
-                }
-            } catch (Exception e) {
-                Platform.runLater(() -> showError("Error while calculating tour",
-                        e.getMessage() == null ? e.toString() : e.getMessage()));
-                e.printStackTrace();
-            }
-        }).start();
+        if (couriers.isEmpty()) {
+            showError("Cannot calculate tour", "No couriers available");
+            return;
+        }
+        calculateTourForCouriers(new ArrayList<>(couriers), false);
     }
 
-    /**
-     * Asynchronous calculation of the optimal tour for a specific courier.(avoid threading issues of shared state)
-     * Called by doCalculateTour.
-     */
-
-    private boolean doCalculateTourForCourierSync(Courier courier) {
-        boolean doesTourNeedsToBeRecalculated = false;
-        this.tourCalculationProgress.set(0.0001);
-        JavaFXApp.getCalculateTourUseCase().provideCityMap(cityMap.get());
-        if (courier.getTourSolution() == null) {
-            doesTourNeedsToBeRecalculated = true;
-        }
-
-        boolean tourCalculationSucceeded = true;
-        try {
-            if (JavaFXApp.getCalculateTourUseCase().doesCalculatedTourNeedsToBeChanged(courier.getDeliveriesDemand())) {
-                JavaFXApp.getCalculateTourUseCase().findOptimalTour(courier.getDeliveriesDemand(), false);
-            }
-        }
-        catch (RuntimeException e) {
-            tourCalculationSucceeded = false;
-        }
-
-        if (tourCalculationSucceeded) {
-            TourSolution solution = JavaFXApp.getCalculateTourUseCase().getOptimalTour();
-
-            Platform.runLater(() -> {
-                this.tourCalculationProgress.set(1);
-                courier.setTourSolution(solution);
-                this.couriers.invalidate();
-            });
-            return doesTourNeedsToBeRecalculated;
-        }
-        else {
-            Platform.runLater(() -> {
-                this.tourCalculationProgress.set(1);
-                showError("Tour Calculation Error", "At least one delivery could not be achieved. Are both pickup and deposit adresses reachable ?");
-            });
-            return true;
-        }
-    }
-
-    /**
-     * Calculate the optimal tour for a specific courier.
-     * Called by commands or doCalculateTourForCourierSync.
-     *
-     * @param courier The courier to calculate the tour for
-     */
     protected void doCalculateTourForCourier(Courier courier) {
+        calculateTourForCouriers(List.of(courier), true);
+    }
+
+    private void calculateTourForCouriers(List<Courier> couriers, boolean singleCourier) {
+        System.out.println("Requesting calculation of tour for " + couriers.size() + " courier(s)");
         if (tourCalculationProgress.get() > 0 && tourCalculationProgress.get() < 1) {
             showError("Cannot calculate tour", "Already running");
             return;
         }
-
-        if (courier.getDeliveriesDemand() == null || courier.getDeliveriesDemand().deliveries().isEmpty()) {
-            showError("Cannot calculate tour", "Courier has no deliveries assigned");
-            return;
-        }
+        this.tourCalculationProgress.set(0.0001);
 
         new Thread(() -> {
             try {
-                doCalculateTourForCourierSync(courier);
-                setTourCalculated(true);
+                boolean isThereAtLeastOneCourierWithDeliveries = false;
+                boolean isThereAtLeastOneCourierWithTourNotAlreadyCalculated = false;
+                HashMap<Courier, TourSolution> courierTourMap = new HashMap<>();
+                for (Courier courier : couriers) {
+                    if (courier.getDeliveriesDemand() != null && !courier.getDeliveriesDemand().deliveries().isEmpty()) {
+                        System.out.println("Calculating tour for courier " + courier.getId());
+
+                        TourSolution solution;
+                        try {
+                            if (JavaFXApp.getCalculateTourUseCase().doesCalculatedTourNeedsToBeChanged(courier.getDeliveriesDemand())) {
+                                isThereAtLeastOneCourierWithTourNotAlreadyCalculated = true;
+                                JavaFXApp.getCalculateTourUseCase().findOptimalTour(courier.getDeliveriesDemand(), false);
+                            }
+                            solution = JavaFXApp.getCalculateTourUseCase().getOptimalTour();
+                        } catch (RuntimeException e) {
+                            Platform.runLater(() -> {
+                                showError("Error while calculating tour",
+                                        (couriers.size() == 1 ? "Cannot calculate tour" : "Cannot calculate tour of courier " + courier.getId())
+                                                + ". Are both pickup and deposit adresses reachable?");
+                                this.tourCalculationProgress.set(0.0);
+                            });
+                            return;
+                        }
+
+                        courierTourMap.put(courier, solution);
+                        isThereAtLeastOneCourierWithDeliveries = true;
+                    }
+                }
+                if (!isThereAtLeastOneCourierWithDeliveries) {
+                    Platform.runLater(() -> {
+                        showError("Cannot calculate tour", couriers.size() == 1 ? "Courier has no deliveries assigned." : "No couriers have deliveries assigned.");
+                        this.tourCalculationProgress.set(0.0);
+                    });
+                    return;
+                } else if (!isThereAtLeastOneCourierWithTourNotAlreadyCalculated) {
+                    Platform.runLater(() -> {
+                        showError("Already calculated", couriers.size() == 1 ? "Courier tour is already up to date." : "All couriers have up to date tours.");
+                        this.tourCalculationProgress.set(0.0);
+                    });
+                    return;
+                }
+                Platform.runLater(() -> {
+                    requestCommand(CommandResult.success(new CommandCalculateTour(this, courierTourMap, singleCourier)));
+                    this.tourCalculationProgress.set(1.0);
+                });
             } catch (Exception e) {
-                Platform.runLater(() -> showError("Error while calculating tour",
-                        e.getMessage() == null ? e.toString() : e.getMessage()));
+                Platform.runLater(() -> {
+                    showError("Error while calculating tour", e.getMessage() == null ? e.toString() : e.getMessage());
+                    this.tourCalculationProgress.set(0.0);
+                });
                 e.printStackTrace();
             }
         }).start();
@@ -574,6 +540,10 @@ public class AppController {
         return tourCalculationProgress.greaterThan(0.0).and(tourCalculationProgress.lessThan(1.0));
     }
 
+    public BooleanBinding tourCalculatedBinding() {
+        return tourCalculationProgress.greaterThanOrEqualTo(1.0);
+    }
+
     /**
      * Get the meme mode property for the easter egg.
      * When true, map tiles will load random memes instead of actual map tiles.
@@ -583,26 +553,12 @@ public class AppController {
     public BooleanProperty memeModeProperty() {
         return memeModeProperty;
     }
+
     /**
      * Toggle the meme mode on/off and clear the tile cache.
      */
     public void toggleMemeMode() {
         memeModeProperty.set(!memeModeProperty.get());
-    }
-    /**
-     * Get the tour calculated property.
-     *
-     * @return The tour calculated property
-     */
-    public BooleanProperty tourCalculatedProperty() {
-        return tourCalculatedProperty;
-    }
-    public boolean isTourCalculated() {
-        return tourCalculatedProperty.get();
-    }
-
-    public void setTourCalculated(boolean calculated) {
-        this.tourCalculatedProperty.set(calculated);
     }
 
     // ============================================================================

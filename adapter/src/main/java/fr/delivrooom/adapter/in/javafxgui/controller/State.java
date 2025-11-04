@@ -71,20 +71,8 @@ public interface State {
      */
     void requestIntersectionSelection();
 
-    /**
-     * Create a command to calculate the tour for all deliveries.
-     *
-     * @return A CommandResult with either a command or an error message
-     */
-    CommandResult createCalculateTourCommand();
 
-    /**
-     * Create a command to calculate the tour for a specific courier.
-     *
-     * @param courier The courier to calculate the tour for
-     * @return A CommandResult with either a command or an error message
-     */
-    CommandResult createCalculateCourierTourCommand(Courier courier);
+    void requestCalculateTour(Courier courier);
 
     /**
      * Create a command to assign a courier to a delivery.

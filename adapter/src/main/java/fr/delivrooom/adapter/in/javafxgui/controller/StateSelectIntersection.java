@@ -43,13 +43,12 @@ public record StateSelectIntersection(AppController controller) implements State
     }
 
     @Override
-    public CommandResult createCalculateTourCommand() {
-        return CommandResult.success(new CommandCalculateTour(controller));
-    }
-
-    @Override
-    public CommandResult createCalculateCourierTourCommand(Courier courier) {
-        return CommandResult.success(new CommandCalculateCourierTour(controller, courier));
+    public void requestCalculateTour(Courier courier) {
+        if (courier != null) {
+            controller.doCalculateTourForCourier(courier);
+        } else {
+            controller.doCalculateTour();
+        }
     }
 
     @Override
