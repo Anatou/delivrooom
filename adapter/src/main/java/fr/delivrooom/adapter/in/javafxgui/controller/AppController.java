@@ -447,24 +447,40 @@ public class AppController {
         if (courier.getTourSolution() == null) {
             doesTourNeedsToBeRecalculated = true;
         }
-        if (JavaFXApp.getCalculateTourUseCase().doesCalculatedTourNeedsToBeChanged(courier.getDeliveriesDemand())) {
-            JavaFXApp.getCalculateTourUseCase().findOptimalTour(courier.getDeliveriesDemand(), false);
+
+        boolean tourCalculationSucceeded = true;
+        try {
+            if (JavaFXApp.getCalculateTourUseCase().doesCalculatedTourNeedsToBeChanged(courier.getDeliveriesDemand())) {
+                JavaFXApp.getCalculateTourUseCase().findOptimalTour(courier.getDeliveriesDemand(), false);
+            }
+        }
+        catch (RuntimeException e) {
+            tourCalculationSucceeded = false;
         }
 
-        TourSolution solution = JavaFXApp.getCalculateTourUseCase().getOptimalTour();
+        if (tourCalculationSucceeded) {
+            TourSolution solution = JavaFXApp.getCalculateTourUseCase().getOptimalTour();
 
-        Platform.runLater(() -> {
-            this.tourCalculationProgress.set(1);
-            courier.setTourSolution(solution);
-            CouriersTourSolution current = this.tourSolution.get();
-            HashMap<Integer, TourSolution> map = (current != null)
-                    ? new HashMap<>(current.couriersTours())
-                    : new HashMap<>();
-            map.put(courier.getId(), solution);
-            this.tourSolution.set(new CouriersTourSolution(map));
-            this.couriers.invalidate();
-        });
-        return doesTourNeedsToBeRecalculated;
+            Platform.runLater(() -> {
+                this.tourCalculationProgress.set(1);
+                courier.setTourSolution(solution);
+                CouriersTourSolution current = this.tourSolution.get();
+                HashMap<Integer, TourSolution> map = (current != null)
+                        ? new HashMap<>(current.couriersTours())
+                        : new HashMap<>();
+                map.put(courier.getId(), solution);
+                this.tourSolution.set(new CouriersTourSolution(map));
+                this.couriers.invalidate();
+            });
+            return doesTourNeedsToBeRecalculated;
+        }
+        else {
+            Platform.runLater(() -> {
+                this.tourCalculationProgress.set(1);
+                showError("Tour Calculation Error", "At least one delivery could not be achieved. Are both pickup and deposit adresses reachable ?");
+            });
+            return true;
+        }
     }
 
     /**
@@ -488,25 +504,37 @@ public class AppController {
             try {
                 this.tourCalculationProgress.set(0.0001);
                 JavaFXApp.getCalculateTourUseCase().provideCityMap(cityMap.get());
+                boolean tourCalculationSucceeded = true;
                 if (JavaFXApp.getCalculateTourUseCase().doesCalculatedTourNeedsToBeChanged(courier.getDeliveriesDemand())) {
                     System.out.println("Tour needs to be recalculated for courier " + courier.getId());
-                    JavaFXApp.getCalculateTourUseCase().findOptimalTour(courier.getDeliveriesDemand(), false);
-                }
-                TourSolution solution = JavaFXApp.getCalculateTourUseCase().getOptimalTour();
-                Platform.runLater(() -> {
-                    this.tourCalculationProgress.set(1);
-                    courier.setTourSolution(solution);
-                    CouriersTourSolution current = this.tourSolution.get();
-                    // if the current solution is null, create a new map, otherwise copy the existing map
-                    HashMap<Integer, TourSolution> map = (current != null)
-                            ? new HashMap<>(current.couriersTours())
-                            : new HashMap<>();
-                    map.put(courier.getId(), solution);
 
-                    this.tourSolution.set(new CouriersTourSolution(map));
-                    this.couriers.invalidate();
-                });
-                setTourCalculated(true);
+                    try {
+                        JavaFXApp.getCalculateTourUseCase().findOptimalTour(courier.getDeliveriesDemand(), false);
+                    } catch (RuntimeException e) {
+                        tourCalculationSucceeded = false;
+                    }
+                }
+                if (tourCalculationSucceeded) {
+                    TourSolution solution = JavaFXApp.getCalculateTourUseCase().getOptimalTour();
+                    Platform.runLater(() -> {
+                        this.tourCalculationProgress.set(1);
+                        courier.setTourSolution(solution);
+                        CouriersTourSolution current = this.tourSolution.get();
+                        // if the current solution is null, create a new map, otherwise copy the existing map
+                        HashMap<Integer, TourSolution> map = (current != null)
+                                ? new HashMap<>(current.couriersTours())
+                                : new HashMap<>();
+                        map.put(courier.getId(), solution);
+
+                        this.tourSolution.set(new CouriersTourSolution(map));
+                        this.couriers.invalidate();
+                    });
+                    setTourCalculated(true);
+                }
+                else {
+                    this.tourCalculationProgress.set(1);
+                }
+
             } catch (Exception e) {
                 Platform.runLater(() -> showError("Error while calculating tour",
                         e.getMessage() == null ? e.toString() : e.getMessage()));
