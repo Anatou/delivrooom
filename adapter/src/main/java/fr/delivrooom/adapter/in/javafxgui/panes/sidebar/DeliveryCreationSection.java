@@ -146,6 +146,11 @@ public class DeliveryCreationSection extends VBox {
                         break;
                     }
                 }
+                Intersection store = controller.deliveriesDemandProperty().getValue().store();
+                if (newIntersection.getNormalizedX()== store.getNormalizedX() && newIntersection.getNormalizedY() == store.getNormalizedY()) {
+                    isInvalid = true;
+                }
+
                 if (requestedIntersectionIsTakeout) {
                     if (delivery!= null && delivery.getId()==newIntersection.getId()){
                         controller.showError("Invalid Intersection", "Pickup and deposit are the same. Select different Pickup and Deposit Intersections");
