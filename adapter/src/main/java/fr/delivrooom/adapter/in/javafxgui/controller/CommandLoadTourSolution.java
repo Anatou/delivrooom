@@ -57,7 +57,9 @@ public class CommandLoadTourSolution implements Command{
     }
 
     @Override
-    public String reverseToString() {
-        return "";
+    public String toString() {
+        return "Load Solution from file " + filename;
     }
+
+
 }
