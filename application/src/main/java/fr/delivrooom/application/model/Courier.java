@@ -47,7 +47,7 @@ public class Courier implements Serializable {
     }
 
     public void addDelivery(Delivery delivery, Intersection store) {
-        if (this.deliveriesDemand == null) {
+        if (this.deliveriesDemand == null || this.deliveriesDemand.deliveries().size() == 0) {
             this.deliveriesDemand = new DeliveriesDemand(new ArrayList<>(), store);
         }
         this.deliveriesDemand.deliveries().add(delivery);
