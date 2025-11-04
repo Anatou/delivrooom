@@ -312,13 +312,13 @@ public class MapOverlay extends StackPane {
             boolean isPickupOrDeposit = false;
 
             Circle intersectionCircle = new Circle(intersectionX, intersectionY, radius, Color.TRANSPARENT);
-           for (Delivery delivery : deliveriesDemand.deliveries()){
+          /* for (Delivery delivery : deliveriesDemand.deliveries()){
                if ((intersection.getNormalizedX()== delivery.takeoutIntersection().getNormalizedX() && intersection.getNormalizedY() == delivery.takeoutIntersection().getNormalizedY())
                    ||(intersection.getNormalizedX()== delivery.deliveryIntersection().getNormalizedX() && intersection.getNormalizedY() == delivery.deliveryIntersection().getNormalizedY())){
                    isPickupOrDeposit = true;
                    break;
                }
-           }
+           }*/
            if (!isPickupOrDeposit) {
                intersectionCircle.setUserData("selectIntersection");
                intersectionCircle.setCursor(Cursor.HAND);

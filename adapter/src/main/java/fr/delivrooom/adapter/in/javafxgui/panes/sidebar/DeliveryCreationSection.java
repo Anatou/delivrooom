@@ -127,7 +127,7 @@ public class DeliveryCreationSection extends VBox {
             State state = controller.stateProperty().getValue();
             Intersection newIntersection = controller.selectedIntersectionProperty().getValue();
             if (oldState instanceof StateSelectIntersection && !(newState instanceof StateSelectIntersection) && newIntersection == null){
-                controller.showError("No intersection found", "Select a valid intersection");
+                controller.showError("Invalid Intersection", "No intersection found. Select an existing intersection");
 
                 if (requestedIntersectionIsTakeout) {
                     buttonTakeout.setText("Select Pickup Intersection");
@@ -137,16 +137,31 @@ public class DeliveryCreationSection extends VBox {
                     buttonDelivery.getStyleClass().removeAll("success","accent");
                 }
             }else if (oldState instanceof StateSelectIntersection && !(newState instanceof StateSelectIntersection) && newIntersection != null){
+                boolean isInvalid = false;
+                for (Delivery delivery : controller.deliveriesDemandProperty().getValue().deliveries()){
+                    if ((newIntersection.getNormalizedX()== delivery.takeoutIntersection().getNormalizedX() && newIntersection.getNormalizedY() == delivery.takeoutIntersection().getNormalizedY())
+                            ||(newIntersection.getNormalizedX()== delivery.deliveryIntersection().getNormalizedX() && newIntersection.getNormalizedY() == delivery.deliveryIntersection().getNormalizedY())){
+                        isInvalid = true;
+
+                        break;
+                    }
+                }
                 if (requestedIntersectionIsTakeout) {
                     if (delivery!= null && delivery.getId()==newIntersection.getId()){
-                        controller.showError("Pickup and deposit are the same", "Select different Pickup and Deposit Intersections");
+                        controller.showError("Invalid Intersection", "Pickup and deposit are the same. Select different Pickup and Deposit Intersections");
                         buttonTakeout.setText("Select Pickup Intersection");
                         buttonTakeout.getStyleClass().removeAll("success","accent");
                     }else {
-                        System.out.println("selected intersection pickup : " + newIntersection.getId());
-                        this.takeout = newIntersection;
-                        buttonTakeout.getStyleClass().add("success");
-                        buttonTakeout.setText("Change Pickup Intersection");
+                        if(isInvalid){
+                            controller.showError("Invalid Intersection", "Intersection is already a pickup or deposit. Select a valid intersection.");
+                            buttonTakeout.setText("Select Pickup Intersection");
+                            buttonTakeout.getStyleClass().removeAll("success","accent");
+                        }else{
+                            System.out.println("selected intersection pickup : " + newIntersection.getId());
+                            this.takeout = newIntersection;
+                            buttonTakeout.getStyleClass().add("success");
+                            buttonTakeout.setText("Change Pickup Intersection");
+                        }
                     }
                 } else {
                     if (takeout!= null && takeout.getId()==newIntersection.getId()){
@@ -154,10 +169,16 @@ public class DeliveryCreationSection extends VBox {
                         buttonDelivery.setText("Select Deposit Intersection");
                         buttonDelivery.getStyleClass().removeAll("success","accent");
                     }else {
-                        System.out.println("selected intersection deposit : " + newIntersection.getId());
-                        this.delivery = newIntersection;
-                        buttonDelivery.getStyleClass().add("success");
-                        buttonDelivery.setText("Change Deposit Intersection");
+                        if(isInvalid){
+                            controller.showError("Invalid Intersection", "Intersection is already a pickup or deposit. Select a valid intersection.");
+                            buttonDelivery.setText("Select Deposit Intersection");
+                            buttonDelivery.getStyleClass().removeAll("success","accent");
+                        }else {
+                            System.out.println("selected intersection deposit : " + newIntersection.getId());
+                            this.delivery = newIntersection;
+                            buttonDelivery.getStyleClass().add("success");
+                            buttonDelivery.setText("Change Deposit Intersection");
+                        }
                     }
                 }
             }
