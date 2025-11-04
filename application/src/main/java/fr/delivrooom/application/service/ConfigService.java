@@ -23,7 +23,12 @@ public class ConfigService implements GetConfigPropertyUseCase {
         this.configProperties = configRepository.loadConfigProperties();
     }
 
-
+    /**
+     * Get a property value by key.
+     *
+     * @param key the property key
+     * @return the property value, or {@code null} if not found
+     */
     @Override
     public String getProperty(String key) {
         return configProperties.getProperty(key);
@@ -62,6 +67,13 @@ public class ConfigService implements GetConfigPropertyUseCase {
         }
     }
 
+    /**
+     * Get a double property value.
+     *
+     * @param key          the property key
+     * @param defaultValue the default value if key is not found or cannot be parsed
+     * @return the property value as a double
+     */
     @Override
     public double getDoubleProperty(String key, double defaultValue) {
         String value = configProperties.getProperty(key);
