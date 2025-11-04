@@ -56,5 +56,10 @@ public class CommandLoadTourSolution implements Command{
         execute();
     }
 
+    @Override
+    public String toString() {
+        return "Load Solution from file " + filename;
+    }
+
 
 }
