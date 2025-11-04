@@ -57,8 +57,13 @@ public class CommandLoadTourSolution implements Command{
     }
 
     @Override
-    public String toString() {
+    public String getStringDescription() {
         return "Load Solution from file " + filename;
+    }
+
+    @Override
+    public String getStringReversedDescription() {
+        return "Unload TourSolution from file " + filename;
     }
 
 

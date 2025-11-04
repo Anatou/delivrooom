@@ -50,7 +50,12 @@ public class CommandLoadDeliveries implements Command {
     }
 
     @Override
-    public String toString() {
+    public String getStringDescription() {
         return "Load Deliveries " + deliveriesUrl.getFile();
+    }
+
+    @Override
+    public String getStringReversedDescription() {
+        return "Unload Deliveries " + deliveriesUrl.getFile();
     }
 }

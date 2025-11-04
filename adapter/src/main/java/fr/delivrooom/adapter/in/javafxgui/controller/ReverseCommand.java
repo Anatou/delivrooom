@@ -13,7 +13,13 @@ public record ReverseCommand(Command command) implements Command {
     }
 
     @Override
-    public String toString() {
-        return "ReverseCommand{" + command + '}';
+    public String getStringDescription() {
+        return command.getStringReversedDescription();
     }
+
+    @Override
+    public String getStringReversedDescription() {
+        return command.getStringDescription();
+    }
+
 }
