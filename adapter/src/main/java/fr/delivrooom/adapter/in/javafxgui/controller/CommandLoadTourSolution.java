@@ -37,7 +37,10 @@ public class CommandLoadTourSolution implements Command{
 
         controller.doRestoreCityMap(tourSolutionSerialiser.cityMap());
         controller.doRestoreDeliveriesDemand(tourSolutionSerialiser.demand());
-        controller.couriersProperty().setAll(tourSolutionSerialiser.couriersAndSolutions());
+        controller.doRestoreCouriers(tourSolutionSerialiser.couriersAndSolutions());
+
+        StateDeliveriesLoaded newState = new StateDeliveriesLoaded(controller);
+        controller.transitionToState(newState);
 
     }
 
