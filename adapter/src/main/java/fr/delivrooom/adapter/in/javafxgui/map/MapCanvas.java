@@ -50,7 +50,6 @@ public class MapCanvas extends StackPane {
             drawMap();
         });
         AppController.getController().deliveriesDemandProperty().addListener(o -> drawMap());
-        AppController.getController().tourSolutionProperty().addListener(o -> drawMap());
         AppController.getController().couriersProperty().addListener((InvalidationListener) o -> drawMap());
         AppController.getController().memeModeProperty().addListener((o) -> {
             this.tilesLayer.clearCache();
