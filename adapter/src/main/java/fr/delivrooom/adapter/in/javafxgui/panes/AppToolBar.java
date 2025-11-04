@@ -123,7 +123,7 @@ public class AppToolBar extends ToolBar {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save Calculated Tour File");
         fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("Fichiers binaires", "*.bin")
+                new FileChooser.ExtensionFilter("Fichiers Vrooom", "*.vrooom")
         );
 
         File file = fileChooser.showSaveDialog(stage);
@@ -137,7 +137,7 @@ public class AppToolBar extends ToolBar {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Load Calculated Tour File");
         fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("Fichiers binaires", "*.bin")
+                new FileChooser.ExtensionFilter("Fichiers Vrooom", "*.vrooom")
         );
 
         File file = fileChooser.showOpenDialog(stage);
