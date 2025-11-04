@@ -357,7 +357,7 @@ public class TourCalculatorService implements CalculateTourUseCase {
         HashMap<Long, Float> time = new HashMap<Long, Float>();
 
         HashMap<Long, Long> predecessors = new HashMap<Long, Long>();
-        PriorityQueue<Long> queue = new PriorityQueue<Long>(Comparator.comparing(distances::get)); // might be unsafe, TODO: test
+        PriorityQueue<Long> queue = new PriorityQueue<Long>(Comparator.comparing(distances::get));
         HashSet<Long> settled = new HashSet<Long>();
         int targetsRemaining = targets.size();
 
@@ -408,7 +408,6 @@ public class TourCalculatorService implements CalculateTourUseCase {
             throw new RuntimeException("Input graph is not connex, no path could be found for at least a target");
         }
 
-        // TODO : since the predecessors are stored in a hashmap, they are not ordered which then leads to paths being constructed in wrong order
         // build Path objects to each target from predecessors
         HashMap<Long, Path> pathToTarget = new HashMap<>();
 
