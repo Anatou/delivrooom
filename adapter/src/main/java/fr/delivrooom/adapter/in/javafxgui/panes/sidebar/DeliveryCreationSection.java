@@ -33,26 +33,32 @@ public class DeliveryCreationSection extends VBox {
         //setAlignment(Pos.TOP_LEFT);
         this.controller = AppController.getController();
 
+        // Crée une infobulle (popup au survol)
+        Tooltip tooltipDurationMinute = new Tooltip("Duration in minutes");
+
+
         // Create button and Sprinner : select takeout intersection and its duration
         Button buttonTakeout = new Button("Select TakeOut Intersection");
         buttonTakeout.setGraphic(new FontIcon(FontAwesomeSolid.LOCATION_ARROW));
         buttonTakeout.setMaxWidth(Double.MAX_VALUE);
+        buttonTakeout.setMinWidth(250);
         Spinner<Integer> durationSpinnerTakeout = new Spinner<>(1,20,5);
         durationSpinnerTakeout.setEditable(true);
-        durationSpinnerTakeout.setMinWidth(175);
         durationSpinnerTakeout.setId("durationSpinnerTakeout");
-        durationSpinnerTakeout.setPromptText("Duration in minutes");
+        //durationSpinnerTakeout.setPromptText("Duration in minutes");
+        durationSpinnerTakeout.setTooltip(tooltipDurationMinute);
         HBox selectIntersectionTakeout = new HBox(5,buttonTakeout, durationSpinnerTakeout);
 
         // Create button and Sprinner : select delivery intersection and its duration
         Button buttonDelivery = new Button("Select Delivery Intersection");
         buttonDelivery.setGraphic(new FontIcon(FontAwesomeSolid.LOCATION_ARROW));
         buttonDelivery.setMaxWidth(Double.MAX_VALUE);
+        buttonDelivery.setMinWidth(250);
         Spinner<Integer> durationSpinnerDelivery = new Spinner<>(1,20,5);
         durationSpinnerDelivery.setEditable(true);
-        durationSpinnerDelivery.setMinWidth(175);
         durationSpinnerDelivery.setId("durationSpinnerDelivery");
-        durationSpinnerDelivery.setPromptText("Duration in minutes");
+        //durationSpinnerDelivery.setPromptText("Duration in minutes");
+        durationSpinnerDelivery.setTooltip(tooltipDurationMinute);
         HBox selectIntersectionDelivery = new HBox(5,buttonDelivery, durationSpinnerDelivery);
 
 
@@ -63,13 +69,17 @@ public class DeliveryCreationSection extends VBox {
         buttonConfirmAddDelivery.getStyleClass().add("accent");
 
         buttonTakeout.setOnAction(e -> {
+            this.takeout = null;
             requestedIntersectionIsTakeout = true;
             buttonTakeout.getStyleClass().add("accent");
+            buttonTakeout.setText("Select Intersection on the map");
             controller.requestIntersectionSelection();
         });
         buttonDelivery.setOnAction(e -> {
+            this.delivery = null;
             requestedIntersectionIsTakeout = false;
             buttonDelivery.getStyleClass().add("accent");
+            buttonDelivery.setText("Select Intersection on the map");
             controller.requestIntersectionSelection();
         });
         buttonConfirmAddDelivery.setOnAction(e -> {
@@ -78,14 +88,28 @@ public class DeliveryCreationSection extends VBox {
             tDuration = durationSpinnerTakeout.getValue();
             dDuration = durationSpinnerDelivery.getValue();
             if (takeout != null && delivery != null) {
-                // Add the delivery by calling the controller and reset style of buttons
-                Delivery addedDelivery = new Delivery(this.takeout, this.delivery, tDuration, dDuration);
-                controller.requestAddDelivery(addedDelivery);
+
+
+
+                    // Add the delivery by calling the controller and reset style of buttons
+                    Delivery addedDelivery = new Delivery(this.takeout, this.delivery, tDuration, dDuration);
+                    controller.requestAddDelivery(addedDelivery);
+                    buttonTakeout.setText("Select TakeOut Intersection");
+                    buttonDelivery.setText("Select Delivery Intersection");
+                    buttonDelivery.getStyleClass().removeAll("success", "accent");
+                    buttonTakeout.getStyleClass().removeAll("success", "accent");
+                    this.takeout = null;
+                    this.delivery = null;
+                }else{
+                controller.showError("Takeout and/or delivery Intersections null", "Select both takeout and delivery Intersections");
                 buttonTakeout.setText("Select TakeOut Intersection");
                 buttonDelivery.setText("Select Delivery Intersection");
-                buttonDelivery.getStyleClass().removeAll("success","accent");
-                buttonTakeout.getStyleClass().removeAll("success","accent");
+                buttonDelivery.getStyleClass().removeAll("success", "accent");
+                buttonTakeout.getStyleClass().removeAll("success", "accent");
+                this.takeout = null;
+                this.delivery = null;
             }
+
         });
 
 
@@ -100,13 +124,23 @@ public class DeliveryCreationSection extends VBox {
         controller.selectedIntersectionProperty().addListener((obs, oldIntersection, newIntersection) -> {
             if (newIntersection != null) {
                 if (requestedIntersectionIsTakeout) {
+                    System.out.println("selected intersection takeout : "+newIntersection.getId());
                     this.takeout = newIntersection;
                     buttonTakeout.getStyleClass().add("success");
                     buttonTakeout.setText("Select Another TakeOut Intersection");
                 } else {
+                    System.out.println("selected intersection deliv : "+newIntersection.getId());
                     this.delivery = newIntersection;
                     buttonDelivery.getStyleClass().add("success");
                     buttonDelivery.setText("Select Another Delivery Intersection");
+                }
+            }else{
+                if (requestedIntersectionIsTakeout) {
+                    buttonTakeout.setText("Select TakeOut Intersection");
+                    buttonTakeout.getStyleClass().removeAll("success","accent");
+                } else {
+                    buttonDelivery.setText("Select Delivery Intersection");
+                    buttonDelivery.getStyleClass().removeAll("success","accent");
                 }
             }
         });
