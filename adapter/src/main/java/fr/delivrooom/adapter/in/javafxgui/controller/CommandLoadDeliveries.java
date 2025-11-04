@@ -27,6 +27,7 @@ public class CommandLoadDeliveries implements Command {
     @Override
     public void execute() {
         try {
+            System.out.println("Executing CommandLoadDeliveries with file: " + deliveriesUrl.getFile());
             previousDeliveries = controller.deliveriesDemandProperty().getValue();
             previousCourierDeliveries = controller.doCaptureCourierDeliveries();
             controller.doLoadDeliveriesFile(deliveriesUrl);

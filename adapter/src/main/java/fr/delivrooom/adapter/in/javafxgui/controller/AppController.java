@@ -358,6 +358,44 @@ public class AppController {
     }
 
     /**
+     * Add a delivery to the deliveries demand.
+     * Called by commands.
+     *
+     * @param delivery The delivery to add
+     */
+    protected void doAddDelivery(Delivery delivery) {
+        System.out.println("Adding delivery from intersection " + delivery.takeoutIntersection().getId()
+                + " to intersection " + delivery.deliveryIntersection().getId());
+        deliveriesDemand.get().deliveries().add(delivery);
+        deliveriesDemand.invalidate();
+    }
+
+    /**
+     * Remove a delivery from the deliveries demand.
+     * Called by commands.
+     *
+     * @param delivery The delivery to remove
+     */
+    protected void doRemoveDelivery(Delivery delivery) {
+        System.out.println("Removing delivery from intersection " + delivery.takeoutIntersection().getId()
+                + " to intersection " + delivery.deliveryIntersection().getId());
+        deliveriesDemand.get().deliveries().remove(delivery);
+        // Also remove from any courier assigned to it (and invalidate their tour)
+        for (Courier courier : couriers) {
+            if (courier.getDeliveriesDemand() != null &&
+                    courier.getDeliveriesDemand().deliveries().contains(delivery)) {
+                courier.removeDelivery(delivery);
+                courier.deleteTourSolution();
+
+                break;
+            }
+        }
+        //this.couriers.invalidate();
+        deliveriesDemand.invalidate();
+    }
+
+
+    /**
      * Add a courier to the system.
      * Called by commands.
      *
@@ -710,9 +748,11 @@ public class AppController {
         for (Courier courier : couriers) {
             if (courier.getDeliveriesDemand() != null) {
                 courier.getDeliveriesDemand().deliveries().clear();
+                System.out.println("Cleared deliveries demand of courier " + courier.getId());
             }
             if (courier.getTourSolution() != null) {
                 courier.deleteTourSolution();
+                System.out.println("Deleted tour solution of courier " + courier.getId());
             }
         }
     }
