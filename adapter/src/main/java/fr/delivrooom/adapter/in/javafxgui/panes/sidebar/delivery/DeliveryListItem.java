@@ -61,17 +61,6 @@ public class DeliveryListItem extends HBox {
 
         getChildren().addAll(deliveryIcon, infoBox, spacer, actionButtons, infoBtn);
 
-        // Make the entire item clickable to show tooltip
-        setOnMouseClicked(e -> {
-            if (e.getClickCount() == 1) {
-                if (tooltip.isShowing()) {
-                    tooltip.hide();
-                } else {
-                    tooltip.show(this);
-                }
-            }
-        });
-
         // Add hover effect
         setOnMouseEntered(e -> getStyleClass().add("hover"));
         setOnMouseExited(e -> getStyleClass().remove("hover"));
