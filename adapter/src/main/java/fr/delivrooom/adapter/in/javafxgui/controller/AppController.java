@@ -423,18 +423,34 @@ public class AppController {
         if (courier.getTourSolution() == null) {
             doesTourNeedsToBeRecalculated = true;
         }
-        if (JavaFXApp.getCalculateTourUseCase().doesCalculatedTourNeedsToBeChanged(courier.getDeliveriesDemand())) {
-            JavaFXApp.getCalculateTourUseCase().findOptimalTour(courier.getDeliveriesDemand(), false);
+
+        boolean tourCalculationSucceeded = true;
+        try {
+            if (JavaFXApp.getCalculateTourUseCase().doesCalculatedTourNeedsToBeChanged(courier.getDeliveriesDemand())) {
+                JavaFXApp.getCalculateTourUseCase().findOptimalTour(courier.getDeliveriesDemand(), false);
+            }
+        }
+        catch (RuntimeException e) {
+            tourCalculationSucceeded = false;
         }
 
-        TourSolution solution = JavaFXApp.getCalculateTourUseCase().getOptimalTour();
+        if (tourCalculationSucceeded) {
+            TourSolution solution = JavaFXApp.getCalculateTourUseCase().getOptimalTour();
 
-        Platform.runLater(() -> {
-            this.tourCalculationProgress.set(1);
-            courier.setTourSolution(solution);
-            this.couriers.invalidate();
-        });
-        return doesTourNeedsToBeRecalculated;
+            Platform.runLater(() -> {
+                this.tourCalculationProgress.set(1);
+                courier.setTourSolution(solution);
+                this.couriers.invalidate();
+            });
+            return doesTourNeedsToBeRecalculated;
+        }
+        else {
+            Platform.runLater(() -> {
+                this.tourCalculationProgress.set(1);
+                showError("Tour Calculation Error", "At least one delivery could not be achieved. Are both pickup and deposit adresses reachable ?");
+            });
+            return true;
+        }
     }
 
     /**
