@@ -8,6 +8,7 @@ import fr.delivrooom.adapter.in.javafxgui.JavaFXApp;
 import fr.delivrooom.adapter.in.javafxgui.controller.AppController;
 import fr.delivrooom.adapter.in.javafxgui.controller.StateInitial;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ToolBar;
@@ -79,6 +80,15 @@ public class AppToolBar extends ToolBar {
                 redoBtn.setText("Redo (" + redoName + ")");
             }
         });
+        Button saveTourBtn = new Button("", new FontIcon(FontAwesomeSolid.SAVE));
+        saveTourBtn.setTooltip(new javafx.scene.control.Tooltip("Save Calculated Tour"));
+        saveTourBtn.setOnAction(e -> handleSaveTourFileDialog());
+        saveTourBtn.disableProperty().bind(controller.tourCalculatedProperty().not());
+
+
+        Button importTourBtn = new Button("", new FontIcon(FontAwesomeSolid.FILE_IMPORT));
+        importTourBtn.setTooltip(new javafx.scene.control.Tooltip("Import Calculated Tour"));
+        importTourBtn.setOnAction(e -> handleLoadTourFileDialog());
 
         edit.getItems().addAll(undoBtn, redoBtn);
 
@@ -95,7 +105,7 @@ public class AppToolBar extends ToolBar {
         logo.setPreserveRatio(true);
         logo.setOnMouseClicked(e -> AppController.getController().toggleMemeMode());
 
-        this.getItems().addAll(open, edit, new Spacer(10), themeToggle, new Spacer(), logo, new Spacer(5));
+        this.getItems().addAll(open, edit, new Spacer(10),saveTourBtn, new Spacer(10),importTourBtn, new Spacer(10), themeToggle, new Spacer(), logo, new Spacer(10));
     }
 
     /**
@@ -107,6 +117,39 @@ public class AppToolBar extends ToolBar {
     public void setStageAndScene(Stage stage, Scene scene) {
         this.stage = stage;
         this.scene = scene;
+    }
+
+    private void handleSaveTourFileDialog() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save Calculated Tour File");
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Fichiers Vrooom", "*.vrooom")
+        );
+        fileChooser.setInitialFileName("default.vrooom");
+
+        File file = fileChooser.showSaveDialog(stage);
+        if (file != null) {
+            String filePath = file.getAbsolutePath();
+            if (!filePath.endsWith(".vrooom")) {
+                file = new File(filePath + ".vrooom");
+            }
+            System.out.println("Fichier sélectionné : " + file.getAbsolutePath());
+            AppController.getController().requestSaveTourFile(file);
+        }
+    }
+
+    private void handleLoadTourFileDialog() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Load Calculated Tour File");
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Fichiers Vrooom", "*.vrooom")
+        );
+
+        File file = fileChooser.showOpenDialog(stage);
+        if (file != null) {
+            System.out.println("Fichier sélectionné : " + file.getAbsolutePath());
+            AppController.getController().requestLoadTourSolution(file);
+        }
     }
 
     private void handleOpenMapFile() {

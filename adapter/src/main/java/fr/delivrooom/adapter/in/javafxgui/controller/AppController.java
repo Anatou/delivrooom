@@ -1,6 +1,7 @@
 package fr.delivrooom.adapter.in.javafxgui.controller;
 
 import fr.delivrooom.adapter.in.javafxgui.JavaFXApp;
+import fr.delivrooom.adapter.in.javafxgui.utils.InvalidableReadOnlyListWrapper;
 import fr.delivrooom.adapter.in.javafxgui.utils.InvalidableReadOnlyObjectWrapper;
 import fr.delivrooom.adapter.out.XMLCityMapLoader;
 import fr.delivrooom.application.model.*;
@@ -8,14 +9,15 @@ import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.scene.control.Alert;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -59,14 +61,15 @@ public class AppController {
     private final CommandManager commandManager = new CommandManager();
     private final InvalidableReadOnlyObjectWrapper<State> currentState = new InvalidableReadOnlyObjectWrapper<>(new StateInitial(this));
     // Loaded data
-    private final InvalidableReadOnlyObjectWrapper<CityMap> cityMap = new InvalidableReadOnlyObjectWrapper<>(null);
-    private final InvalidableReadOnlyObjectWrapper<DeliveriesDemand> deliveriesDemand = new InvalidableReadOnlyObjectWrapper<>(null);
-    private final InvalidableReadOnlyObjectWrapper<TourSolution> tourSolution = new InvalidableReadOnlyObjectWrapper<>(null);
-    private final ReadOnlyListWrapper<Courier> couriers = new ReadOnlyListWrapper<>(FXCollections.observableArrayList());
+    protected final InvalidableReadOnlyObjectWrapper<CityMap> cityMap = new InvalidableReadOnlyObjectWrapper<>(null);
+    protected final InvalidableReadOnlyObjectWrapper<DeliveriesDemand> deliveriesDemand = new InvalidableReadOnlyObjectWrapper<>(null);
+    protected final InvalidableReadOnlyObjectWrapper<CouriersTourSolution> tourSolution = new InvalidableReadOnlyObjectWrapper<>(null);
+    protected final InvalidableReadOnlyListWrapper<Courier> couriers = new InvalidableReadOnlyListWrapper<>(FXCollections.observableArrayList());
     // 0 = not running, 0 < x < 1 = running, 1 = done
-    private final DoubleProperty tourCalculationProgress = new SimpleDoubleProperty(0);
-    private final InvalidableReadOnlyObjectWrapper<Intersection> selectedIntersection = new InvalidableReadOnlyObjectWrapper<>(null);
-    private final BooleanProperty memeModeProperty = new SimpleBooleanProperty(false);
+    protected final DoubleProperty tourCalculationProgress = new SimpleDoubleProperty(0);
+    protected final InvalidableReadOnlyObjectWrapper<Intersection> selectedIntersection = new InvalidableReadOnlyObjectWrapper<>(null);
+    protected final BooleanProperty memeModeProperty = new SimpleBooleanProperty(false);
+    protected final BooleanProperty tourCalculatedProperty = new SimpleBooleanProperty(false);
 
     private AppController() {
     }
@@ -228,6 +231,30 @@ public class AppController {
         requestCommand(result);
     }
 
+    public void requestLoadTourSolution(File file) {
+        CommandResult result = getState().createLoadTourCommand(cityMap.get(), deliveriesDemand.get(), couriers.get(), file.getAbsolutePath());
+        requestCommand(result);
+    }
+
+    /**
+     * Request to save the current tour to a file.
+     *
+     * @param file The file to save the tour to
+     */
+    public void requestSaveTourFile(File file) {
+        if (file == null) {
+            showError("Save Error", "No file specified for saving.");
+            return;
+        }
+        try {
+            getState().saveTour(file.getAbsolutePath());
+            System.out.println("Tour saved to " + file.getAbsolutePath());
+        } catch (Exception e) {
+            showError("Save Error", "Failed to save the tour: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
 
     // ============================================================================
     // PROTECTED API - Do Methods (for commands to modify data)
@@ -275,6 +302,12 @@ public class AppController {
         this.deliveriesDemand.set(JavaFXApp.guiUseCase().getDeliveriesDemand(cityMap.get(), url));
         this.tourSolution.set(null);
         deleteDeliveryDemandOfCourier();
+    }
+
+    protected void doRestoreCouriers(List<Courier> courierList) {
+        couriersProperty().setAll(courierList);
+        couriers.invalidate();
+        deliveriesDemand.invalidate();
     }
 
     /**
@@ -325,32 +358,6 @@ public class AppController {
     }
 
     /**
-     * Add a delivery to the deliveries demand.
-     * Called by commands.
-     *
-     * @param delivery The delivery to add
-     */
-    protected void doAddDelivery(Delivery delivery) {
-        System.out.println("Adding delivery from intersection " + delivery.takeoutIntersection().getId()
-                + " to intersection " + delivery.deliveryIntersection().getId());
-        deliveriesDemand.get().deliveries().add(delivery);
-        deliveriesDemand.invalidate();
-    }
-
-    /**
-     * Remove a delivery from the deliveries demand.
-     * Called by commands.
-     *
-     * @param delivery The delivery to remove
-     */
-    protected void doRemoveDelivery(Delivery delivery) {
-        System.out.println("Removing delivery from intersection " + delivery.takeoutIntersection().getId()
-                + " to intersection " + delivery.deliveryIntersection().getId());
-        deliveriesDemand.get().deliveries().remove(delivery);
-        deliveriesDemand.invalidate();
-    }
-
-    /**
      * Add a courier to the system.
      * Called by commands.
      *
@@ -381,27 +388,40 @@ public class AppController {
     }
 
     /**
-     * Calculate the optimal tour for all deliveries.
+     * Calculate the optimal tour for all couriers
      * Called by commands.
      */
     protected void doCalculateTour() {
-        if (tourCalculationProgress.get() > 0 && tourCalculationProgress.get() < 1) {
-            showError("Cannot calculate tour", "Already running");
-            return;
-        }
-
         new Thread(() -> {
             try {
-                this.tourCalculationProgress.set(0.0001);
-                JavaFXApp.getCalculateTourUseCase().provideCityMap(cityMap.get());
-                if (JavaFXApp.getCalculateTourUseCase().doesCalculatedTourNeedsToBeChanged(deliveriesDemand.get())) {
-                    JavaFXApp.getCalculateTourUseCase().findOptimalTour(deliveriesDemand.get(), false);
+                boolean isThereAtLeastOneCourierWithDeliveries = false;
+                boolean isThereAtLeastOneCourierWithTourNotAlreadyCalculated = false;
+                for (Courier courier : couriers) {
+                    if (courier.getDeliveriesDemand() != null && !courier.getDeliveriesDemand().deliveries().isEmpty()) {
+                        System.out.println("Calculating tour for courier " + courier.getId());
+                        if (doCalculateTourForCourierSync(courier)) {
+                            isThereAtLeastOneCourierWithTourNotAlreadyCalculated = true;
+                            System.out.println("Tour recalculated for courier " + courier.getId());
+                            setTourCalculated(true);
+                        }
+                        isThereAtLeastOneCourierWithDeliveries = true;
+                    } else {
+                        // No deliveries assigned, remove any existing tour
+                        courier.deleteTourSolution();
+
+                    }
                 }
-                TourSolution solution = JavaFXApp.getCalculateTourUseCase().getOptimalTour();
-                Platform.runLater(() -> {
-                    this.tourCalculationProgress.set(1);
-                    this.tourSolution.set(solution);
-                });
+                if (couriers.isEmpty()) {
+                    Platform.runLater(() -> showError("Cannot calculate tour", "No couriers available"));
+                    return;
+                }
+                if (!isThereAtLeastOneCourierWithDeliveries) {
+                    Platform.runLater(() -> showError("Cannot calculate tour", "No couriers have deliveries assigned"));
+                    return;
+                }
+                if (!isThereAtLeastOneCourierWithTourNotAlreadyCalculated) {
+                    Platform.runLater(() -> showError("Doesn't calculate tour", "All couriers' tours are already up to date"));
+                }
             } catch (Exception e) {
                 Platform.runLater(() -> showError("Error while calculating tour",
                         e.getMessage() == null ? e.toString() : e.getMessage()));
@@ -411,8 +431,40 @@ public class AppController {
     }
 
     /**
+     * Asynchronous calculation of the optimal tour for a specific courier.(avoid threading issues of shared state)
+     * Called by doCalculateTour.
+     */
+
+    private boolean doCalculateTourForCourierSync(Courier courier) throws Exception {
+        boolean doesTourNeedsToBeRecalculated = false;
+        this.tourCalculationProgress.set(0.0001);
+        JavaFXApp.getCalculateTourUseCase().provideCityMap(cityMap.get());
+        if (courier.getTourSolution() == null) {
+            doesTourNeedsToBeRecalculated = true;
+        }
+        if (JavaFXApp.getCalculateTourUseCase().doesCalculatedTourNeedsToBeChanged(courier.getDeliveriesDemand())) {
+            JavaFXApp.getCalculateTourUseCase().findOptimalTour(courier.getDeliveriesDemand(), false);
+        }
+
+        TourSolution solution = JavaFXApp.getCalculateTourUseCase().getOptimalTour();
+
+        Platform.runLater(() -> {
+            this.tourCalculationProgress.set(1);
+            courier.setTourSolution(solution);
+            CouriersTourSolution current = this.tourSolution.get();
+            HashMap<Integer, TourSolution> map = (current != null)
+                    ? new HashMap<>(current.couriersTours())
+                    : new HashMap<>();
+            map.put(courier.getId(), solution);
+            this.tourSolution.set(new CouriersTourSolution(map));
+            this.couriers.invalidate();
+        });
+        return doesTourNeedsToBeRecalculated;
+    }
+
+    /**
      * Calculate the optimal tour for a specific courier.
-     * Called by commands.
+     * Called by commands or doCalculateTourForCourierSync.
      *
      * @param courier The courier to calculate the tour for
      */
@@ -439,8 +491,17 @@ public class AppController {
                 Platform.runLater(() -> {
                     this.tourCalculationProgress.set(1);
                     courier.setTourSolution(solution);
-                    this.tourSolution.set(solution);
+                    CouriersTourSolution current = this.tourSolution.get();
+                    // if the current solution is null, create a new map, otherwise copy the existing map
+                    HashMap<Integer, TourSolution> map = (current != null)
+                            ? new HashMap<>(current.couriersTours())
+                            : new HashMap<>();
+                    map.put(courier.getId(), solution);
+
+                    this.tourSolution.set(new CouriersTourSolution(map));
+                    this.couriers.invalidate();
                 });
+                setTourCalculated(true);
             } catch (Exception e) {
                 Platform.runLater(() -> showError("Error while calculating tour",
                         e.getMessage() == null ? e.toString() : e.getMessage()));
@@ -453,10 +514,16 @@ public class AppController {
      * Restore a previous tour solution state.
      * Called by commands during undo.
      *
-     * @param tourSolution The tour solution to restore
+     * @param couriersTourSolution The tour (of couriers) solution to restore
      */
-    protected void doRestoreTourSolution(TourSolution tourSolution) {
-        this.tourSolution.set(tourSolution);
+    protected void doRestoreTourSolution(CouriersTourSolution couriersTourSolution) {
+        this.tourSolution.set(couriersTourSolution);
+        // Also update each courier's individual tour solution
+        if (couriersTourSolution != null) {
+            for (Courier courier : couriers) {
+                courier.deleteTourSolution();
+            }
+        }
     }
 
     // ============================================================================
@@ -475,13 +542,35 @@ public class AppController {
         if (assignedCourier != null) {
             if (!assignedCourier.equals(courier)) {
                 assignedCourier.removeDelivery(delivery);
-                if (courier != null) courier.addDelivery(delivery, store);
+                assignedCourier.deleteTourSolution();
+                if (courier != null) {
+                    courier.addDelivery(delivery, store);
+                    courier.deleteTourSolution();
+                }
             }
         } else if (courier != null) {
             courier.addDelivery(delivery, store);
+            courier.deleteTourSolution();
         }
         this.deliveriesDemand.invalidate();
+        this.couriers.invalidate();
     }
+
+    protected void doSaveTourSolution(String filename) {
+        TourSolutionSerialiserIO tourSolutionSerialiserIO = new TourSolutionSerialiserIO();
+        List<Courier> courierList = new ArrayList<>();
+        for (Courier c : couriers.get()) {
+            courierList.add(c);
+        }
+        try {
+            TourSolutionSerialiser serial = new TourSolutionSerialiser(cityMap.get(), deliveriesDemand.get(), courierList);
+            tourSolutionSerialiserIO.saveTourSolutionSerialization(serial, filename);
+        }
+        catch (IOException e) {
+            showError("Tour saving error", "Unable to save Tour");
+        }
+    }
+
 
     /**
      * Transition to a new state.
@@ -519,15 +608,19 @@ public class AppController {
      *
      * @return The list of couriers in the system, as an observable list.
      */
-    public ObservableList<Courier> couriersProperty() {
-        return couriers;
+    public ReadOnlyListProperty<Courier> couriersProperty() {
+        return couriers.getReadOnlyProperty();
+    }
+
+    public void invalidateCouriers() {
+        couriers.invalidate();
     }
 
     public ReadOnlyProperty<CityMap> cityMapProperty() {
         return cityMap.getReadOnlyProperty();
     }
 
-    public ReadOnlyProperty<TourSolution> tourSolutionProperty() {
+    public ReadOnlyProperty<CouriersTourSolution> tourSolutionProperty() {
         return tourSolution.getReadOnlyProperty();
     }
 
@@ -565,12 +658,26 @@ public class AppController {
     public BooleanProperty memeModeProperty() {
         return memeModeProperty;
     }
-
     /**
      * Toggle the meme mode on/off and clear the tile cache.
      */
     public void toggleMemeMode() {
         memeModeProperty.set(!memeModeProperty.get());
+    }
+    /**
+     * Get the tour calculated property.
+     *
+     * @return The tour calculated property
+     */
+    public BooleanProperty tourCalculatedProperty() {
+        return tourCalculatedProperty;
+    }
+    public boolean isTourCalculated() {
+        return tourCalculatedProperty.get();
+    }
+
+    public void setTourCalculated(boolean calculated) {
+        this.tourCalculatedProperty.set(calculated);
     }
 
     // ============================================================================

@@ -9,15 +9,23 @@ import fr.delivrooom.adapter.in.javafxgui.controller.StateSelectIntersection;
 import fr.delivrooom.adapter.in.javafxgui.panes.sidebar.delivery.DeliveryTooltip;
 import fr.delivrooom.application.model.*;
 import javafx.geometry.Point2D;
+import javafx.geometry.VPos;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
+import javafx.scene.Scene;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
+import javafx.scene.text.TextAlignment;
+import org.kordamp.ikonli.fontawesome6.FontAwesomeSolid;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,6 +36,9 @@ public class MapOverlay extends StackPane {
     private final Canvas canvasLayer;
     private final Pane deliveryLayer;
     private final Pane intersectionLayer;
+    private final Image storeImageIcon;
+    private final Image pickupImageIcon;
+    private final Image depositImageIcon;
     private final double unit_fixed = 5; // The unit size for roads and points dimensioning, fixed with the map
     private double unit_scalable = 5; // The unit size for roads and points dimensioning, scaling with the map
     private double width;
@@ -40,6 +51,12 @@ public class MapOverlay extends StackPane {
         this.canvasLayer = new Canvas();
         this.deliveryLayer = new Pane();
         this.intersectionLayer = new Pane();
+
+        final Pane dummyPane = new Pane();
+        final Scene dummyScene = new Scene(dummyPane);
+        storeImageIcon = getImageIcon(FontAwesomeSolid.WAREHOUSE, dummyPane, Color.GREEN);
+        pickupImageIcon = getImageIcon(FontAwesomeSolid.ARROW_CIRCLE_UP, dummyPane, Color.BLUE);
+        depositImageIcon = getImageIcon(FontAwesomeSolid.ARROW_CIRCLE_DOWN, dummyPane, Color.RED);
 
         getChildren().addAll(canvasLayer, deliveryLayer, intersectionLayer);
 
@@ -113,62 +130,73 @@ public class MapOverlay extends StackPane {
         CityMap cityMap = controller.cityMapProperty().getValue();
         if (cityMap == null) return;
         DeliveriesDemand deliveriesDemand = controller.deliveriesDemandProperty().getValue();
-        DeliveriesDemand deliveriesLeft = new DeliveriesDemand(
-                new ArrayList<>(deliveriesDemand.deliveries()),
-                deliveriesDemand.store()
-        );
+        HashMap<Long, Boolean> isDeliveryInCourierTour = new HashMap<>();
 
         // Draw roads
         gc.setStroke(Color.rgb(220, 220, 220));
         gc.setLineWidth(unit_scalable);
         for (HashMap<Long, Road> subMap : cityMap.roads().values()) {
             for (Road road : subMap.values()) {
-                drawRoad(gc, scale, minX, minY, road);
+                drawRoad(gc, scale, minX, minY, road, false);
             }
         }
         // Draw intersections
         gc.setFill(Color.WHITE);
         gc.setStroke(Color.rgb(220, 220, 220));
         for (Intersection intersection : cityMap.intersections().values()) {
-            drawIntersection(gc, scale, minX, minY, intersection, 1.3 * unit_scalable, true);
+            drawIntersection(gc, scale, minX, minY, intersection, 1.3 * unit_scalable, null, null, -1);
         }
 
         // Draw deliveries demands
         boolean isStoreDrawn = false;
         if (deliveriesDemand != null) {
-            System.out.println("Drawing deliveries demand on map overlay.");
+            DeliveriesDemand deliveriesLeft = new DeliveriesDemand(
+                    new ArrayList<>(deliveriesDemand.deliveries()),
+                    deliveriesDemand.store()
+            );
             // iterate trough couriers to draw their paths if available
             List<Courier> allCouriers = controller.couriersProperty();
             for (Courier courier : allCouriers) {
                 TourSolution courierTour = courier.getTourSolution();
                 if (courierTour != null && courier.isDisplayTourSolution()) {
                     // attribute a color to each courier path
-                    System.out.println("Drawing tour for courier: " + courier.getId());
                     displayTourSolution(courier);
-                    isStoreDrawn = true;
                     // Remove delivered deliveries from deliveriesLeft
-                    DeliveriesDemand courierDemand = courier.getDeliveriesDemand();
-                    for (Delivery d : courierDemand.deliveries()) {
-                        deliveriesLeft.deliveries().remove(d);
+                    for (Delivery delivery : courier.getDeliveriesDemand().deliveries()) {
+                        isDeliveryInCourierTour.put(delivery.deliveryIntersection().getId(), true);
+                        isDeliveryInCourierTour.put(delivery.takeoutIntersection().getId(), true);
+
                     }
                 }
             }
             // Display the remaining deliveries in red for pickup and blue for delivery
             // Draw warehouse point in green
-            if (!isStoreDrawn) {
-                gc.setFill(Color.GREEN);
-                drawIntersection(gc, scale, minX, minY, deliveriesLeft.store(), 4 * unit_scalable, true);
-            }
+            drawIntersection(gc, scale, minX, minY, deliveriesLeft.store(), 4 * unit_scalable, storeImageIcon, null, -1);
             // Takeout point is a red square, delivery point in a blue circle
-            for (Delivery delivery : deliveriesLeft.deliveries()) {
-                gc.setFill(Color.BLUE);
-                drawIntersection(gc, scale, minX, minY, delivery.takeoutIntersection(), 4 * unit_scalable, false);
-                gc.setFill(Color.RED);
-                drawIntersection(gc, scale, minX, minY, delivery.deliveryIntersection(), 4 * unit_scalable, true);
+            int pairIndex = 0;
+            for (Delivery delivery : deliveriesDemand.deliveries()) {
+                if (isDeliveryInCourierTour.getOrDefault(delivery.deliveryIntersection().getId(), false)) {
+                    continue;
+                }
+                String label = indexToLabel(pairIndex++);
+                drawIntersection(gc, scale, minX, minY, delivery.takeoutIntersection(), 4 * unit_scalable, pickupImageIcon, label, -1);
+                drawIntersection(gc, scale, minX, minY, delivery.deliveryIntersection(), 4 * unit_scalable, depositImageIcon, label, -1);
             }
 
         }
 
+    }
+
+    private String indexToLabel(int index) {
+        // Convertit 0 -> "A", 1 -> "B", ..., 25 -> "Z", 26 -> "AA", etc.
+        StringBuilder sb = new StringBuilder();
+        int n = index + 1; // rendre 1-based pour la conversion
+        while (n > 0) {
+            int rem = (n - 1) % 26;
+            sb.insert(0, (char) ('A' + rem));
+            n = (n - 1) / 26;
+        }
+        return sb.toString();
     }
 
     public void displayTourSolution(Courier courier) {
@@ -184,108 +212,52 @@ public class MapOverlay extends StackPane {
         TourSolution tourSolution = courier.getTourSolution();
         Color courierColor = Color.hsb((courier.getId() * 137) % 360, 0.7, 0.9);
 
-
-
         // Draw the calculated tour if available (numbers only on store/pickup/delivery in visit order)
         gc.setStroke(courierColor);
+        gc.setFill(courierColor);
         gc.setLineWidth(4 * unit_scalable);
         // Build map of target intersection ids -> type ("store","pickup","delivery")
 
+        if (tourSolution != null) {
+            gc.setLineWidth(2 * unit_scalable);
 
-        HashMap<Long, String> targetTypes = new HashMap<>();
-        Intersection store = deliveriesDemand.store();
-        if (store != null) targetTypes.put(store.getId(), "store");
-        for (Delivery d : deliveriesDemand.deliveries()) {
-            if (d.takeoutIntersection() != null) {
-                targetTypes.putIfAbsent(d.takeoutIntersection().getId(), "pickup");
-            }
-            if (d.deliveryIntersection() != null) {
-                targetTypes.putIfAbsent(d.deliveryIntersection().getId(), "delivery");
-            }
-        }
-
-        // Build visit order position map (warehouse is 1, first pickup is 2, etc.)
-        List<Long> visitOrder = tourSolution.deliveryOrder();
-        HashMap<Long, Integer> visitPos = new HashMap<>();
-        int pos = 1;
-        for (Long id : visitOrder) {
-            visitPos.put(id, pos++);
-        }
-
-        // Build delivery to pickup map
-        HashMap<Long, Long> deliveryToPickup = new HashMap<>();
-        for (Delivery d : deliveriesDemand.deliveries()) {
-            if (d.deliveryIntersection() != null && d.takeoutIntersection() != null) {
-                deliveryToPickup.put(d.deliveryIntersection().getId(), d.takeoutIntersection().getId());
+            for (Path path : tourSolution.paths()) {
+                List<Road> roads = path.intersections();
+                float deltaArrow = 0;
+                for (Road road : roads) {
+                    deltaArrow += road.getLength();
+                    boolean drawArrow = false;
+                    if (deltaArrow > 500) { drawArrow = true; deltaArrow = 0; }
+                    drawRoad(gc, scale, minX, minY, road, drawArrow);
+                }
             }
         }
+        // display numbers on store/pickup/delivery in visit order
+        int visitIndex = 1;
+        for (Long intersectionId : tourSolution.deliveryOrder()) {
+            Intersection intersection = cityMap.intersections().get(intersectionId);
+            if (intersection != null) {
 
-        // Build labels for each visited target (for deliveries, show pickup and delivery positions with a dot)
-        HashMap<Long, String> labels = new HashMap<>();
-        for (Long id : visitOrder) {
-            String type = targetTypes.get(id);
-            Integer myPos = visitPos.get(id);
-            if ("delivery".equals(type)) {
-                Long pickupId = deliveryToPickup.get(id);
-                Integer pickupPos = pickupId != null ? visitPos.get(pickupId) : null;
-                String suffix = (pickupPos != null) ? String.valueOf(pickupPos) : "?";
-                labels.put(id, (myPos != null ? myPos : -1) + "." + suffix);
-            } else {
-                labels.put(id, myPos != null ? String.valueOf(myPos) : "?");
+                if (intersectionId == deliveriesDemand.store().getId()) {
+                    continue;
+                }
+                // check if pickup or delivery
+                boolean isPickup = false;
+                for (Delivery delivery : deliveriesDemand.deliveries()) {
+                    if (delivery.takeoutIntersection().getId() == intersectionId) {
+                        isPickup = true;
+                        break;
+                    }
+                }
+                if (isPickup) {
+                    drawIntersection(gc, scale, minX, minY, intersection, 4 * unit_scalable, pickupImageIcon, Integer.toString(visitIndex), courier.getId());
+                } else {
+                    drawIntersection(gc, scale, minX, minY, intersection, 4 * unit_scalable, depositImageIcon, Integer.toString(visitIndex), courier.getId());
+                }
+
+                visitIndex += 1;
             }
         }
-
-        for (Path path : tourSolution.paths()) {
-            List<Road> roads = path.intersections();
-            for (Road road : roads) {
-                drawRoad(gc, scale, minX, minY, road);
-            }
-        }
-
-        gc.setTextAlign(javafx.scene.text.TextAlignment.CENTER);
-        gc.setTextBaseline(javafx.geometry.VPos.CENTER);
-
-        for (Long id : visitOrder) {
-            String label = labels.get(id);
-            if (label == null) continue;
-            Intersection inter = cityMap.intersections().get(id);
-            if (inter == null) continue;
-            double x = (inter.getNormalizedX() - minX) * scale;
-            double y = (inter.getNormalizedY() - minY) * scale;
-
-            double fontSize = Math.max(10.0, 6.0 * unit_scalable);
-            double numBgRadius = fontSize;
-
-            String type = targetTypes.get(id);
-            Color bgColor = Color.WHITE;
-            Color strokeColor = Color.DARKGREEN;
-            Color textColor = Color.DARKGREEN;
-            if ("store".equals(type)) {
-                bgColor = Color.GREEN;
-                strokeColor = Color.DARKGREEN;
-                textColor = Color.WHITE;
-            } else if ("pickup".equals(type)) {
-                bgColor = Color.BLUE;
-                strokeColor = Color.DARKBLUE;
-                textColor = Color.WHITE;
-            } else if ("delivery".equals(type)) {
-                bgColor = Color.RED;
-                strokeColor = Color.DARKRED;
-                textColor = Color.WHITE;
-            }
-
-            gc.setFill(bgColor);
-            gc.fillOval(x - numBgRadius, y - numBgRadius, numBgRadius * 2.0, numBgRadius * 2.0);
-            gc.setStroke(strokeColor);
-            gc.setLineWidth(1.0);
-            gc.strokeOval(x - numBgRadius, y - numBgRadius, numBgRadius * 2.0, numBgRadius * 2.0);
-
-            gc.setFill(textColor);
-            gc.setFont(javafx.scene.text.Font.font(fontSize));
-            gc.fillText(label, x, y);
-        }
-
-
     }
 
     public void updateDeliveryLayer() {
@@ -348,17 +320,64 @@ public class MapOverlay extends StackPane {
     }
 
 
-    private void drawIntersection(GraphicsContext gc, double scale, double minX, double minY, Intersection intersection, double radius, boolean circle) {
+    private void drawIntersection(GraphicsContext gc, double scale, double minX, double minY, Intersection intersection, double radius, Image icon, String text, int courierId) {
         double x = (intersection.getNormalizedX() - minX) * scale;
         double y = (intersection.getNormalizedY() - minY) * scale;
 
-        if (circle)
+        if (icon!=null) {
+            Paint oldColor = gc.getFill();
+            gc.setFill(Color.WHITE);
+            gc.fillOval(x - icon.getHeight()/1.5, y - icon.getHeight()/1.5, 2 * icon.getHeight()/1.5, 2 * icon.getHeight()/1.5);
+            gc.setFill(oldColor);
+            if (icon == storeImageIcon) {
+                gc.drawImage(icon, x-icon.getWidth()/3, y-icon.getHeight()/2.5, icon.getWidth()/1.5, icon.getHeight()/1.5);
+            } else {
+                gc.drawImage(icon, x-icon.getWidth()/2*1.5, y-icon.getHeight()/2*1.5, icon.getWidth()*1.5, icon.getHeight()*1.5);
+            }
+        } else {
             gc.fillOval(x - radius, y - radius, 2 * radius, 2 * radius);
-        else
-            gc.fillRect(x - radius, y - radius, 2 * radius, 2 * radius);
+        }
+
+        if (text != null) {
+            gc.setTextAlign(TextAlignment.CENTER);
+            gc.setTextBaseline(VPos.BASELINE);
+            Paint oldColor = gc.getFill();
+            double fontSize = radius;
+            double circleRadius = radius;
+            double x_offset = 0;
+            double y_offset = 0;
+            if (icon!=null) {
+                fontSize = icon.getHeight()/1.5;
+                circleRadius = icon.getHeight();
+                x_offset = icon.getWidth()/2;
+                y_offset = icon.getHeight()/2;
+            }
+            gc.setFont(javafx.scene.text.Font.font(fontSize));
+            // display color of the courier insted
+            Color courierColor = (courierId == -1) ? Color.WHITE : Color.hsb((courierId * 137) % 360, 0.7, 0.9);
+
+            gc.setFill(courierColor);
+            gc.fillOval(x, y, circleRadius, circleRadius);
+            gc.setFill(Color.BLACK);
+            gc.fillText(text, x+x_offset, y+y_offset+fontSize/3);
+            gc.setFill(oldColor);
+        }
     }
 
-    private void drawRoad(GraphicsContext gc, double scale, double minX, double minY, Road road) {
+    private Image getImageIcon(FontAwesomeSolid icon, Pane dummyPane, Paint iconColor) {
+        FontIcon fontIcon = new FontIcon(icon);
+        fontIcon.setIconColor(iconColor);
+        dummyPane.getChildren().add(fontIcon);
+        SnapshotParameters snapshotParameters = new SnapshotParameters();
+        snapshotParameters.setFill(Color.TRANSPARENT);
+        Image fontImage = fontIcon.snapshot(snapshotParameters, null);
+        dummyPane.getChildren().remove(fontIcon);
+        return fontImage;
+    }
+
+    private void drawRoad(GraphicsContext gc, double scale, double minX, double minY, Road road, Boolean drawArrow) {
+        if (drawArrow==null) { drawArrow = false; }
+
         Intersection origin = road.getOrigin();
         Intersection destin = road.getDestination();
 
@@ -368,6 +387,34 @@ public class MapOverlay extends StackPane {
         double y2 = (destin.getNormalizedY() - minY) * scale;
 
         gc.strokeLine(x1, y1, x2, y2);
-    }
 
+        if (drawArrow) {
+            double road_vector_x = x2-x1;
+            double road_vector_y = y2-y1;
+
+            double triangle_center_x = (x1 + x2) / 2;
+            double triangle_center_y = (y1 + y2) / 2;
+
+            double alpha = Math.atan2(road_vector_y, road_vector_x) - Math.PI/2;
+
+            double triangle_size = 0.000001*scale;
+
+            double[] xPoints = {
+                    -triangle_size*Math.sin(alpha) + triangle_center_x,
+                    -triangle_size*Math.sin(alpha + 2*Math.PI/3) + triangle_center_x,
+                    -triangle_size*Math.sin(alpha + 4*Math.PI/3) + triangle_center_x,
+            };
+
+            double[] yPoints = {
+                    triangle_size*Math.cos(alpha) + triangle_center_y,
+                    triangle_size*Math.cos(alpha + 2*Math.PI/3) + triangle_center_y,
+                    triangle_size*Math.cos(alpha + 4*Math.PI/3) + triangle_center_y,
+            };
+            Color oldColor = (Color)gc.getFill();
+            Color toDarken = (Color)gc.getStroke();
+            gc.setFill(toDarken.brighter());
+            gc.fillPolygon(xPoints, yPoints, 3);
+            gc.setFill(oldColor);
+        }
+    }
 }

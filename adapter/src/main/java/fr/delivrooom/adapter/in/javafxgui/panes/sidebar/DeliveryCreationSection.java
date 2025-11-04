@@ -128,12 +128,12 @@ public class DeliveryCreationSection extends VBox {
                     System.out.println("selected intersection pickup : "+newIntersection.getId());
                     this.takeout = newIntersection;
                     buttonTakeout.getStyleClass().add("success");
-                    buttonTakeout.setText("Select Another Pickup Intersection");
+                    buttonTakeout.setText("Change Pickup Intersection");
                 } else {
                     System.out.println("selected intersection deposit : "+newIntersection.getId());
                     this.delivery = newIntersection;
                     buttonDelivery.getStyleClass().add("success");
-                    buttonDelivery.setText("Select Another Deposit Intersection");
+                    buttonDelivery.setText("Change Deposit Intersection");
                 }
             }else{
                 if (requestedIntersectionIsTakeout) {

@@ -13,7 +13,7 @@ import java.util.*;
 
 public class TourCalculatorService implements CalculateTourUseCase {
 
-    protected boolean useDynamicProgramming = false;
+    protected boolean useDynamicProgramming = true;
     protected boolean hasMapChangedSinceLastCompute;
     protected CityGraph graph;
     protected TourSolution tourSolution;
@@ -94,6 +94,7 @@ public class TourCalculatorService implements CalculateTourUseCase {
             shortestPathsMatrix.put(intersectionId, pathsFromIntersection);
         }
 
+
         shortestPathsGraph = new ShortestPathsGraph(shortestPathsMatrix);
 
         long tpsDebut = System.currentTimeMillis();
@@ -114,27 +115,48 @@ public class TourCalculatorService implements CalculateTourUseCase {
         List<Path> tourPaths = new ArrayList<>();
         //System.out.println("Solution intersections order : ");
         List<Long> solutionList = Arrays.asList(tspSolution);
-        // TODO : replace bestTime with actual time calculation (has to be done in TSP solver)
-        float bestTime = 0.f;
         for (int i = 0; i < tspSolution.length; i++) {
             long fromId = tspSolution[i];
             long toId = tspSolution[(i + 1) % tspSolution.length]; // wrap around to form a cycle
             Path path = shortestPathsMatrix.get(fromId).get(toId);
-            bestTime += path.totalTime();
             tourPaths.add(path);
-            if (useTimeAsCost){
-                //System.out.println(fromId + " -> " + toId + " (time cost: " + path.totalTime() + " seconds) |  length : " + path.totalLength() + " meters");
-            }else {
-
-                //System.out.println(fromId + " -> " + toId + " (path length: " + path.totalLength() + ")" + " | " + path.totalTime() + " seconds");
-            }
         }
-//        System.out.println("tour paths constructed :" + tourPaths.size() + " paths");
-//        System.out.println("Total tour cost (distance): " + tspSolutionCost);
-//        System.out.println("Total tour cost (time): " + bestTime + " seconds | distance "+ tspSolutionCost/4.17 + " + waiting " + (bestTime - tspSolutionCost/4.17) + " seconds");
-        long temps = System.currentTimeMillis() - tpsDebut;
+        // calculate total time
+        Intersection prevIntersection = null;
+        float totalTime = 0;
 
+        for (Long d : solutionList) {
+            Intersection intersection = null;
+            if (calculatedDemand.store().getId() == d) {
+                intersection = calculatedDemand.store();
+                prevIntersection = intersection;
+                intersection.setTimeArrivedSeconds(totalTime);
+                continue;
+            }
+            for (Delivery del : calculatedDemand.deliveries()) {
+                if (del.takeoutIntersection().getId() == d) {
+                    totalTime += del.takeoutDuration();
+                    intersection = del.takeoutIntersection();
+                }
+                if (del.deliveryIntersection().getId() == d) {
+                    totalTime += del.deliveryDuration();
+                    intersection = del.deliveryIntersection();
+                }
+                if (calculatedDemand.store().getId() == d) {
+                    intersection = calculatedDemand.store();
+                }
+            }
+
+            if (prevIntersection != null && intersection != null) {
+                totalTime += shortestPathsGraph.getCout(prevIntersection.getId(), intersection.getId()) / 4.17;
+            }
 //
+            prevIntersection = intersection;
+            intersection.setTimeArrivedSeconds(totalTime);
+
+        }
+
+        // TODO : faire un log pour vérifier que l'ordre est cohérent
         tourSolution = new TourSolution(tourPaths, tspSolutionCost, solutionList);
     }
 

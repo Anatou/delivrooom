@@ -1,15 +1,16 @@
 package fr.delivrooom.adapter.in.javafxgui.controller;
 
-import fr.delivrooom.application.model.TourSolution;
+import fr.delivrooom.application.model.CouriersTourSolution;
+import javafx.application.Platform;
+
+import java.util.HashMap;
 
 /**
- * Command to calculate the optimal tour for all deliveries.
- * Supports undo by restoring the previous tour solution.
+ * Command to calculate all couriers' tours.
  */
 public class CommandCalculateTour implements Command {
 
     private final AppController controller;
-    private TourSolution previousTourSolution;
 
     public CommandCalculateTour(AppController controller) {
         this.controller = controller;
@@ -17,18 +18,29 @@ public class CommandCalculateTour implements Command {
 
     @Override
     public void execute() {
-        previousTourSolution = controller.tourSolutionProperty().getValue();
         controller.doCalculateTour();
     }
 
     @Override
     public void undo() {
-        controller.doRestoreTourSolution(previousTourSolution);
+        Platform.runLater(() -> {
+            System.out.println("Undo: clearing all couriers' tours.");
+
+            controller.doRestoreTourSolution(new CouriersTourSolution(new HashMap<>()));
+
+            var couriersList = controller.couriersProperty().getValue();
+            if (couriersList != null) {
+                for (var courier : couriersList) {
+                    courier.deleteTourSolution();
+                }
+            }
+
+            controller.invalidateCouriers();
+        });
     }
 
     @Override
     public String toString() {
-        return "Calculate tour";
+        return "Calculate tour for all couriers";
     }
-
 }

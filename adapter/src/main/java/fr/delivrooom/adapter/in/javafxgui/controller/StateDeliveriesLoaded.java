@@ -1,10 +1,9 @@
 package fr.delivrooom.adapter.in.javafxgui.controller;
 
-import fr.delivrooom.application.model.Courier;
-import fr.delivrooom.application.model.Delivery;
-import fr.delivrooom.application.model.Intersection;
+import fr.delivrooom.application.model.*;
 
 import java.net.URL;
+import java.util.List;
 
 /**
  * Deliveries loaded state - both map and deliveries have been loaded.
@@ -29,7 +28,7 @@ public record StateDeliveriesLoaded(AppController controller) implements State {
 
     @Override
     public CommandResult createRemoveDeliveryCommand(Delivery delivery) {
-        return CommandResult.success(new CommandRemoveDelivery(controller, delivery));
+        return CommandResult.success(new ReverseCommand(new CommandAddDelivery(controller, delivery)));
     }
 
     @Override
@@ -72,5 +71,31 @@ public record StateDeliveriesLoaded(AppController controller) implements State {
     @Override
     public String getStateName() {
         return "DeliveriesLoadedState";
+    }
+
+    @Override
+    public void saveTour(String filename) {
+        // in this state, there might be tours calculated for some couriers
+        boolean anyTourToSave = false;
+        System.out.println("Checking for tours to save...");
+
+        List<Courier> courierList = controller.couriersProperty();
+        for (Courier courier : courierList) {
+            if (courier.getTourSolution() != null) {
+                anyTourToSave = true;
+                break;
+            }
+        }
+        if (anyTourToSave) {
+            System.out.println("Check tour saved...");
+            controller.doSaveTourSolution(filename);
+        }
+        else {
+            controller.showError("No tour calculated", "No tour to save from any courier");
+        }
+    }
+
+    public CommandResult createLoadTourCommand(CityMap sourceCityMap, DeliveriesDemand sourceDeliveriesDemand, List<Courier> sourceCouriers, String filename) {
+        return CommandResult.success( new CommandLoadTourSolution(controller, this, sourceCityMap, sourceDeliveriesDemand, sourceCouriers, filename) );
     }
 }

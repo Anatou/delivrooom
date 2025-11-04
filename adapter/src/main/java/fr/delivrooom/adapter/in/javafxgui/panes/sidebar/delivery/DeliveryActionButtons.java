@@ -14,7 +14,7 @@ public class DeliveryActionButtons extends HBox {
     Delivery delivery;
     ComboBox<Courier> courierComboBox;
 
-    public DeliveryActionButtons(Delivery delivery) {
+    public DeliveryActionButtons(Delivery delivery, Runnable deleteSideEffect) {
         super(5);
         this.delivery = delivery;
         this.courierComboBox = new ComboBox<>();
@@ -26,6 +26,7 @@ public class DeliveryActionButtons extends HBox {
         deleteBtn.getStyleClass().addAll("button-icon");
         deleteBtn.setOnAction(e -> {
             appController.requestRemoveDelivery(delivery);
+            deleteSideEffect.run();
         });
 
         courierComboBox.setPromptText("Courier");

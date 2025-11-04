@@ -36,6 +36,9 @@ public class CommandAssignCourier implements Command {
 
     @Override
     public String toString() {
+        if (newCourier == null) {
+            return "Remove Courier assignment for " + delivery.takeoutIntersection().getId() + " > " + delivery.deliveryIntersection().getId();
+        }
         return "Assign Courier " + newCourier.getId() + " to " + delivery.takeoutIntersection().getId() + " > " + delivery.deliveryIntersection().getId();
     }
 }
