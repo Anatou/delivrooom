@@ -304,6 +304,12 @@ public class AppController {
         deleteDeliveryDemandOfCourier();
     }
 
+    protected void doRestoreCouriers(List<Courier> courierList) {
+        couriersProperty().setAll(courierList);
+        couriers.invalidate();
+        deliveriesDemand.invalidate();
+    }
+
     /**
      * Restore a previous deliveries demand state.
      * Called by commands during undo.
