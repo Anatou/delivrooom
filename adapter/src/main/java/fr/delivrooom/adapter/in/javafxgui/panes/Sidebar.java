@@ -2,7 +2,6 @@ package fr.delivrooom.adapter.in.javafxgui.panes;
 
 import fr.delivrooom.adapter.in.javafxgui.panes.sidebar.BottomSection;
 import fr.delivrooom.adapter.in.javafxgui.panes.sidebar.DeliveryCreationSection;
-import fr.delivrooom.adapter.in.javafxgui.panes.sidebar.TestSection;
 import fr.delivrooom.adapter.in.javafxgui.panes.sidebar.courier.CouriersSection;
 import fr.delivrooom.adapter.in.javafxgui.panes.sidebar.delivery.DeliveriesSection;
 import javafx.geometry.Insets;
@@ -28,7 +27,6 @@ public class Sidebar extends VBox {
     private final DeliveryCreationSection deliveryCreationSection;
     private final CouriersSection couriersSection;
     private final DeliveriesSection deliveriesSection;
-    private final TestSection testSection;
     private final BottomSection bottomSection;
 
     public Sidebar() {
@@ -45,7 +43,6 @@ public class Sidebar extends VBox {
         deliveryCreationSection = new DeliveryCreationSection();
         couriersSection = new CouriersSection();
         deliveriesSection = new DeliveriesSection();
-        testSection = new TestSection();
         bottomSection = new BottomSection();
 
         // Create scrollable content area
@@ -55,9 +52,7 @@ public class Sidebar extends VBox {
                 getNoPaddingSeparator(),
                 couriersSection,
                 getNoPaddingSeparator(),
-                deliveriesSection,
-                getNoPaddingSeparator(),
-                testSection
+                deliveriesSection
         );
 
         ScrollPane scrollPane = new ScrollPane(scrollableContent);
