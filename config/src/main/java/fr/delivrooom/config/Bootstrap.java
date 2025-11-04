@@ -12,6 +12,13 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class Bootstrap {
+    /**
+     * The main entry point of the application.
+     * This method sets up the dependency injection framework, instantiating repositories,
+     * services (use cases), and launching the JavaFX GUI.
+     *
+     * @param args Command line arguments (not used).
+     */
     public static void main(String[] args) {
 
         ConfigRepository configRepository;

@@ -5,7 +5,12 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * @param deliveryOrder List of delivery IDs in the order they are served
+ * Represents a calculated tour for a set of deliveries.
+ * This class is a record, making it an immutable data carrier.
+ *
+ * @param paths         The list of {@link Path} objects that make up the tour.
+ * @param totalLength   The total length of the tour in meters.
+ * @param deliveryOrder A list of intersection IDs in the order they are visited in the tour.
  */
 public record TourSolution(List<Path> paths, float totalLength, List<Long> deliveryOrder) implements Serializable {
     @Serial

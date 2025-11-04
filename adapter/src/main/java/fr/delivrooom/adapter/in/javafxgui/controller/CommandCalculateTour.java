@@ -17,12 +17,23 @@ public class CommandCalculateTour implements Command {
 
     private final HashMap<Courier, TourSolution> previousTourSolutions = new HashMap<>();
 
+    /**
+     * Creates a command to calculate and apply tour solutions for one or more couriers.
+     *
+     * @param controller    The main application controller.
+     * @param solutions     A map of couriers to their calculated tour solutions.
+     * @param singleCourier True if the calculation is for a single courier, false otherwise.
+     */
     public CommandCalculateTour(AppController controller, HashMap<Courier, TourSolution> solutions, boolean singleCourier) {
         this.controller = controller;
         this.solutions = solutions;
         this.singleCourier = singleCourier;
     }
 
+    /**
+     * Executes the command, applying the new tour solutions to the couriers.
+     * It saves the previous tour solutions to enable undo.
+     */
     @Override
     public void execute() {
         previousTourSolutions.clear();
@@ -36,6 +47,9 @@ public class CommandCalculateTour implements Command {
         controller.invalidateCouriers();
     }
 
+    /**
+     * Undoes the command, restoring the previous tour solutions for all affected couriers.
+     */
     @Override
     public void undo() {
         if (!singleCourier) {

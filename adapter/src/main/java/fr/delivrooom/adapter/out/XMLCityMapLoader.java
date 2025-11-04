@@ -14,8 +14,19 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.HashMap;
 
+/**
+ * An adapter that implements the {@link CityMapRepository} port.
+ * It loads city map data from an XML file.
+ */
 public class XMLCityMapLoader implements CityMapRepository {
 
+    /**
+     * Parses an XML file from a given URL and constructs a {@link CityMap} object.
+     *
+     * @param cityMapURL The URL of the XML map file.
+     * @return A {@link CityMap} object representing the loaded map.
+     * @throws Exception if an error occurs during file parsing or if the XML format is invalid.
+     */
     @Override
     public CityMap getCityMap(URL cityMapURL) throws Exception {
         HashMap<Long, Intersection> intersections = new HashMap<>();

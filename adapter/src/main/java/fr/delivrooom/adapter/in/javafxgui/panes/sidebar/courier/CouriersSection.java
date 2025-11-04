@@ -26,6 +26,10 @@ public class CouriersSection extends VBox {
     private final CouriersList couriersList;
     private final TitledPane titledPane;
 
+    /**
+     * Constructs the CouriersSection, a collapsible pane that contains the list of couriers
+     * and controls for adding new ones.
+     */
     public CouriersSection() {
         super(0);
 
@@ -104,10 +108,20 @@ public class CouriersSection extends VBox {
     }
 
 
+    /**
+     * Checks if the couriers section is currently expanded.
+     *
+     * @return true if the pane is expanded, false otherwise.
+     */
     public boolean isExpanded() {
         return titledPane.isExpanded();
     }
 
+    /**
+     * Sets the expanded state of the couriers section.
+     *
+     * @param expanded true to expand the pane, false to collapse it.
+     */
     public void setExpanded(boolean expanded) {
         titledPane.setExpanded(expanded);
     }

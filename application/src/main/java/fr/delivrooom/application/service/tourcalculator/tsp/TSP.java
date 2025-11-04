@@ -4,26 +4,32 @@ import fr.delivrooom.application.model.DeliveriesDemand;
 import fr.delivrooom.application.port.out.NotifyTSPProgressToGui;
 import fr.delivrooom.application.service.tourcalculator.Graphe;
 
+/**
+ * Interface for Traveling Salesperson Problem (TSP) solvers.
+ */
 public interface TSP {
 
     /**
-     * Cherche une solution au TSP pour le graphe <code>g</code> dans la limite de <code>tpsLimite</code> millisecondes
-     * Attention : la solution calculee commence necessairement par le sommet 0
-     * @param tpsLimite
-     * @param g
+     * Search for a solution to the TSP for the given graph within a time limit.
+     * Note: The calculated solution must start from vertex 0.
+     *
+     * @param tpsLimite              The time limit in milliseconds.
+     * @param g                      The graph to solve the TSP for.
+     * @param demand                 The delivery demand, containing constraints.
+     * @param notifyTSPProgressToGui A callback to notify the GUI of progress.
      */
-    public void searchSolution(int tpsLimite, Graphe g, DeliveriesDemand demand, NotifyTSPProgressToGui notifyTSPProgressToGui);
+    void searchSolution(int tpsLimite, Graphe g, DeliveriesDemand demand, NotifyTSPProgressToGui notifyTSPProgressToGui);
 
     /**
-     * @return le ieme sommet visite dans la solution calculee par <code>chercheSolution</code>
-     * (-1 si <code>chercheSolution</code> n'a pas encore ete appele, ou si i < 0 ou i >= g.getNbSommets())
+     * @return An array of vertex IDs representing the best tour found.
+     * Returns {@code null} or an empty array if no solution has been found.
      */
-    public Long[] getBestSolution();
+    Long[] getBestSolution();
 
     /**
-     * @return la somme des couts des arcs de la solution calculee par <code>chercheSolution</code>
-     * (-1 si <code>chercheSolution</code> n'a pas encore ete appele).
+     * @return The cost of the best solution found.
+     * Returns -1 if no solution has been found.
      */
-    public float getBestCost();
+    float getBestCost();
 
 }

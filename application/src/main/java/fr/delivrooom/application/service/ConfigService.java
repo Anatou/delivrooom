@@ -5,21 +5,25 @@ import fr.delivrooom.application.port.out.ConfigRepository;
 
 import java.util.Properties;
 
+/**
+ * Service for retrieving configuration properties.
+ * This class implements the {@link GetConfigPropertyUseCase} and uses a
+ * {@link ConfigRepository} to load the properties.
+ */
 public class ConfigService implements GetConfigPropertyUseCase {
 
     private final Properties configProperties;
 
+    /**
+     * Constructs a new ConfigService.
+     *
+     * @param configRepository The repository to load the configuration from.
+     */
     public ConfigService(ConfigRepository configRepository) {
         this.configProperties = configRepository.loadConfigProperties();
     }
 
 
-    /**
-     * Get a property value by key
-     *
-     * @param key the property key
-     * @return the property value, or null if not found
-     */
     @Override
     public String getProperty(String key) {
         return configProperties.getProperty(key);

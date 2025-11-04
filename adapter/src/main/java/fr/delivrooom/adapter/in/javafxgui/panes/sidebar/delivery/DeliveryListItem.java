@@ -20,6 +20,11 @@ public class DeliveryListItem extends HBox {
     private final DeliveryTooltip tooltip;
     private final DeliveryActionButtons actionButtons;
 
+    /**
+     * Constructs a DeliveryListItem for a given delivery.
+     *
+     * @param delivery The delivery to be displayed in this list item.
+     */
     public DeliveryListItem(Delivery delivery) {
         super(5);
         this.tooltip = new DeliveryTooltip(delivery, false);

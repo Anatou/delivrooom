@@ -11,6 +11,11 @@ import fr.delivrooom.application.service.tourcalculator.tsp.TSP3;
 
 import java.util.*;
 
+/**
+ * Service responsible for calculating optimal delivery tours.
+ * This class implements the {@link CalculateTourUseCase} and contains the core logic
+ * for solving the Traveling Salesperson Problem (TSP) with delivery constraints.
+ */
 public class TourCalculatorService implements CalculateTourUseCase {
 
     protected boolean useDynamicProgramming = true;
@@ -20,6 +25,11 @@ public class TourCalculatorService implements CalculateTourUseCase {
     protected DeliveriesDemand calculatedDemand;
     protected final NotifyTSPProgressToGui notifyTSPProgressToGui;
 
+    /**
+     * Constructs a new TourCalculatorService.
+     *
+     * @param notifyTSPProgressToGui A callback interface to notify the GUI of TSP calculation progress.
+     */
     public TourCalculatorService(NotifyTSPProgressToGui notifyTSPProgressToGui) {
         // create a Tour calculator with a graph
         this.notifyTSPProgressToGui = notifyTSPProgressToGui;
@@ -41,8 +51,7 @@ public class TourCalculatorService implements CalculateTourUseCase {
         // checks if the demand is different from the last calculated one or if no tour has been calculated yet
         if (calculatedDemand == null) {
             return demand != null && !demand.deliveries().isEmpty();
-        }
-        else {
+        } else {
             return hasMapChangedSinceLastCompute || !calculatedDemand.equals(demand);
         }
     }
@@ -152,9 +161,9 @@ public class TourCalculatorService implements CalculateTourUseCase {
             }
 
             if (prevIntersection != null && intersection != null) {
-                totalTime += shortestPathsGraph.getCout(prevIntersection.getId(), intersection.getId()) / 4.17;
+                totalTime += shortestPathsGraph.getCout(prevIntersection.getId(), intersection.getId()) / 4.17F;
             }
-//
+
             prevIntersection = intersection;
             intersection.setTimeArrivedSeconds(totalTime);
 

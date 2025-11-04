@@ -16,6 +16,14 @@ import javafx.scene.layout.VBox;
 import org.kordamp.ikonli.fontawesome6.FontAwesomeSolid;
 import org.kordamp.ikonli.javafx.FontIcon;
 
+/**
+ * The main canvas for displaying the map, composed of multiple layers:
+ * - A {@link MapTiles} layer for the background map imagery.
+ * - A {@link MapOverlay} layer for drawing roads, intersections, and delivery information.
+ * - A controls layer for UI elements like zoom buttons.
+ * <p>
+ * This class handles user interactions like zooming and panning.
+ */
 public class MapCanvas extends StackPane {
 
     // Zoom config
@@ -32,7 +40,9 @@ public class MapCanvas extends StackPane {
     private double lastMouseY;
     private boolean dragging = false;
 
-
+    /**
+     * Constructs a new MapCanvas, initializing all layers and setting up event listeners.
+     */
     public MapCanvas() {
         this.tilesLayer = new MapTiles();
         this.overlayLayer = new MapOverlay();
@@ -210,6 +220,10 @@ public class MapCanvas extends StackPane {
         return v;
     }
 
+    /**
+     * Redraws all layers of the map. This method is called when the view changes (pan, zoom)
+     * or when the underlying data (map, deliveries) is updated.
+     */
     public void drawMap() {
         if (getWidth() <= 0 || getHeight() <= 0) return;
         CityMap cityMap = AppController.getController().cityMapProperty().getValue();
@@ -250,6 +264,9 @@ public class MapCanvas extends StackPane {
 
     /**
      * Clear the tile cache (used for easter egg meme mode)
+     */
+    /**
+     * Clears the tile cache. This is used, for example, when toggling meme mode.
      */
     public void clearTileCache() {
         tilesLayer.clearCache();

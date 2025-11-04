@@ -23,78 +23,16 @@ cd config
 ../mvnw javafx:run
 ```
 
-## GUI Architecture: State-Driven Command Factory Pattern
+## GUI Architecture
 
-The application uses a sophisticated combination of **State Pattern** and **Command Pattern** to manage user interactions and application state
-transitions.
+The application's GUI is built on a **State-Driven Command Factory** pattern, which combines the State and Command design patterns for robust state
+management and full undo/redo capabilities.
 
-### Architecture Flow
+For a detailed explanation, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
-```
-┌─────────────┐
-│UI Components│
-└──────┬──────┘
-       │ 1. User Action
-       ▼
-┌─────────────────┐
-│  AppController  │
-│  requestX()     │
-└──────┬──────────┘
-       │ 2. Ask State
-       ▼
-┌─────────────────┐
-│  Current State  │
-│  (Factory)      │
-└──────┬──────────┘
-       │ 3. Create Command
-       ▼
-┌─────────────────┐
-│    Command      │
-└──────┬──────────┘
-       │ 4. Execute via Manager
-       ▼
-┌─────────────────┐
-│ CommandManager  │
-│ (Undo/Redo)     │
-└──────┬──────────┘
-       │ 5. Execute
-       ▼
-┌─────────────────┐
-│    Command      │
-│  execute()      │
-└──────┬──────────┘
-       │ 6. Modify Data
-       ▼
-┌─────────────────┐
-│  AppController  │
-│  doX()          │
-└──────┬──────────┘
-       │ 7. May Trigger
-       ▼
-┌─────────────────┐
-│State Transition │
-└─────────────────┘
-```
+## Features
 
-### Key Principles
-
-1. **States as Command Factories**: States don't execute operations; they create commands that encapsulate operations
-2. **Controller as Gateway**: Only 3 public methods: `requestCommand()`, `undoCommand()`, `redoCommand()`
-3. **Commands Encapsulate Logic**: All business operations are wrapped in undoable commands
-4. **Clear Method Naming**:
-    - `requestX()` - Public methods for UI to request operations
-    - `doX()` - Protected methods for commands to modify data
-
-### Benefits
-
-- ✅ **Full Undo/Redo Support**: All operations are undoable, including state transitions
-- ✅ **Strong Encapsulation**: Controller has minimal public API
-- ✅ **State Validation**: States control which operations are allowed
-- ✅ **Testability**: Clear separation of concerns
-- ✅ **Maintainability**: Easy to add new commands and states
-
-## Implementations delivered (so far)
-
-- When the app starts, it loads the intersection points from the xml map files and displays those on a real map.
-- Then, deliveries points are loaded from another xml file and are displayed on the map. Blue points are delivery points, red points are pickup points. Tne green point is the warehouse.
-- When both maps and delivery points are loaded, the route is computed and displayed on the map (for now only small maps works since we are using a fairly simple Dijkstra).
+- **Map Visualization**: Loads and displays intersections from XML map files onto an interactive map.
+- **Delivery Management**: Loads delivery points from XML files and visualizes them on the map.
+- **Tour Calculation**: Computes and displays optimized delivery routes.
+- **Undo/Redo**: All actions are fully reversible.

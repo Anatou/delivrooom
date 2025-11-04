@@ -21,6 +21,11 @@ import java.util.Objects;
  * 4. Test & Debug (collapsible)
  * Plus a fixed bottom section with progress bar and GO button.
  */
+
+/**
+ * The main sidebar of the application, containing various sections for managing
+ * deliveries, couriers, and other application functions.
+ */
 public class Sidebar extends VBox {
 
     // Sections
@@ -29,6 +34,9 @@ public class Sidebar extends VBox {
     private final DeliveriesSection deliveriesSection;
     private final BottomSection bottomSection;
 
+    /**
+     * Constructs the Sidebar and initializes all its child sections.
+     */
     public Sidebar() {
         super(0);
 

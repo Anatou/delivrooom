@@ -18,12 +18,23 @@ public class CommandLoadDeliveries implements Command {
     private DeliveriesDemand previousDeliveries;
     private Map<Courier, DeliveriesDemand> previousCourierDeliveries;
 
+    /**
+     * Creates a command to load a deliveries demand file.
+     *
+     * @param controller    The main application controller.
+     * @param deliveriesUrl The URL of the deliveries file to load.
+     * @param sourceState   The state from which the command was created, for undo purposes.
+     */
     public CommandLoadDeliveries(AppController controller, URL deliveriesUrl, State sourceState) {
         this.controller = controller;
         this.deliveriesUrl = deliveriesUrl;
         this.sourceState = sourceState;
     }
 
+    /**
+     * Executes the command, loading the deliveries demand from the specified URL.
+     * It saves the previous deliveries state for undo and transitions to the `StateDeliveriesLoaded`.
+     */
     @Override
     public void execute() {
         try {
@@ -37,6 +48,10 @@ public class CommandLoadDeliveries implements Command {
         }
     }
 
+    /**
+     * Undoes the command, restoring the previous deliveries demand and courier assignments.
+     * It also reverts the application state to the source state.
+     */
     @Override
     public void undo() {
         try {

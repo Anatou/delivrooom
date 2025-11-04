@@ -22,6 +22,14 @@ public class CommandAssignCourier implements Command {
     private final Courier oldCourier;
     private TourSolution oldCourierPreviousTourSolution = null;
 
+    /**
+     * Creates a command to assign a courier to a delivery.
+     *
+     * @param controller The main application controller.
+     * @param delivery   The delivery to be assigned.
+     * @param store      The warehouse intersection.
+     * @param newCourier The courier to assign the delivery to. Can be null to unassign.
+     */
     public CommandAssignCourier(AppController controller, Delivery delivery, Intersection store, Courier newCourier) {
         this.controller = controller;
         this.store = store;
@@ -37,6 +45,11 @@ public class CommandAssignCourier implements Command {
         }
     }
 
+    /**
+     * Executes the command, assigning the new courier to the delivery.
+     * This involves removing the delivery from the old courier (if any) and adding it to the new one.
+     * The tours of both affected couriers are invalidated.
+     */
     @Override
     public void execute() {
         Courier assignedCourier = controller.getCourierForDelivery(delivery);
@@ -57,6 +70,10 @@ public class CommandAssignCourier implements Command {
         controller.couriers.invalidate();
     }
 
+    /**
+     * Undoes the command, restoring the original courier assignment for the delivery.
+     * The delivery is moved back to the old courier, and the previous tour solutions are restored.
+     */
     @Override
     public void undo() {
         Courier assignedCourier = controller.getCourierForDelivery(delivery);

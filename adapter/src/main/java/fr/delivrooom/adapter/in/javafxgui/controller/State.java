@@ -72,6 +72,11 @@ public interface State {
     void requestIntersectionSelection();
 
 
+    /**
+     * Request to calculate the tour for a specific courier, or for all couriers if the provided courier is null.
+     *
+     * @param courier The courier to calculate the tour for, or null for all couriers.
+     */
     void requestCalculateTour(Courier courier);
 
     /**
@@ -106,7 +111,22 @@ public interface State {
      */
     String getStateName();
 
+    /**
+     * Saves the current tour solution to a file.
+     * The behavior may vary depending on the state.
+     *
+     * @param filename The path to the file where the tour will be saved.
+     */
     void saveTour(String filename);
 
+    /**
+     * Creates a command to load a tour solution from a file.
+     *
+     * @param sourceCityMap          The city map before loading, for undo.
+     * @param sourceDeliveriesDemand The deliveries demand before loading, for undo.
+     * @param sourceCouriers         The list of couriers before loading, for undo.
+     * @param filename               The path to the file to load the tour solution from.
+     * @return A {@link CommandResult} containing the load command or an error.
+     */
     CommandResult createLoadTourCommand(CityMap sourceCityMap, DeliveriesDemand sourceDeliveriesDemand, List<Courier> sourceCouriers, String filename);
 }

@@ -4,6 +4,10 @@ import fr.delivrooom.application.service.tourcalculator.Graphe;
 
 import java.util.*;
 
+/**
+ * A placeholder for a fourth TSP implementation.
+ * Currently, it is identical to {@link TSP3}.
+ */
 public class TSP4 extends TemplateTSP {
 
     @Override

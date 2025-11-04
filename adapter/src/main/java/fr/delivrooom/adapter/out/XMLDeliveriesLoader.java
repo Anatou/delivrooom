@@ -16,8 +16,22 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * An adapter that implements the {@link DeliveriesRepository} port.
+ * It loads delivery demand data from an XML file.
+ */
 public class XMLDeliveriesLoader implements DeliveriesRepository {
 
+    /**
+     * Parses an XML file from a given URL and constructs a {@link DeliveriesDemand} object.
+     * The delivery and pickup locations are matched with intersections from the provided {@link CityMap}.
+     *
+     * @param cityMap       The city map containing the intersections.
+     * @param deliveriesURL The URL of the XML deliveries file.
+     * @return A {@link DeliveriesDemand} object.
+     * @throws Exception if an error occurs during file parsing, or if intersections
+     *                   mentioned in the deliveries file are not found in the city map.
+     */
     @Override
     public DeliveriesDemand getDeliveriesDemand(CityMap cityMap, URL deliveriesURL) throws Exception {
         List<Delivery> deliveries = new ArrayList<>();

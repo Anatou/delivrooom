@@ -18,6 +18,12 @@ public class DeliveryTooltip extends Popover {
 
     private final Delivery delivery;
 
+    /**
+     * Constructs a DeliveryTooltip for a given delivery.
+     *
+     * @param delivery          The delivery to display information about.
+     * @param showActionButtons True to show action buttons (e.g., assign courier), false otherwise.
+     */
     public DeliveryTooltip(Delivery delivery, Boolean showActionButtons) {
         super();
         this.delivery = delivery;
@@ -111,6 +117,11 @@ public class DeliveryTooltip extends Popover {
         return grid;
     }
 
+    /**
+     * Gets the delivery associated with this tooltip.
+     *
+     * @return The {@link Delivery} object.
+     */
     public Delivery getDelivery() {
         return delivery;
     }

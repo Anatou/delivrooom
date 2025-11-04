@@ -23,6 +23,9 @@ public class DeliveriesList extends VBox {
     private final ObservableList<DeliveryListItem> deliveryItems;
     private final Label emptyLabel;
 
+    /**
+     * Constructs a DeliveriesList, initializing its components and data bindings.
+     */
     public DeliveriesList() {
         super(5);
         this.deliveryItems = FXCollections.observableArrayList();
@@ -74,6 +77,7 @@ public class DeliveriesList extends VBox {
 
     /**
      * Update the list with a new set of deliveries.
+     got     * @param deliveries The list of deliveries to display.
      */
     public void setDeliveries(List<Delivery> deliveries) {
         deliveryItems.clear();

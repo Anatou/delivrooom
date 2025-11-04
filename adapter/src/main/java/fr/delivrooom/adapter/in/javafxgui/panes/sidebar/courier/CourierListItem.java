@@ -13,23 +13,42 @@ import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.util.function.Consumer;
 
+/**
+ * A custom {@link ListCell} for displaying a {@link Courier} in a {@link javafx.scene.control.ListView}.
+ * This cell includes the courier's name and buttons for actions like deleting, calculating a tour,
+ * and toggling tour visibility on the map.
+ */
 public class CourierListItem extends ListCell<Courier> {
 
     private final Consumer<Courier> onDelete;
     private final Consumer<Courier> onCalculate;
     private final Consumer<Courier> onToggleVisibility;
 
+    /**
+     * Constructs a CourierListItem.
+     *
+     * @param onDelete           A consumer to be called when the delete button is pressed.
+     * @param onCalculate        A consumer to be called when the calculate button is pressed.
+     * @param onToggleVisibility A consumer to be called when the visibility button is pressed.
+     */
     public CourierListItem(Consumer<Courier> onDelete, Consumer<Courier> onCalculate, Consumer<Courier> onToggleVisibility) {
         this.onDelete = onDelete;
         this.onCalculate = onCalculate;
         this.onToggleVisibility = onToggleVisibility;
     }
 
+    /**
+     * Updates the cell to display the provided courier item.
+     * This method is called by the ListView when the cell needs to be rendered.
+     *
+     * @param courier The courier to display.
+     * @param empty   True if the cell is empty, false otherwise.
+     */
     @Override
     public void updateItem(Courier courier, boolean empty) {
         super.updateItem(courier, empty);
 
-        if (empty) {
+        if (empty || courier == null) {
             setText(null);
             setGraphic(null);
         } else {
