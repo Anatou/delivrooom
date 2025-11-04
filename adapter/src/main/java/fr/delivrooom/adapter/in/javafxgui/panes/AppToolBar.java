@@ -124,10 +124,10 @@ public class AppToolBar extends ToolBar {
             AppController.getController().undoCommand();
         });
         scene.getAccelerators().put(new KeyCodeCombination(KeyCode.Y, KeyCombination.SHORTCUT_DOWN), () -> {
-            AppController.getController().undoCommand();
+            AppController.getController().redoCommand();
         });
         scene.getAccelerators().put(new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN), () -> {
-            AppController.getController().undoCommand();
+            AppController.getController().redoCommand();
         });
     }
 
