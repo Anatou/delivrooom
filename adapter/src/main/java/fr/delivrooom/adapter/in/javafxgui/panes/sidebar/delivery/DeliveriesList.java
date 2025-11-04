@@ -3,6 +3,7 @@ package fr.delivrooom.adapter.in.javafxgui.panes.sidebar.delivery;
 import fr.delivrooom.adapter.in.javafxgui.controller.AppController;
 import fr.delivrooom.application.model.DeliveriesDemand;
 import fr.delivrooom.application.model.Delivery;
+import javafx.beans.InvalidationListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -58,14 +59,17 @@ public class DeliveriesList extends VBox {
             }
         });
 
-        AppController.getController().deliveriesDemandProperty().addListener(o -> {
-            DeliveriesDemand deliveries = AppController.getController().deliveriesDemandProperty().getValue();
-            if (deliveries != null) {
-                setDeliveries(deliveries.deliveries());
-            } else {
-                setDeliveries(List.of());
-            }
-        });
+        AppController.getController().deliveriesDemandProperty().addListener(o -> update());
+        AppController.getController().couriersProperty().addListener((InvalidationListener) o -> update());
+    }
+
+    private void update() {
+        DeliveriesDemand deliveries = AppController.getController().deliveriesDemandProperty().getValue();
+        if (deliveries != null) {
+            setDeliveries(deliveries.deliveries());
+        } else {
+            setDeliveries(List.of());
+        }
     }
 
     /**
