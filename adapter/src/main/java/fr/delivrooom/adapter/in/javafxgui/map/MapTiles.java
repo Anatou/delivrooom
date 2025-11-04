@@ -35,10 +35,6 @@ public class MapTiles extends Canvas {
     public MapTiles() {
         ZOOM_SCALE_FACTOR = JavaFXApp.getConfigPropertyUseCase().getDoubleProperty("map.zoom.scaleFactor", 1.0);
         loadMemeFiles();
-
-        AppController.getController().memeModeProperty().addListener((obs, oldVal, newVal) -> {
-            tileCache.clear();
-        });
     }
 
     /**
