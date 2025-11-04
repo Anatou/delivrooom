@@ -10,24 +10,38 @@ public class CommandAddCourier implements Command {
 
     private final AppController controller;
     private final Courier courier;
+    private int courierIndex;
 
     public CommandAddCourier(AppController controller, Courier courier) {
         this.controller = controller;
         this.courier = courier;
+
+        // In case of a ReverseCommand(this), we store the courier index
+        courierIndex = controller.couriers.indexOf(courier);
     }
 
     @Override
     public void execute() {
-        controller.doAddCourier(courier);
+        if (courierIndex != -1) {
+            controller.couriers.add(courierIndex, courier);
+        } else {
+            controller.couriers.add(courier);
+        }
     }
 
     @Override
     public void undo() {
-        controller.doRemoveCourier(courier);
+        courierIndex = controller.couriers.indexOf(courier);
+        controller.couriers.remove(courier);
     }
 
     @Override
-    public String toString() {
+    public String getStringDescription() {
         return "Add Courier " + courier.getId();
+    }
+
+    @Override
+    public String getStringReversedDescription() {
+        return "Remove Courier " + courier.getId();
     }
 }

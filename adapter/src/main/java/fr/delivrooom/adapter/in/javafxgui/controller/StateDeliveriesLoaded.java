@@ -65,7 +65,7 @@ public record StateDeliveriesLoaded(AppController controller) implements State {
 
     @Override
     public CommandResult createRemoveCourierCommand(Courier courier) {
-        return CommandResult.success(new CommandRemoveCourier(controller, courier));
+        return CommandResult.success(new ReverseCommand(new CommandAddCourier(controller, courier)));
     }
 
     @Override
