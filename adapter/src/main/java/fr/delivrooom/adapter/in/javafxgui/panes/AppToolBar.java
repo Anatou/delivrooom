@@ -92,7 +92,7 @@ public class AppToolBar extends ToolBar {
         if (undoName == null) {
             undoBtn.setTooltip(getInstantTooltip("Nothing to Undo"));
         } else {
-            undoBtn.setTooltip(getInstantTooltip("Undo (Ctrl+Z):" + undoName));
+            undoBtn.setTooltip(getInstantTooltip("Undo (Ctrl+Z): " + undoName));
         }
         String redoName = controller.getNextRedoCommandName();
         if (redoName == null) {
