@@ -1,7 +1,6 @@
 package fr.delivrooom.application.model;
 
-import java.io.Serial;
-import java.io.Serializable;
+import java.io.*;
 import java.util.List;
 
 /**

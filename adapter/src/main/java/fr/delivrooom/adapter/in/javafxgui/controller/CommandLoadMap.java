@@ -45,12 +45,7 @@ public class CommandLoadMap implements Command {
     }
 
     @Override
-    public String getStringDescription() {
+    public String toString() {
         return "Load map " + mapUrl.toString();
-    }
-
-    @Override
-    public String getStringReversedDescription() {
-        return "Unload map " + mapUrl.toString();
     }
 }
