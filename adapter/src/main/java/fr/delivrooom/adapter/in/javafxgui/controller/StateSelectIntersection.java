@@ -28,7 +28,7 @@ public record StateSelectIntersection(AppController controller) implements State
 
     @Override
     public CommandResult createRemoveDeliveryCommand(Delivery delivery) {
-        return CommandResult.success(new CommandRemoveDelivery(controller, delivery));
+        return CommandResult.success(new ReverseCommand(new CommandAddDelivery(controller, delivery)));
     }
 
     @Override

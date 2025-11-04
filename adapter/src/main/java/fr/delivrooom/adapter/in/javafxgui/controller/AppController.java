@@ -61,15 +61,15 @@ public class AppController {
     private final CommandManager commandManager = new CommandManager();
     private final InvalidableReadOnlyObjectWrapper<State> currentState = new InvalidableReadOnlyObjectWrapper<>(new StateInitial(this));
     // Loaded data
-    private final InvalidableReadOnlyObjectWrapper<CityMap> cityMap = new InvalidableReadOnlyObjectWrapper<>(null);
-    private final InvalidableReadOnlyObjectWrapper<DeliveriesDemand> deliveriesDemand = new InvalidableReadOnlyObjectWrapper<>(null);
-    private final InvalidableReadOnlyObjectWrapper<CouriersTourSolution> tourSolution = new InvalidableReadOnlyObjectWrapper<>(null);
-    private final InvalidableReadOnlyListWrapper<Courier> couriers = new InvalidableReadOnlyListWrapper<>(FXCollections.observableArrayList());
+    protected final InvalidableReadOnlyObjectWrapper<CityMap> cityMap = new InvalidableReadOnlyObjectWrapper<>(null);
+    protected final InvalidableReadOnlyObjectWrapper<DeliveriesDemand> deliveriesDemand = new InvalidableReadOnlyObjectWrapper<>(null);
+    protected final InvalidableReadOnlyObjectWrapper<CouriersTourSolution> tourSolution = new InvalidableReadOnlyObjectWrapper<>(null);
+    protected final InvalidableReadOnlyListWrapper<Courier> couriers = new InvalidableReadOnlyListWrapper<>(FXCollections.observableArrayList());
     // 0 = not running, 0 < x < 1 = running, 1 = done
-    private final DoubleProperty tourCalculationProgress = new SimpleDoubleProperty(0);
-    private final InvalidableReadOnlyObjectWrapper<Intersection> selectedIntersection = new InvalidableReadOnlyObjectWrapper<>(null);
-    private final BooleanProperty memeModeProperty = new SimpleBooleanProperty(false);
-    private final BooleanProperty tourCalculatedProperty = new SimpleBooleanProperty(false);
+    protected final DoubleProperty tourCalculationProgress = new SimpleDoubleProperty(0);
+    protected final InvalidableReadOnlyObjectWrapper<Intersection> selectedIntersection = new InvalidableReadOnlyObjectWrapper<>(null);
+    protected final BooleanProperty memeModeProperty = new SimpleBooleanProperty(false);
+    protected final BooleanProperty tourCalculatedProperty = new SimpleBooleanProperty(false);
 
     private AppController() {
     }
