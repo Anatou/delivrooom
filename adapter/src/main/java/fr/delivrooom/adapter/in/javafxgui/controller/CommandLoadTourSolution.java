@@ -3,7 +3,6 @@ package fr.delivrooom.adapter.in.javafxgui.controller;
 import fr.delivrooom.application.model.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 public class CommandLoadTourSolution implements Command{
@@ -56,4 +55,11 @@ public class CommandLoadTourSolution implements Command{
     public void redo() {
         execute();
     }
+
+    @Override
+    public String toString() {
+        return "Load Solution from file " + filename;
+    }
+
+
 }
