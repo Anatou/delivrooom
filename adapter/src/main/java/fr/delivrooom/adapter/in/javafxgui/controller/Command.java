@@ -7,7 +7,7 @@ public interface Command {
 
     void undo();
 
-    String toString();
+    String getStringDescription();
 
-    String reverseToString();
+    String getStringReversedDescription();
 }

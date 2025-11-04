@@ -66,10 +66,18 @@ public class CommandAssignCourier implements Command {
     }
 
     @Override
-    public String toString() {
+    public String getStringDescription() {
         if (newCourier == null) {
-            return "Remove Courier assignment for " + delivery.takeoutIntersection().getId() + " > " + delivery.deliveryIntersection().getId();
+            return "Unassign Courier from " + delivery.takeoutIntersection().getId() + " > " + delivery.deliveryIntersection().getId();
         }
         return "Assign Courier " + newCourier.getId() + " to " + delivery.takeoutIntersection().getId() + " > " + delivery.deliveryIntersection().getId();
+    }
+
+    @Override
+    public String getStringReversedDescription() {
+        if (oldCourier == null) {
+            return "Unassign Courier from " + delivery.takeoutIntersection().getId() + " > " + delivery.deliveryIntersection().getId();
+        }
+        return "Assign Courier " + oldCourier.getId() + " to " + delivery.takeoutIntersection().getId() + " > " + delivery.deliveryIntersection().getId();
     }
 }

@@ -57,8 +57,13 @@ public class CommandAddDelivery implements Command {
     }
 
     @Override
-    public String toString() {
+    public String getStringDescription() {
         return "Add Delivery " + delivery.takeoutIntersection().getId() + " > " + delivery.deliveryIntersection().getId();
+    }
+
+    @Override
+    public String getStringReversedDescription() {
+        return "Remove Delivery " + delivery.takeoutIntersection().getId() + " > " + delivery.deliveryIntersection().getId();
     }
 }
 

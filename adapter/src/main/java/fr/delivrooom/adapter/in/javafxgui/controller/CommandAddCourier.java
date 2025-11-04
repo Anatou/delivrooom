@@ -36,7 +36,12 @@ public class CommandAddCourier implements Command {
     }
 
     @Override
-    public String toString() {
+    public String getStringDescription() {
         return "Add Courier " + courier.getId();
+    }
+
+    @Override
+    public String getStringReversedDescription() {
+        return "Remove Courier " + courier.getId();
     }
 }
