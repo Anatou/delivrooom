@@ -125,9 +125,14 @@ public class AppToolBar extends ToolBar {
         fileChooser.getExtensionFilters().add(
                 new FileChooser.ExtensionFilter("Fichiers Vrooom", "*.vrooom")
         );
+        fileChooser.setInitialFileName("default.vrooom");
 
         File file = fileChooser.showSaveDialog(stage);
         if (file != null) {
+            String filePath = file.getAbsolutePath();
+            if (!filePath.endsWith(".vrooom")) {
+                file = new File(filePath + ".vrooom");
+            }
             System.out.println("Fichier sélectionné : " + file.getAbsolutePath());
             AppController.getController().requestSaveTourFile(file);
         }

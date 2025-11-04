@@ -102,11 +102,11 @@ public class DeliveryCreationSection extends VBox {
                 if (requestedIntersectionIsTakeout) {
                     this.takeout = newIntersection;
                     buttonTakeout.getStyleClass().add("success");
-                    buttonTakeout.setText("Select Another TakeOut Intersection");
+                    buttonTakeout.setText("Change TakeOut Intersection");
                 } else {
                     this.delivery = newIntersection;
                     buttonDelivery.getStyleClass().add("success");
-                    buttonDelivery.setText("Select Another Delivery Intersection");
+                    buttonDelivery.setText("Change Delivery Intersection");
                 }
             }
         });
