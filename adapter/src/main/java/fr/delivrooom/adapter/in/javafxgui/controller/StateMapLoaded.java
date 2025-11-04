@@ -41,20 +41,12 @@ public record StateMapLoaded(AppController controller) implements State {
 
     @Override
     public void requestIntersectionSelection() {
-        controller.showError("No map loaded",
-                "Please load a map file first before selecting an intersection.");
+        controller.showError("No map loaded", "Please load a map file first before selecting an intersection.");
     }
 
     @Override
-    public CommandResult createCalculateTourCommand() {
-        return CommandResult.error("No deliveries loaded",
-                "Please load deliveries first before calculating the tour.");
-    }
-
-    @Override
-    public CommandResult createCalculateCourierTourCommand(Courier courier) {
-        return CommandResult.error("No deliveries loaded",
-                "Please load deliveries first before calculating a courier tour.");
+    public void requestCalculateTour(Courier courier) {
+        controller.showError("Cannot calculate tour", "Please load deliveries first before calculating the tour.");
     }
 
     @Override
@@ -83,6 +75,6 @@ public record StateMapLoaded(AppController controller) implements State {
     }
 
     public CommandResult createLoadTourCommand(CityMap sourceCityMap, DeliveriesDemand sourceDeliveriesDemand, List<Courier> sourceCouriers, String filename) {
-        return CommandResult.success( new CommandLoadTourSolution(controller, this, sourceCityMap, sourceDeliveriesDemand, sourceCouriers, filename) );
+        return CommandResult.success(new CommandLoadTourSolution(controller, this, sourceCityMap, sourceDeliveriesDemand, sourceCouriers, filename));
     }
 }

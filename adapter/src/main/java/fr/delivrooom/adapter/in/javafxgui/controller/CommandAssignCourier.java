@@ -3,6 +3,7 @@ package fr.delivrooom.adapter.in.javafxgui.controller;
 import fr.delivrooom.application.model.Courier;
 import fr.delivrooom.application.model.Delivery;
 import fr.delivrooom.application.model.Intersection;
+import fr.delivrooom.application.model.TourSolution;
 
 /**
  * Command to assign a courier to a delivery.
@@ -14,15 +15,26 @@ public class CommandAssignCourier implements Command {
 
     private final Delivery delivery;
     private final Intersection store;
+
     private final Courier newCourier;
+    private TourSolution newCourierPreviousTourSolution = null;
+
     private final Courier oldCourier;
+    private TourSolution oldCourierPreviousTourSolution = null;
 
     public CommandAssignCourier(AppController controller, Delivery delivery, Intersection store, Courier newCourier) {
         this.controller = controller;
         this.store = store;
         this.delivery = delivery;
+
         this.oldCourier = controller.getCourierForDelivery(delivery);
+        if (oldCourier != null) {
+            this.oldCourierPreviousTourSolution = oldCourier.getTourSolution();
+        }
         this.newCourier = newCourier;
+        if (newCourier != null) {
+            this.newCourierPreviousTourSolution = newCourier.getTourSolution();
+        }
     }
 
     @Override
@@ -52,14 +64,17 @@ public class CommandAssignCourier implements Command {
             if (!assignedCourier.equals(oldCourier)) {
                 assignedCourier.removeDelivery(delivery);
                 assignedCourier.deleteTourSolution();
+                if (assignedCourier.equals(newCourier)) {
+                    newCourier.setTourSolution(newCourierPreviousTourSolution);
+                }
                 if (oldCourier != null) {
                     oldCourier.addDelivery(delivery, store);
-                    oldCourier.deleteTourSolution();
+                    oldCourier.setTourSolution(oldCourierPreviousTourSolution);
                 }
             }
         } else if (oldCourier != null) {
             oldCourier.addDelivery(delivery, store);
-            oldCourier.deleteTourSolution();
+            oldCourier.setTourSolution(oldCourierPreviousTourSolution);
         }
         controller.deliveriesDemand.invalidate();
         controller.couriers.invalidate();

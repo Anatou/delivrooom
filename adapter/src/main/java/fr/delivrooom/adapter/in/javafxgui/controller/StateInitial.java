@@ -47,15 +47,8 @@ public record StateInitial(AppController controller) implements State {
     }
 
     @Override
-    public CommandResult createCalculateTourCommand() {
-        return CommandResult.error("Cannot calculate tour",
-                "No map or deliveries loaded.");
-    }
-
-    @Override
-    public CommandResult createCalculateCourierTourCommand(Courier courier) {
-        return CommandResult.error("Cannot calculate tour",
-                "No map or deliveries loaded.");
+    public void requestCalculateTour(Courier courier) {
+        controller.showError("Cannot calculate tour", "No map or deliveries loaded.");
     }
 
     @Override
@@ -85,6 +78,6 @@ public record StateInitial(AppController controller) implements State {
     }
 
     public CommandResult createLoadTourCommand(CityMap sourceCityMap, DeliveriesDemand sourceDeliveriesDemand, List<Courier> sourceCouriers, String filename) {
-        return CommandResult.success( new CommandLoadTourSolution(controller, this, sourceCityMap, sourceDeliveriesDemand, sourceCouriers, filename) );
+        return CommandResult.success(new CommandLoadTourSolution(controller, this, sourceCityMap, sourceDeliveriesDemand, sourceCouriers, filename));
     }
 }
