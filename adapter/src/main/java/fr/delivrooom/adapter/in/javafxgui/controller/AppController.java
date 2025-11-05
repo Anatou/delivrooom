@@ -302,17 +302,6 @@ public class AppController {
         requestCommand(result);
     }
 
-    /**
-     * Load a map file using the application service.
-     * Called by commands.
-     *
-     * @param url The map url to load
-     */
-    protected void doLoadMapFile(URL url) throws Exception {
-        this.cityMap.set(JavaFXApp.guiUseCase().getCityMap(url));
-        JavaFXApp.getCalculateTourUseCase().provideCityMap(cityMap.get());
-        deleteDeliveryDemandOfCourier();
-    }
 
     /**
      * Restore a previous city map state.
@@ -325,17 +314,6 @@ public class AppController {
         if (cityMap != null) {
             JavaFXApp.getCalculateTourUseCase().provideCityMap(cityMap);
         }
-    }
-
-    /**
-     * Load a deliveries file using the application service.
-     * Called by commands.
-     *
-     * @param url The deliveries file to load
-     */
-    protected void doLoadDeliveriesFile(URL url) throws Exception {
-        this.deliveriesDemand.set(JavaFXApp.guiUseCase().getDeliveriesDemand(cityMap.get(), url));
-        deleteDeliveryDemandOfCourier();
     }
 
     protected void doRestoreCouriers(List<Courier> courierList) {
@@ -672,17 +650,6 @@ public class AppController {
             commandManager.executeCommand(result.command());
         } else {
             showError(result.errorTitle(), result.errorMessage());
-        }
-    }
-
-    private void deleteDeliveryDemandOfCourier() {
-        for (Courier courier : couriers) {
-            if (courier.getDeliveriesDemand() != null) {
-                courier.getDeliveriesDemand().deliveries().clear();
-            }
-            if (courier.getTourSolution() != null) {
-                courier.deleteTourSolution();
-            }
         }
     }
 

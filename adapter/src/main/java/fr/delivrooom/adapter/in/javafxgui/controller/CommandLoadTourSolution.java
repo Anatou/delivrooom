@@ -14,9 +14,12 @@ public class CommandLoadTourSolution implements Command {
 
     private final AppController controller;
     private final State sourceState;
+
     private final CityMap sourceCityMap;
     private final DeliveriesDemand sourceDeliveriesDemand;
+
     private final List<Courier> sourceCouriers;
+
     private final String filename;
 
     /**
