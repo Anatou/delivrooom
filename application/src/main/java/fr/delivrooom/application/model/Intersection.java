@@ -125,7 +125,7 @@ public class Intersection implements Serializable {
             return "N/A";
         }
         int totalMinutes = (int) (getTimeArrivedMinutes());
-        int hours = 17 + (totalMinutes / 60);
+        int hours = 8 + (totalMinutes / 60);
         int minutes = totalMinutes % 60;
         return String.format("%02d:%02d", hours, minutes);
     }
