@@ -162,7 +162,7 @@ public class DeliveryCreationSection extends VBox {
                             buttonTakeout.setText("Select Pickup Intersection");
                             buttonTakeout.getStyleClass().removeAll("success","accent");
                         }else{
-                            System.out.println("selected intersection pickup : " + newIntersection.getId());
+                            //System.out.println("selected intersection pickup : " + newIntersection.getId());
                             this.takeout = newIntersection;
                             buttonTakeout.getStyleClass().add("success");
                             buttonTakeout.setText("Change Pickup Intersection");
@@ -179,7 +179,7 @@ public class DeliveryCreationSection extends VBox {
                             buttonDelivery.setText("Select Deposit Intersection");
                             buttonDelivery.getStyleClass().removeAll("success","accent");
                         }else {
-                            System.out.println("selected intersection deposit : " + newIntersection.getId());
+                            //System.out.println("selected intersection deposit : " + newIntersection.getId());
                             this.delivery = newIntersection;
                             buttonDelivery.getStyleClass().add("success");
                             buttonDelivery.setText("Change Deposit Intersection");

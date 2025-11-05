@@ -152,7 +152,7 @@ public class AppToolBar extends ToolBar {
             if (!filePath.endsWith(".vrooom")) {
                 file = new File(filePath + ".vrooom");
             }
-            System.out.println("Fichier sélectionné : " + file.getAbsolutePath());
+            //System.out.println("Fichier sélectionné : " + file.getAbsolutePath());
             AppController.getController().requestSaveTourFile(file);
         }
     }
@@ -166,7 +166,7 @@ public class AppToolBar extends ToolBar {
 
         File file = fileChooser.showOpenDialog(stage);
         if (file != null) {
-            System.out.println("Fichier sélectionné : " + file.getAbsolutePath());
+            //System.out.println("Fichier sélectionné : " + file.getAbsolutePath());
             AppController.getController().requestLoadTourSolution(file);
         }
     }

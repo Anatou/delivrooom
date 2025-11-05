@@ -23,7 +23,7 @@ public class TourSolutionSerialiserIO {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filename))) {
             oos.writeObject(serial);
         }
-        System.out.println("Successfully dumped Serialisation object");
+        //System.out.println("Successfully dumped Serialisation object");
     }
 
     /**

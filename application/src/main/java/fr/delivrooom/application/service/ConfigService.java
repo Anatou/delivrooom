@@ -62,7 +62,7 @@ public class ConfigService implements GetConfigPropertyUseCase {
         try {
             return Integer.parseInt(value);
         } catch (NumberFormatException e) {
-            System.err.println("Invalid integer value for property " + key + ": " + value);
+            //System.err.println("Invalid integer value for property " + key + ": " + value);
             return defaultValue;
         }
     }
@@ -83,7 +83,7 @@ public class ConfigService implements GetConfigPropertyUseCase {
         try {
             return Double.parseDouble(value);
         } catch (NumberFormatException e) {
-            System.err.println("Invalid double value for property " + key + ": " + value);
+            //System.err.println("Invalid double value for property " + key + ": " + value);
             return defaultValue;
         }
     }

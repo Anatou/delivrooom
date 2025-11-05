@@ -77,7 +77,7 @@ public class MapTiles extends Canvas {
             future.cancel(true);
         }
         pendingTiles.clear();
-        System.out.println("Tile cache cleared");
+        //System.out.println("Tile cache cleared");
     }
 
     /**
@@ -142,9 +142,9 @@ public class MapTiles extends Canvas {
                 if (url == null) {
                     String urlStr = MAPTILER_URL + tileKey + ".jpg?key=" + MAPTILER_API_KEY;
                     url = new URI(urlStr).toURL();
-                    System.out.println("Downloading tile " + tileKey);
+                    //System.out.println("Downloading tile " + tileKey);
                 } else {
-                    System.out.println("Loading tile " + tileKey + " from file cache");
+                    //System.out.println("Loading tile " + tileKey + " from file cache");
                 }
 
                 // Load image in a background thread
@@ -156,7 +156,7 @@ public class MapTiles extends Canvas {
 
                 return image;
             } catch (IOException | URISyntaxException e) {
-                System.err.println("Failed to load tile " + tileKey + ": " + e.getMessage());
+                //System.err.println("Failed to load tile " + tileKey + ": " + e.getMessage());
                 return null;
             }
         });
@@ -178,7 +178,7 @@ public class MapTiles extends Canvas {
     public void cancelTilesRequestsNotIn(ArrayList<String> requestedTiles) {
         for (String tileKey : new ArrayList<>(pendingTiles.keySet())) {
             if (!requestedTiles.contains(tileKey)) {
-                System.out.println("Cancelling tile request " + tileKey);
+                //System.out.println("Cancelling tile request " + tileKey);
                 pendingTiles.get(tileKey).cancel(true);
                 pendingTiles.remove(tileKey);
             }

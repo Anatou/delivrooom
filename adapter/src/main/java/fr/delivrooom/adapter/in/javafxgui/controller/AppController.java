@@ -280,7 +280,7 @@ public class AppController {
         }
         try {
             getState().saveTour(file.getAbsolutePath());
-            System.out.println("Tour saved to " + file.getAbsolutePath());
+            //System.out.println("Tour saved to " + file.getAbsolutePath());
         } catch (Exception e) {
             showError("Save Error", "Failed to save the tour: " + e.getMessage());
             e.printStackTrace();
@@ -396,7 +396,7 @@ public class AppController {
     }
 
     private void calculateTourForCouriers(List<Courier> couriers, boolean singleCourier) {
-        System.out.println("Requesting calculation of tour for " + couriers.size() + " courier(s)");
+        //System.out.println("Requesting calculation of tour for " + couriers.size() + " courier(s)");
         if (tourCalculationProgress.get() > 0 && tourCalculationProgress.get() < 1) {
             showError("Cannot calculate tour", "Already running");
             return;
@@ -411,7 +411,7 @@ public class AppController {
                 HashMap<Courier, TourSolution> courierTourMap = new HashMap<>();
                 for (Courier courier : couriers) {
                     if (courier.getDeliveriesDemand() != null && !courier.getDeliveriesDemand().deliveries().isEmpty()) {
-                        System.out.println("Calculating tour for courier " + courier.getId());
+                        //System.out.println("Calculating tour for courier " + courier.getId());
 
                         try {
                             if (courier.getTourSolution() == null) {
