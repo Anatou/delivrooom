@@ -20,4 +20,5 @@ public record GetNameService(NameRepository nameRepository) implements GetNameUs
     public String getName() {
         return nameRepository.getName();
     }
+
 }
