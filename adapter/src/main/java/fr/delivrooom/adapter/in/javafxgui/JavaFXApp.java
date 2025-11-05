@@ -7,7 +7,10 @@ import fr.delivrooom.application.port.in.GetConfigPropertyUseCase;
 import fr.delivrooom.application.port.in.GetNameUseCase;
 import fr.delivrooom.application.port.in.GuiUseCase;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
+
+import java.util.Objects;
 
 /**
  * Main entry point for the JavaFX application.
@@ -84,7 +87,7 @@ public class JavaFXApp extends javafx.application.Application {
         stage.setTitle("Delivrooom");
         stage.setScene(new Scene(mainPane, 1300, 750));
         mainPane.setStageAndScene(stage, stage.getScene());
-        //stage.getIcons().add(new Image(Objects.requireNonNull(JavaFXApp.class.getResourceAsStream("/assets/logo_mini.png"))));
+        stage.getIcons().add(new Image(Objects.requireNonNull(JavaFXApp.class.getResourceAsStream("/assets/logo_mini.png"))));
         stage.show();
     }
 }
