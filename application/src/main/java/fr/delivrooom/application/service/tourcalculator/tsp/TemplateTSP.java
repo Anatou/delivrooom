@@ -78,7 +78,7 @@ public abstract class TemplateTSP implements TSP {
 
         if (System.currentTimeMillis() - tpsDebut > tpsLimite) {
             System.out.println("Timeout reached after " + tpsLimite + " ms and " + calls + " calls.");
-            return; //TODO: throw a timeout exception so we know whether or not we have a perfect solution
+            return;
         }
         if (reachableNodes.isEmpty()) { // every delivery point has been visited
             ++consideredPossibilities;
@@ -101,7 +101,7 @@ public abstract class TemplateTSP implements TSP {
                     Long deliveryPoint = pickupToDelivery.get(nextNode);
                     reachableNodes.add(deliveryPoint);
                 }
-                branchAndBound((Long) nextNode, reachableNodes, visitedNodes, visitedCost + (float) g.getCout(currentNode, nextNode));
+                branchAndBound(nextNode, reachableNodes, visitedNodes, visitedCost + g.getCout(currentNode, nextNode));
                 visitedNodes.remove(nextNode);
                 reachableNodes.add(nextNode);
                 if (pickupToDelivery.containsKey(nextNode)) {
