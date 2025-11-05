@@ -69,6 +69,7 @@ public class CommandAddDelivery implements Command {
             controller.invalidateCouriers();
         }
         controller.deliveriesDemand.get().deliveries().remove(delivery);
+        controller.deliveriesDemand.invalidate();
     }
 
     @Override
