@@ -39,7 +39,7 @@ public class CommandCalculateTour implements Command {
         previousTourSolutions.clear();
         for (Courier courier : controller.couriersProperty().getValue()) {
             previousTourSolutions.put(courier, courier.getTourSolution());
-            if (!singleCourier) courier.deleteTourSolution();
+            //if (!singleCourier) courier.deleteTourSolution();
         }
         for (Map.Entry<Courier, TourSolution> entry : solutions.entrySet()) {
             entry.getKey().setTourSolution(entry.getValue());
@@ -52,11 +52,11 @@ public class CommandCalculateTour implements Command {
      */
     @Override
     public void undo() {
-        if (!singleCourier) {
-            for (Courier courier : controller.couriersProperty().getValue()) {
-                courier.deleteTourSolution();
-            }
-        }
+//        if (!singleCourier) {
+//            for (Courier courier : controller.couriersProperty().getValue()) {
+//                courier.deleteTourSolution();
+//            }
+//        }
         for (Map.Entry<Courier, TourSolution> entry : previousTourSolutions.entrySet()) {
             entry.getKey().setTourSolution(entry.getValue());
         }
