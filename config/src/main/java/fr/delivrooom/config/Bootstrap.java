@@ -27,7 +27,7 @@ public class Bootstrap {
             if (configInputStream == null) {
                 throw new RuntimeException("config.properties file not found in resources. Please create a copy of config.properties and customize it.");
             }
-            System.out.println("Loading configuration from config.properties...");
+            //System.out.println("Loading configuration from config.properties...");
             configRepository = new ConfigLoader(configInputStream);
         } catch (IOException ex) {
             throw new RuntimeException("Failed to load configuration", ex);
