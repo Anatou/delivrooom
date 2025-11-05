@@ -39,6 +39,12 @@ public class TourCalculatorService implements CalculateTourUseCase {
         this.hasMapChangedSinceLastCompute = false;
     }
 
+    /**
+     * Provides the city map used to build the working graph for shortest path computations.
+     * Marks the current map as changed to trigger recomputation if needed.
+     *
+     * @param m the {@link CityMap} to be used by the calculator; must not be {@code null}
+     */
     @Override
     public void provideCityMap(CityMap m) {
         this.graph = new CityGraph(m);
@@ -46,6 +52,16 @@ public class TourCalculatorService implements CalculateTourUseCase {
 
     }
 
+    /**
+     * Indicates whether a previously computed tour must be recomputed.
+     * Returns true if:
+     * - no tour was computed yet and the demand is non-empty, or
+     * - the map has changed since the last computation, or
+     * - the provided demand differs from the last computed one.
+     *
+     * @param demand the new deliveries demand to compare against the last computed one
+     * @return {@code true} if a recomputation is necessary; {@code false} otherwise
+     */
     @Override
     public boolean doesCalculatedTourNeedsToBeChanged(DeliveriesDemand demand) {
         // checks if the demand is different from the last calculated one or if no tour has been calculated yet
@@ -56,11 +72,28 @@ public class TourCalculatorService implements CalculateTourUseCase {
         }
     }
 
+    /**
+     * Returns the last computed optimal tour solution, or {@code null} if none was computed yet.
+     *
+     * @return the {@link TourSolution}, possibly {@code null}
+     */
     @Override
     public TourSolution getOptimalTour() {
         return tourSolution;
     }
 
+    /**
+     * Computes the optimal tour for the given demand.
+     * Steps:
+     * - Builds the reduced graph of shortest paths between all required points (store, pickups, deliveries).
+     * - Solves the TSP on the reduced graph (dynamic programming or heuristic).
+     * - Reconstructs the full tour with paths and timing information.
+     * The GUI can be notified of progress through {@code notifyTSPProgressToGui}.
+     *
+     * @param demand        the deliveries demand to optimize; must not be {@code null}
+     * @param useTimeAsCost if {@code true}, use travel time (including service times) as cost; otherwise use distance
+     * @throws RuntimeException if the base graph is missing or not connected for some targets
+     */
     @Override
     public void findOptimalTour(DeliveriesDemand demand, boolean useTimeAsCost) throws RuntimeException {
         // first : find all shortest paths between any pair of nodes in the graph
@@ -168,11 +201,19 @@ public class TourCalculatorService implements CalculateTourUseCase {
             intersection.setTimeArrivedSeconds(totalTime);
 
         }
-
-        // TODO : faire un log pour vérifier que l'ordre est cohérent
         tourSolution = new TourSolution(tourPaths, tspSolutionCost, solutionList);
     }
 
+    /**
+     * Computes shortest paths from a start intersection to a set of target intersections.
+     * Delegates to a targeted Dijkstra search with either distance or time as the optimization criterion.
+     *
+     * @param startIntersectionId the source intersection id
+     * @param targets             the set of target intersection ids to reach
+     * @param useTimeAsCost       if {@code true}, optimize for time; otherwise optimize for distance
+     * @return a map targetId \-> {@link Path} describing the shortest path to each target
+     * @throws RuntimeException if the graph is not connected for some target
+     */
     protected HashMap<Long, Path> findShortestPaths(long startIntersectionId , HashSet<Long> targets, boolean useTimeAsCost) throws RuntimeException {
         /* find the shortest paths from startIntersectionId to all targets
          * using Dijkstra's algorithm (for now)
@@ -185,6 +226,16 @@ public class TourCalculatorService implements CalculateTourUseCase {
         return targetedDijkstraSearch(startIntersectionId, targets, useTimeAsCost);
     }
 
+    /**
+     * Runs a targeted Dijkstra search from a start node to a set of targets.
+     * Can optimize either distance or time (including pickup/delivery service durations).
+     *
+     * @param startIntersectionId the source intersection id
+     * @param targets             the set of target intersection ids to reach
+     * @param useTime             if {@code true}, optimize for time; otherwise optimize for distance
+     * @return a map targetId \-> {@link Path} describing the shortest path to each target
+     * @throws RuntimeException if the graph is not connected for some target
+     */
     protected HashMap<Long, Path> targetedDijkstraSearch(long startIntersectionId, HashSet<Long> targets, boolean useTime) throws RuntimeException {
         int n = graph.getNbSommets();
         HashMap<Long, Float> distances = new HashMap<>();
@@ -288,6 +339,17 @@ public class TourCalculatorService implements CalculateTourUseCase {
 
         return pathToTarget;
     }
+
+    /**
+     * Runs a time-optimized targeted Dijkstra search from a start node to a set of targets.
+     * Travel time is computed from distance assuming ~15 km/h (4.17 m/s) and includes
+     * pickup/delivery service durations when visiting corresponding nodes.
+     *
+     * @param startIntersectionId the source intersection id
+     * @param targets             the set of target intersection ids to reach
+     * @return a map targetId \-> {@link Path} describing the fastest path to each target
+     * @throws RuntimeException if the graph is not connected for some target
+     */
     protected HashMap<Long, Path> targetedDijkstraSearchTime(long startIntersectionId, HashSet<Long> targets) throws RuntimeException {
         //
         int n = graph.getNbSommets();
@@ -295,7 +357,7 @@ public class TourCalculatorService implements CalculateTourUseCase {
         HashMap<Long, Float> time = new HashMap<Long, Float>();
 
         HashMap<Long, Long> predecessors = new HashMap<Long, Long>();
-        PriorityQueue<Long> queue = new PriorityQueue<Long>(Comparator.comparing(distances::get)); // might be unsafe, TODO: test
+        PriorityQueue<Long> queue = new PriorityQueue<Long>(Comparator.comparing(distances::get));
         HashSet<Long> settled = new HashSet<Long>();
         int targetsRemaining = targets.size();
 
@@ -346,7 +408,6 @@ public class TourCalculatorService implements CalculateTourUseCase {
             throw new RuntimeException("Input graph is not connex, no path could be found for at least a target");
         }
 
-        // TODO : since the predecessors are stored in a hashmap, they are not ordered which then leads to paths being constructed in wrong order
         // build Path objects to each target from predecessors
         HashMap<Long, Path> pathToTarget = new HashMap<>();
 
@@ -385,4 +446,3 @@ public class TourCalculatorService implements CalculateTourUseCase {
 
 
 }
-

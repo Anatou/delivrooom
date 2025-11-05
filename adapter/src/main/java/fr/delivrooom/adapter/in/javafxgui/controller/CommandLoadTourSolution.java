@@ -66,18 +66,10 @@ public class CommandLoadTourSolution implements Command {
      */
     @Override
     public void undo() {
-
         controller.doRestoreCityMap(sourceCityMap);
         controller.doRestoreDeliveriesDemand(sourceDeliveriesDemand);
         controller.couriersProperty().setAll(sourceCouriers);
         controller.transitionToState(sourceState);
-    }
-
-    /**
-     * Re-executes the command.
-     */
-    public void redo() {
-        execute();
     }
 
     @Override

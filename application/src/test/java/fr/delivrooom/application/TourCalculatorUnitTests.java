@@ -1,3 +1,4 @@
+// language: java
 package fr.delivrooom.application;
 
 import fr.delivrooom.application.model.*;
@@ -10,8 +11,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * Mock implementation of {@link NotifyTSPProgressToGui} for unit testing.
+ * Verifies that the reported TSP progress percentage is strictly increasing.
+ */
 class NotifyTSPProgressMock implements NotifyTSPProgressToGui {
     Double lastPercentage;
+
+    /**
+     * Records the latest progress percentage and asserts it is strictly increasing.
+     *
+     * @param percentage the current TSP computation progress in \[0.0, 100.0]
+     */
     @Override
     public void notifyTSPProgressToGui(double percentage) {
         if (lastPercentage != null) {
@@ -21,11 +32,31 @@ class NotifyTSPProgressMock implements NotifyTSPProgressToGui {
     }
 }
 
+/**
+ * Unit tests for {@link TourCalculatorService}.
+ */
 public class TourCalculatorUnitTests {
 
+    /**
+     * Computes a 1-based linear intersection id from grid coordinates.
+     *
+     * @param x     the x index in the grid \[0..width-1]
+     * @param y     the y index in the grid \[0..height-1]
+     * @param width the total grid width
+     * @return the 1-based intersection id
+     */
     static Long getIdFromGridPos(int x, int y, int width) {
         return (long) y *width + x + 1;
     }
+
+    /**
+     * Builds a Manhattan-like grid {@link CityMap} of given dimensions.
+     * Each node connects to its 4-neighbors with unit-length bidirectional roads.
+     *
+     * @param width  number of columns
+     * @param height number of rows
+     * @return a new {@link CityMap} instance
+     */
     static CityMap getManhattanMap(int width, int height) {
         HashMap<Long, Intersection> intersections = new HashMap<>();
         for (int x=0; x < width; x++) {
@@ -74,20 +105,53 @@ public class TourCalculatorUnitTests {
         }
         return new CityMap(intersections, roadsFromInters);
     }
+
+    /**
+     * Removes a directed road from the given city map.
+     *
+     * @param c         the original {@link CityMap}
+     * @param fromInter origin intersection id
+     * @param toInter   destination intersection id
+     * @return a new {@link CityMap} instance without the specified directed road
+     */
     static CityMap removeRoadFromCityMap(CityMap c, long fromInter, long toInter) {
         HashMap<Long, Intersection> intersections = c.intersections();
         HashMap<Long, HashMap<Long, Road>> roadsFromInters = c.roads();
         roadsFromInters.get(fromInter).remove(toInter);
         return new CityMap(intersections, roadsFromInters);
     }
+
+    /**
+     * Removes both directed roads between two intersections.
+     *
+     * @param c      the original {@link CityMap}
+     * @param interA first intersection id
+     * @param interB second intersection id
+     * @return a new {@link CityMap} without the bidirectional connection
+     */
     static CityMap removeBidirectionalRoadFromCityMap(CityMap c, long interA, long interB) {
         c = removeRoadFromCityMap(c, interA, interB);
         c = removeRoadFromCityMap(c, interB, interA);
         return c;
     }
+
+    /**
+     * Creates an {@link Intersection} with unknown coordinates for the given id.
+     *
+     * @param id the intersection id
+     * @return a new {@link Intersection} with coordinates \(-1, -1\)
+     */
     static Intersection makeIntersectionFromId(long id) {
         return new Intersection(id, -1,-1);
     }
+
+    /**
+     * Creates a {@link Delivery} with 1s pickup and 1s delivery durations.
+     *
+     * @param pickup  pickup intersection id
+     * @param deposit delivery intersection id
+     * @return a new {@link Delivery}
+     */
     static Delivery makeDelivery(long pickup, long deposit) {
         return new Delivery(
                 makeIntersectionFromId(pickup),
@@ -96,6 +160,9 @@ public class TourCalculatorUnitTests {
         );
     }
 
+    /**
+     * Ensures that with zero deliveries, no tour is computed and solution remains null.
+     */
     @Test
     public void test_tsp_for_zero_delivery() {
         /* Ville utilisée
@@ -116,6 +183,9 @@ public class TourCalculatorUnitTests {
         Assertions.assertNull(tourSolution);
     }
 
+    /**
+     * Verifies shortest tour length for a single delivery in a 2x2 grid.
+     */
     @Test
     public void test_tsp_for_one_delivery_1() {
         /* Ville utilisée
@@ -139,6 +209,9 @@ public class TourCalculatorUnitTests {
         Assertions.assertEquals(4.f, tourSolution.totalLength());
     }
 
+    /**
+     * Verifies tour length increases when a direct path is removed.
+     */
     @Test
     public void test_tsp_for_one_delivery_2() {
         /* Ville utilisée
@@ -163,6 +236,9 @@ public class TourCalculatorUnitTests {
         Assertions.assertEquals(6.f, tourSolution.totalLength());
     }
 
+    /**
+     * Verifies tour length on a larger 4x4 grid with a single delivery.
+     */
     @Test
     public void test_tsp_for_one_delivery_3() {
         /* Ville utilisée
@@ -190,6 +266,9 @@ public class TourCalculatorUnitTests {
         Assertions.assertEquals(10.f, tourSolution.totalLength());
     }
 
+    /**
+     * Stress test on a 40x40 grid for one delivery; validates expected tour length.
+     */
     @Test
     public void test_tsp_for_one_delivery_4() {
         /* Ville utilisée
@@ -211,6 +290,9 @@ public class TourCalculatorUnitTests {
         Assertions.assertEquals(156.f, tourSolution.totalLength());
     }
 
+    /**
+     * Verifies optimal tour for two deliveries on a 4x4 grid without road removals.
+     */
     @Test
     public void test_tsp_for_two_deliveries_1() {
         /* Ville utilisée
@@ -237,6 +319,9 @@ public class TourCalculatorUnitTests {
         Assertions.assertEquals(14.f, tourSolution.totalLength());
     }
 
+    /**
+     * Verifies impact of removing several bottom-row connections on the optimal tour.
+     */
     @Test
     public void test_tsp_for_two_deliveries_2() {
         /* Ville utilisée
@@ -266,6 +351,9 @@ public class TourCalculatorUnitTests {
         Assertions.assertEquals(18.f, tourSolution.totalLength());
     }
 
+    /**
+     * Verifies optimal tour with disconnected vertical connections and two deliveries.
+     */
     @Test
     public void test_tsp_for_two_deliveries_3() {
         /* Ville utilisée

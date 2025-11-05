@@ -6,7 +6,6 @@ import fr.delivrooom.application.service.tourcalculator.Graphe;
 
 import java.util.*;
 
-// TODO : add progress bar updates in the computeD method
 
 /**
  * An implementation of the Traveling Salesperson Problem (TSP) using dynamic programming

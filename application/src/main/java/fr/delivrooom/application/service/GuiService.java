@@ -17,11 +17,26 @@ import java.net.URL;
  */
 public record GuiService(CityMapRepository cityMapRepository, DeliveriesRepository deliveriesRepository) implements GuiUseCase {
 
+    /**
+     * Loads a {@link CityMap} from the given URL using the configured repository.
+     *
+     * @param mapURL the URL pointing to the city map resource; must not be {@code null}
+     * @return the parsed {@link CityMap}
+     * @throws Exception if the resource cannot be read or parsed
+     */
     @Override
     public CityMap getCityMap(URL mapURL) throws Exception {
         return cityMapRepository.getCityMap(mapURL);
     }
 
+    /**
+     * Loads a {@link DeliveriesDemand} for the provided {@link CityMap} from the given URL.
+     *
+     * @param cityMap       the city map used to validate and resolve intersections; must not be {@code null}
+     * @param deliveriesURL the URL pointing to the deliveries demand resource; must not be {@code null}
+     * @return the parsed {@link DeliveriesDemand}
+     * @throws Exception if the resource cannot be read, parsed, or is inconsistent with the map
+     */
     @Override
     public DeliveriesDemand getDeliveriesDemand(CityMap cityMap, URL deliveriesURL) throws Exception {
         return deliveriesRepository.getDeliveriesDemand(cityMap, deliveriesURL);

@@ -322,7 +322,9 @@ public class AppController {
      */
     protected void doRestoreCityMap(CityMap cityMap) {
         this.cityMap.set(cityMap);
-        JavaFXApp.getCalculateTourUseCase().provideCityMap(cityMap);
+        if (cityMap != null) {
+            JavaFXApp.getCalculateTourUseCase().provideCityMap(cityMap);
+        }
     }
 
     /**
