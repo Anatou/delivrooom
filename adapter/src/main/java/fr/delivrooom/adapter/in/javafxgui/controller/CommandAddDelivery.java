@@ -16,18 +16,30 @@ public class CommandAddDelivery implements Command {
     private TourSolution associatedTourSolution = null;
     private int deliveryIndex;
 
+    /**
+     * Creates a command to add a delivery.
+     *
+     * @param controller The main application controller.
+     * @param delivery   The delivery to be added.
+     */
     public CommandAddDelivery(AppController controller, Delivery delivery) {
         this.delivery = delivery;
         this.controller = controller;
 
         // In case the delivery already exists (in case of ReverseCommand(this), we store the delivery index and associated courier)
-        deliveryIndex = controller.deliveriesDemand.get().deliveries().indexOf(delivery);
-        associatedCourier = controller.getCourierForDelivery(delivery);
-        if (associatedCourier != null) {
-            associatedTourSolution = associatedCourier.getTourSolution();
+        if (controller.deliveriesDemandProperty().getValue() != null) {
+            deliveryIndex = controller.deliveriesDemandProperty().getValue().deliveries().indexOf(delivery);
+            associatedCourier = controller.getCourierForDelivery(delivery);
+            if (associatedCourier != null) {
+                associatedTourSolution = associatedCourier.getTourSolution();
+            }
         }
     }
 
+    /**
+     * Executes the command, adding the delivery to the deliveries demand.
+     * If the delivery was previously associated with a courier, this association is restored.
+     */
     @Override
     public void execute() {
         if (deliveryIndex == -1) {
@@ -44,6 +56,9 @@ public class CommandAddDelivery implements Command {
         controller.deliveriesDemand.invalidate();
     }
 
+    /**
+     * Undoes the command, removing the delivery from the deliveries demand and from any assigned courier.
+     */
     @Override
     public void undo() {
         controller.deliveriesDemand.get().deliveries().remove(delivery);
@@ -51,8 +66,9 @@ public class CommandAddDelivery implements Command {
         if (associatedCourier != null) {
             associatedCourier.removeDelivery(delivery);
             associatedCourier.deleteTourSolution();
-            controller.couriers.invalidate();
+            controller.invalidateCouriers();
         }
+        controller.deliveriesDemand.get().deliveries().remove(delivery);
         controller.deliveriesDemand.invalidate();
     }
 

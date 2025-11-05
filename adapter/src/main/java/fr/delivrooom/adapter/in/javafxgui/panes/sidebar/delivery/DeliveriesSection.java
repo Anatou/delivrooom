@@ -16,6 +16,9 @@ public class DeliveriesSection extends VBox {
     private final DeliveriesList deliveriesList;
     private final TitledPane titledPane;
 
+    /**
+     * Constructs the DeliveriesSection, a collapsible pane containing the list of deliveries.
+     */
     public DeliveriesSection() {
         super(0);
         // Create the deliveries list
@@ -48,14 +51,29 @@ public class DeliveriesSection extends VBox {
         getChildren().add(titledPane);
     }
 
+    /**
+     * Gets the underlying list of deliveries.
+     *
+     * @return The {@link DeliveriesList} instance.
+     */
     public DeliveriesList getDeliveriesList() {
         return deliveriesList;
     }
 
+    /**
+     * Checks if the deliveries section is currently expanded.
+     *
+     * @return true if the pane is expanded, false otherwise.
+     */
     public boolean isExpanded() {
         return titledPane.isExpanded();
     }
 
+    /**
+     * Sets the expanded state of the deliveries section.
+     *
+     * @param expanded true to expand the pane, false to collapse it.
+     */
     public void setExpanded(boolean expanded) {
         titledPane.setExpanded(expanded);
     }

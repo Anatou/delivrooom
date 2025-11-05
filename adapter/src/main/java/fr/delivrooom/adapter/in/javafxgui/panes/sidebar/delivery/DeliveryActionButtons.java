@@ -9,11 +9,21 @@ import javafx.scene.layout.HBox;
 import org.kordamp.ikonli.fontawesome6.FontAwesomeSolid;
 import org.kordamp.ikonli.javafx.FontIcon;
 
+/**
+ * A component that provides action buttons for a delivery, such as assigning a courier
+ * or deleting the delivery.
+ */
 public class DeliveryActionButtons extends HBox {
 
     Delivery delivery;
     ComboBox<Courier> courierComboBox;
 
+    /**
+     * Constructs a set of action buttons for a specific delivery.
+     *
+     * @param delivery         The delivery to associate with the buttons.
+     * @param deleteSideEffect A callback to run after the delete action is performed.
+     */
     public DeliveryActionButtons(Delivery delivery, Runnable deleteSideEffect) {
         super(5);
         this.delivery = delivery;

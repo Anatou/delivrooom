@@ -31,6 +31,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * A sophisticated overlay for the map, responsible for drawing vector data such as roads,
+ * intersections, delivery points, and calculated tour routes. This component is layered
+ * on top of the map tiles and handles the rendering of dynamic, data-driven elements.
+ * <p>
+ * The overlay consists of three layers:
+ * <ul>
+ *   <li><b>Canvas Layer:</b> For drawing static or less frequently updated elements like roads and tours.</li>
+ *   <li><b>Delivery Layer:</b> For interactive delivery-related elements.</li>
+ *   <li><b>Intersection Layer:</b> For interactive intersection elements, visible during selection mode.</li>
+ * </ul>
+ */
 public class MapOverlay extends StackPane {
 
     private final Canvas canvasLayer;
@@ -47,6 +59,10 @@ public class MapOverlay extends StackPane {
     private double minX;
     private double minY;
 
+    /**
+     * Constructs a MapOverlay, initializing its layers and setting up listeners
+     * to react to changes in the application state.
+     */
     public MapOverlay() {
         this.canvasLayer = new Canvas();
         this.deliveryLayer = new Pane();
@@ -85,12 +101,24 @@ public class MapOverlay extends StackPane {
         });
     }
 
+    /**
+     * Clears all drawings from the overlay layers.
+     */
     public void clear() {
         canvasLayer.getGraphicsContext2D().clearRect(0, 0, canvasLayer.getWidth(), canvasLayer.getHeight());
         intersectionLayer.getChildren().clear();
         deliveryLayer.getChildren().clear();
     }
 
+    /**
+     * Updates and redraws the entire overlay based on the current viewport and application data.
+     *
+     * @param width  The current width of the map canvas.
+     * @param height The current height of the map canvas.
+     * @param scale  The current zoom scale of the map.
+     * @param minX   The minimum normalized X coordinate of the visible area.
+     * @param minY   The minimum normalized Y coordinate of the visible area.
+     */
     public void updateOverlay(double width, double height, double scale, double minX, double minY) {
         AppController controller = AppController.getController();
         unit_scalable = 2e-7 * scale;
@@ -144,7 +172,7 @@ public class MapOverlay extends StackPane {
         gc.setFill(Color.WHITE);
         gc.setStroke(Color.rgb(220, 220, 220));
         for (Intersection intersection : cityMap.intersections().values()) {
-            drawIntersection(gc, scale, minX, minY, intersection, 1.3 * unit_scalable, null, null, -1);
+            drawIntersection(gc, scale, minX, minY, intersection, 1.3 * unit_scalable, null, null, -1, null);
         }
 
         // Draw deliveries demands
@@ -171,7 +199,7 @@ public class MapOverlay extends StackPane {
             }
             // Display the remaining deliveries in red for pickup and blue for delivery
             // Draw warehouse point in green
-            drawIntersection(gc, scale, minX, minY, deliveriesLeft.store(), 4 * unit_scalable, storeImageIcon, null, -1);
+            drawIntersection(gc, scale, minX, minY, deliveriesLeft.store(), 4 * unit_scalable, storeImageIcon, null, -1, null);
             // Takeout point is a red square, delivery point in a blue circle
             int pairIndex = 0;
             for (Delivery delivery : deliveriesDemand.deliveries()) {
@@ -179,8 +207,8 @@ public class MapOverlay extends StackPane {
                     continue;
                 }
                 String label = indexToLabel(pairIndex++);
-                drawIntersection(gc, scale, minX, minY, delivery.takeoutIntersection(), 4 * unit_scalable, pickupImageIcon, label, -1);
-                drawIntersection(gc, scale, minX, minY, delivery.deliveryIntersection(), 4 * unit_scalable, depositImageIcon, label, -1);
+                drawIntersection(gc, scale, minX, minY, delivery.takeoutIntersection(), 4 * unit_scalable, pickupImageIcon, label, -1, null);
+                drawIntersection(gc, scale, minX, minY, delivery.deliveryIntersection(), 4 * unit_scalable, depositImageIcon, label, -1, null);
             }
 
         }
@@ -234,6 +262,7 @@ public class MapOverlay extends StackPane {
         }
         // display numbers on store/pickup/delivery in visit order
         int visitIndex = 1;
+
         for (Long intersectionId : tourSolution.deliveryOrder()) {
             Intersection intersection = cityMap.intersections().get(intersectionId);
             if (intersection != null) {
@@ -243,17 +272,26 @@ public class MapOverlay extends StackPane {
                 }
                 // check if pickup or delivery
                 boolean isPickup = false;
+                int pairIndex = 0;
                 for (Delivery delivery : deliveriesDemand.deliveries()) {
                     if (delivery.takeoutIntersection().getId() == intersectionId) {
                         isPickup = true;
+
+                        break;
+                    }else if (delivery.deliveryIntersection().getId() == intersectionId){
                         break;
                     }
+                    pairIndex++;
                 }
+
+
                 if (isPickup) {
-                    drawIntersection(gc, scale, minX, minY, intersection, 4 * unit_scalable, pickupImageIcon, Integer.toString(visitIndex), courier.getId());
+                    drawIntersection(gc, scale, minX, minY, intersection, 4 * unit_scalable, pickupImageIcon, indexToLabel(pairIndex), courier.getId(), Integer.toString(visitIndex));
                 } else {
-                    drawIntersection(gc, scale, minX, minY, intersection, 4 * unit_scalable, depositImageIcon, Integer.toString(visitIndex), courier.getId());
+                    drawIntersection(gc, scale, minX, minY, intersection, 4 * unit_scalable, depositImageIcon, indexToLabel(pairIndex), courier.getId(), Integer.toString(visitIndex));
                 }
+
+
 
                 visitIndex += 1;
             }
@@ -333,7 +371,7 @@ public class MapOverlay extends StackPane {
     }
 
 
-    private void drawIntersection(GraphicsContext gc, double scale, double minX, double minY, Intersection intersection, double radius, Image icon, String text, int courierId) {
+    private void drawIntersection(GraphicsContext gc, double scale, double minX, double minY, Intersection intersection, double radius, Image icon, String text, int courierId, String order) {
         double x = (intersection.getNormalizedX() - minX) * scale;
         double y = (intersection.getNormalizedY() - minY) * scale;
 
@@ -375,6 +413,35 @@ public class MapOverlay extends StackPane {
             gc.fillText(text, x+x_offset, y+y_offset+fontSize/3);
             gc.setFill(oldColor);
         }
+
+        if (order != null) {
+            gc.setTextAlign(TextAlignment.CENTER);
+            gc.setTextBaseline(VPos.BASELINE);
+            Paint oldColor = gc.getFill();
+            double fontSize = radius;
+            double circleRadius = radius;
+            double offset = 13;
+            double x_offset = offset;
+            double y_offset = offset;
+
+            if (icon!=null) {
+                fontSize = icon.getHeight()/1.5;
+                circleRadius = icon.getHeight();
+                x_offset = icon.getWidth()/2 + offset;
+                y_offset = icon.getHeight()/2 ;
+            }
+            gc.setFont(javafx.scene.text.Font.font(fontSize));
+            // display color of the courier insted
+            Color courierColor = (courierId == -1) ? Color.WHITE : Color.hsb((courierId * 137) % 360, 0.7, 0.9);
+
+            gc.setFill(courierColor);
+            gc.fillOval(x+offset,y, circleRadius, circleRadius);
+            gc.setFill(Color.BLACK);
+            gc.fillText(order, x+x_offset, y+y_offset+fontSize/3);
+            gc.setFill(oldColor);
+        }
+
+
     }
 
     private Image getImageIcon(FontAwesomeSolid icon, Pane dummyPane, Paint iconColor) {

@@ -3,6 +3,7 @@ package fr.delivrooom.adapter.in.javafxgui.controller;
 import fr.delivrooom.application.model.Courier;
 import fr.delivrooom.application.model.Delivery;
 import fr.delivrooom.application.model.Intersection;
+import fr.delivrooom.application.model.TourSolution;
 
 /**
  * Command to assign a courier to a delivery.
@@ -14,17 +15,41 @@ public class CommandAssignCourier implements Command {
 
     private final Delivery delivery;
     private final Intersection store;
-    private final Courier newCourier;
-    private final Courier oldCourier;
 
+    private final Courier newCourier;
+    private TourSolution newCourierPreviousTourSolution = null;
+
+    private final Courier oldCourier;
+    private TourSolution oldCourierPreviousTourSolution = null;
+
+    /**
+     * Creates a command to assign a courier to a delivery.
+     *
+     * @param controller The main application controller.
+     * @param delivery   The delivery to be assigned.
+     * @param store      The warehouse intersection.
+     * @param newCourier The courier to assign the delivery to. Can be null to unassign.
+     */
     public CommandAssignCourier(AppController controller, Delivery delivery, Intersection store, Courier newCourier) {
         this.controller = controller;
         this.store = store;
         this.delivery = delivery;
+
         this.oldCourier = controller.getCourierForDelivery(delivery);
+        if (oldCourier != null) {
+            this.oldCourierPreviousTourSolution = oldCourier.getTourSolution();
+        }
         this.newCourier = newCourier;
+        if (newCourier != null) {
+            this.newCourierPreviousTourSolution = newCourier.getTourSolution();
+        }
     }
 
+    /**
+     * Executes the command, assigning the new courier to the delivery.
+     * This involves removing the delivery from the old courier (if any) and adding it to the new one.
+     * The tours of both affected couriers are invalidated.
+     */
     @Override
     public void execute() {
         Courier assignedCourier = controller.getCourierForDelivery(delivery);
@@ -45,6 +70,10 @@ public class CommandAssignCourier implements Command {
         controller.couriers.invalidate();
     }
 
+    /**
+     * Undoes the command, restoring the original courier assignment for the delivery.
+     * The delivery is moved back to the old courier, and the previous tour solutions are restored.
+     */
     @Override
     public void undo() {
         Courier assignedCourier = controller.getCourierForDelivery(delivery);
@@ -52,14 +81,17 @@ public class CommandAssignCourier implements Command {
             if (!assignedCourier.equals(oldCourier)) {
                 assignedCourier.removeDelivery(delivery);
                 assignedCourier.deleteTourSolution();
+                if (assignedCourier.equals(newCourier)) {
+                    newCourier.setTourSolution(newCourierPreviousTourSolution);
+                }
                 if (oldCourier != null) {
                     oldCourier.addDelivery(delivery, store);
-                    oldCourier.deleteTourSolution();
+                    oldCourier.setTourSolution(oldCourierPreviousTourSolution);
                 }
             }
         } else if (oldCourier != null) {
             oldCourier.addDelivery(delivery, store);
-            oldCourier.deleteTourSolution();
+            oldCourier.setTourSolution(oldCourierPreviousTourSolution);
         }
         controller.deliveriesDemand.invalidate();
         controller.couriers.invalidate();

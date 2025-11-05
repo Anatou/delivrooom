@@ -1,13 +1,10 @@
 package fr.delivrooom.adapter.in.javafxgui.panes.sidebar;
 
-import atlantafx.base.controls.Spacer;
 import fr.delivrooom.adapter.in.javafxgui.controller.AppController;
 import fr.delivrooom.adapter.in.javafxgui.controller.State;
 import fr.delivrooom.adapter.in.javafxgui.controller.StateSelectIntersection;
 import fr.delivrooom.application.model.Delivery;
 import fr.delivrooom.application.model.Intersection;
-import javafx.geometry.Insets;
-import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
@@ -29,6 +26,9 @@ public class DeliveryCreationSection extends VBox {
     private Intersection takeout;
     private Intersection delivery;
 
+    /**
+     * Constructs the DeliveryCreationSection, initializing the form for adding new deliveries.
+     */
     public DeliveryCreationSection() {
         super(0);
         //setPadding(new Insets(10));
@@ -89,8 +89,8 @@ public class DeliveryCreationSection extends VBox {
         buttonConfirmAddDelivery.setOnAction(e -> {
             int tDuration;
             int dDuration;
-            tDuration = durationSpinnerTakeout.getValue();
-            dDuration = durationSpinnerDelivery.getValue();
+            tDuration = durationSpinnerTakeout.getValue()*60;
+            dDuration = durationSpinnerDelivery.getValue()*60;
             if (takeout != null && delivery != null) {
 
 

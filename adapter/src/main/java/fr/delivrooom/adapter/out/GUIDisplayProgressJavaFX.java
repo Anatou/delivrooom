@@ -4,6 +4,11 @@ import fr.delivrooom.adapter.in.javafxgui.controller.AppController;
 import fr.delivrooom.application.port.out.NotifyTSPProgressToGui;
 import javafx.application.Platform;
 
+/**
+ * An adapter that implements the {@link NotifyTSPProgressToGui} port.
+ * It updates a JavaFX progress property on the UI thread, allowing for safe
+ * progress updates from background TSP calculation threads.
+ */
 public class GUIDisplayProgressJavaFX implements NotifyTSPProgressToGui {
 
     @Override

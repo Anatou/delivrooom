@@ -1,15 +1,14 @@
 package fr.delivrooom.adapter.in.javafxgui.controller;
 
 /**
- * Result of a command creation request from a state.
- * Contains either a command to execute or an error message explaining why the operation is not allowed.
+ * Represents the result of a command creation attempt from a state.
+ * This record can hold either a valid {@link Command} to be executed or error details if the command
+ * could not be created (e.g., because the operation is invalid in the current state).
+ * This pattern allows states to return specific, contextual error messages.
  *
- * <p>This pattern allows states to provide specific, contextual error messages
- * when operations are not allowed in the current state.</p>
- *
- * @param command      The command to execute, or null if operation not allowed
- * @param errorTitle   The error dialog title, or null if operation is allowed
- * @param errorMessage The error message explaining why operation is not allowed, or null if allowed
+ * @param command      The command to execute, or {@code null} if the operation is not allowed.
+ * @param errorTitle   The title for an error dialog, or {@code null} if the operation is successful.
+ * @param errorMessage The message for an error dialog, or {@code null} if the operation is successful.
  */
 public record CommandResult(Command command, String errorTitle, String errorMessage) {
 

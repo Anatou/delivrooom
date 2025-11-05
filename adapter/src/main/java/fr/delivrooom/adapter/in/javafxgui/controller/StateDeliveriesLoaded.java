@@ -43,13 +43,12 @@ public record StateDeliveriesLoaded(AppController controller) implements State {
     }
 
     @Override
-    public CommandResult createCalculateTourCommand() {
-        return CommandResult.success(new CommandCalculateTour(controller));
-    }
-
-    @Override
-    public CommandResult createCalculateCourierTourCommand(Courier courier) {
-        return CommandResult.success(new CommandCalculateCourierTour(controller, courier));
+    public void requestCalculateTour(Courier courier) {
+        if (courier != null) {
+            controller.doCalculateTourForCourier(courier);
+        } else {
+            controller.doCalculateTour();
+        }
     }
 
     @Override
@@ -95,7 +94,16 @@ public record StateDeliveriesLoaded(AppController controller) implements State {
         }
     }
 
-    public CommandResult createLoadTourCommand(CityMap sourceCityMap, DeliveriesDemand sourceDeliveriesDemand, List<Courier> sourceCouriers, String filename) {
-        return CommandResult.success( new CommandLoadTourSolution(controller, this, sourceCityMap, sourceDeliveriesDemand, sourceCouriers, filename) );
+    /**
+     * Creates a command to load a tour solution from a file.
+     *
+     * @param sourceCityMap          The city map before loading, for undo.
+     * @param sourceDeliveriesDemand The deliveries demand before loading, for undo.
+     * @param sourceCouriers         The list of couriers before loading, for undo.
+     * @param filename               The path to the file to load the tour solution from.
+     * @return A {@link CommandResult} containing the load command or an error.
+     */
+    public CommandResult createLoadTourCommand(CityMap sourceCityMap, DeliveriesDemand sourceDeliveriesDemand, String filename) {
+        return CommandResult.success(new CommandLoadTourSolution(controller, this, sourceCityMap, sourceDeliveriesDemand, filename));
     }
 }

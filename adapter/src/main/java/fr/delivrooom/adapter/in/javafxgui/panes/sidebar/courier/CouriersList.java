@@ -7,10 +7,20 @@ import javafx.beans.binding.Bindings;
 import javafx.scene.control.ListView;
 
 
+/**
+ * A {@link ListView} that displays a list of {@link Courier} objects using {@link CourierListItem}s
+ * as its cells. It automatically stays in sync with the application's central list of couriers.
+ */
 public class CouriersList extends ListView<Courier> {
 
+    /**
+     * The fixed height for each item in the courier list.
+     */
     public static final double COURIER_ITEM_HEIGHT = 35;
 
+    /**
+     * Constructs a CouriersList, setting up data bindings and the cell factory.
+     */
     public CouriersList() {
         super();
 

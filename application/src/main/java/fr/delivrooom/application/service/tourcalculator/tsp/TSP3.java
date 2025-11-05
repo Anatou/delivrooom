@@ -4,21 +4,20 @@ import fr.delivrooom.application.service.tourcalculator.Graphe;
 
 import java.util.*;
 
+/**
+ * A more advanced TSP solver that uses a Minimum Spanning Tree (MST) as a lower bound.
+ * The bound is calculated by summing:
+ * <ul>
+ *     <li>The cost of the MST of the subgraph induced by the unvisited vertices.</li>
+ *     <li>The cost of the shortest arc from the current vertex to an unvisited vertex.</li>
+ *     <li>The cost of the shortest arc from an unvisited vertex to the depot (vertex 0).</li>
+ * </ul>
+ * This provides a much tighter bound than {@link TSP2}, leading to more efficient pruning.
+ */
 public class TSP3 extends TemplateTSP {
 
     @Override
     protected float bound(Long currentVertex, Collection<Long> unseen) {
-        /**
-         Une fonction d’évaluation plus évoluée (qui calcule une borne plus proche de la solution optimale, mais avec
-         une complexité plus élevée) consiste à calculer le coût c de l’arbre couvrant minimal du sous-graphe induit par les
-         sommets non visités, et à ajouter à c :
-         — le coût du plus petit arc reliant le dernier sommet visité et arrivant sur un des sommets non visités,
-         — et le coût du plus petit arc reliant un des sommets non visités à 0.
-         */
-
-        // lists to store costs and predecessors for Prim's algorithm
-
-
         float bound = 0.F;
         float minOutgoing = Float.MAX_VALUE;
         float minToZero = Float.MAX_VALUE;
@@ -35,25 +34,6 @@ public class TSP3 extends TemplateTSP {
                 minToZero = lengthToZero;
             }
         }
-
-        // cost of the minimum spanning tree of the subgraph induced by unseen vertices
-        /**
-         * fonction prim(G, s)
-         *        pour tout sommet t
-         *               cout[t] := +∞
-         *               pred[t] := null
-         *        cout[s] := 0
-         *        F := file de priorité contenant les sommets de G avec cout[.] comme priorité
-         *        tant que F ≠ vide
-         *             t := F.defiler
-         *             pour toute arête t--u avec u appartenant à F
-         *                 si cout[u] >= poids de l'arête entre les sommets t et u
-         *                        pred[u] := t
-         *                        cout[u] := poids de l'arête entre les sommets t et u
-         *                        F.notifierDiminution(u)
-         *
-         *        retourner pred
-         */
 
         // retrieve all the edges from the unseen vertices and store their cost
         HashMap<Long, HashMap<Long, Float>> edgesFromUnseenVertices = new HashMap<>();

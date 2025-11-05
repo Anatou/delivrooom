@@ -3,7 +3,6 @@ package fr.delivrooom.adapter.in.javafxgui.controller;
 import fr.delivrooom.application.model.*;
 
 import java.net.URL;
-import java.util.List;
 
 /**
  * Initial state - no map or deliveries loaded yet.
@@ -47,15 +46,8 @@ public record StateInitial(AppController controller) implements State {
     }
 
     @Override
-    public CommandResult createCalculateTourCommand() {
-        return CommandResult.error("Cannot calculate tour",
-                "No map or deliveries loaded.");
-    }
-
-    @Override
-    public CommandResult createCalculateCourierTourCommand(Courier courier) {
-        return CommandResult.error("Cannot calculate tour",
-                "No map or deliveries loaded.");
+    public void requestCalculateTour(Courier courier) {
+        controller.showError("Cannot calculate tour", "No map or deliveries loaded.");
     }
 
     @Override
@@ -84,7 +76,17 @@ public record StateInitial(AppController controller) implements State {
         controller.showError("Unable to save tour", "No tour has been calculated yet.");
     }
 
-    public CommandResult createLoadTourCommand(CityMap sourceCityMap, DeliveriesDemand sourceDeliveriesDemand, List<Courier> sourceCouriers, String filename) {
-        return CommandResult.success( new CommandLoadTourSolution(controller, this, sourceCityMap, sourceDeliveriesDemand, sourceCouriers, filename) );
+    @Override
+    /**
+     * Creates a command to load a tour solution from a file.
+     *
+     * @param sourceCityMap          The city map before loading, for undo.
+     * @param sourceDeliveriesDemand The deliveries demand before loading, for undo.
+     * @param sourceCouriers         The list of couriers before loading, for undo.
+     * @param filename               The path to the file to load the tour solution from.
+     * @return A {@link CommandResult} containing the load command or an error.
+     */
+    public CommandResult createLoadTourCommand(CityMap sourceCityMap, DeliveriesDemand sourceDeliveriesDemand, String filename) {
+        return CommandResult.success(new CommandLoadTourSolution(controller, this, sourceCityMap, sourceDeliveriesDemand, filename));
     }
 }

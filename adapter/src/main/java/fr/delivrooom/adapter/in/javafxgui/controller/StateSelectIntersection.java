@@ -43,13 +43,12 @@ public record StateSelectIntersection(AppController controller) implements State
     }
 
     @Override
-    public CommandResult createCalculateTourCommand() {
-        return CommandResult.success(new CommandCalculateTour(controller));
-    }
-
-    @Override
-    public CommandResult createCalculateCourierTourCommand(Courier courier) {
-        return CommandResult.success(new CommandCalculateCourierTour(controller, courier));
+    public void requestCalculateTour(Courier courier) {
+        if (courier != null) {
+            controller.doCalculateTourForCourier(courier);
+        } else {
+            controller.doCalculateTour();
+        }
     }
 
     @Override
@@ -95,7 +94,7 @@ public record StateSelectIntersection(AppController controller) implements State
         }
     }
 
-    public CommandResult createLoadTourCommand(CityMap sourceCityMap, DeliveriesDemand sourceDeliveriesDemand, List<Courier> sourceCouriers, String filename) {
-        return CommandResult.success( new CommandLoadTourSolution(controller, this, sourceCityMap, sourceDeliveriesDemand, sourceCouriers, filename) );
+    public CommandResult createLoadTourCommand(CityMap sourceCityMap, DeliveriesDemand sourceDeliveriesDemand, String filename) {
+        return CommandResult.success(new CommandLoadTourSolution(controller, this, sourceCityMap, sourceDeliveriesDemand, filename));
     }
 }

@@ -21,6 +21,9 @@ public class TestSection extends VBox {
     private final TitledPane titledPane;
     private AppController controller;
 
+    /**
+     * Constructs the TestSection, a collapsible pane with debugging and testing utilities.
+     */
     public TestSection() {
         super(0);
 
@@ -272,10 +275,20 @@ public class TestSection extends VBox {
 
     }*/
 
+    /**
+     * Checks if the test section is currently expanded.
+     *
+     * @return true if the pane is expanded, false otherwise.
+     */
     public boolean isExpanded() {
         return titledPane.isExpanded();
     }
 
+    /**
+     * Sets the expanded state of the test section.
+     *
+     * @param expanded true to expand the pane, false to collapse it.
+     */
     public void setExpanded(boolean expanded) {
         titledPane.setExpanded(expanded);
     }
