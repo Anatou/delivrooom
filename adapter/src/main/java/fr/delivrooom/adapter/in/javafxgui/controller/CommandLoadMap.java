@@ -52,7 +52,7 @@ public class CommandLoadMap implements Command {
             previousProgress = controller.tourCalculationProgress.get();
             previousCouriers = new HashMap<>();
             for (Courier courier : controller.couriers) {
-                previousCouriers.put(courier, new Pair<>(courier.getTourSolution(), courier.getDeliveriesDemand()));
+                previousCouriers.put(courier, new Pair<>(courier.getTourSolution(), courier.getDeliveriesDemand() == null ? null : courier.getDeliveriesDemand().clone()));
                 if (courier.getDeliveriesDemand() != null) {
                     courier.getDeliveriesDemand().deliveries().clear();
                 }
