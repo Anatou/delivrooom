@@ -14,7 +14,7 @@ public class CommandCalculateTour implements Command {
     private final AppController controller;
     private final HashMap<Courier, TourSolution> solutions;
     private final boolean singleCourier;
-    private double previousProgress = 0;
+    private final double previousProgress;
 
     private final HashMap<Courier, TourSolution> previousTourSolutions = new HashMap<>();
 
@@ -25,10 +25,11 @@ public class CommandCalculateTour implements Command {
      * @param solutions     A map of couriers to their calculated tour solutions.
      * @param singleCourier True if the calculation is for a single courier, false otherwise.
      */
-    public CommandCalculateTour(AppController controller, HashMap<Courier, TourSolution> solutions, boolean singleCourier) {
+    public CommandCalculateTour(AppController controller, HashMap<Courier, TourSolution> solutions, boolean singleCourier, double previousProgress) {
         this.controller = controller;
         this.solutions = solutions;
         this.singleCourier = singleCourier;
+        this.previousProgress = previousProgress;
     }
 
     /**
@@ -42,7 +43,6 @@ public class CommandCalculateTour implements Command {
             previousTourSolutions.put(courier, courier.getTourSolution());
             //if (!singleCourier) courier.deleteTourSolution();
         }
-        this.previousProgress = controller.tourCalculationProgress.get();
         for (Map.Entry<Courier, TourSolution> entry : solutions.entrySet()) {
             entry.getKey().setTourSolution(entry.getValue());
         }

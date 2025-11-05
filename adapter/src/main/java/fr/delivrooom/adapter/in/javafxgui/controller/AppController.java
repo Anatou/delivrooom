@@ -446,7 +446,7 @@ public class AppController {
                     return;
                 }
                 Platform.runLater(() -> {
-                    requestCommand(CommandResult.success(new CommandCalculateTour(this, courierTourMap, singleCourier)));
+                    requestCommand(CommandResult.success(new CommandCalculateTour(this, courierTourMap, singleCourier, previousProgress)));
                     this.tourCalculationProgress.set(1.0);
                 });
             } catch (Exception e) {
