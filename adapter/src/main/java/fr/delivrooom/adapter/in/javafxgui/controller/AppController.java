@@ -264,7 +264,7 @@ public class AppController {
      * @param file The file containing the tour solution.
      */
     public void requestLoadTourSolution(File file) {
-        CommandResult result = getState().createLoadTourCommand(cityMap.get(), deliveriesDemand.get(), couriers.get(), file.getAbsolutePath());
+        CommandResult result = getState().createLoadTourCommand(cityMap.get(), deliveriesDemand.get(), file.getAbsolutePath());
         requestCommand(result);
     }
 
@@ -302,17 +302,6 @@ public class AppController {
         requestCommand(result);
     }
 
-    /**
-     * Load a map file using the application service.
-     * Called by commands.
-     *
-     * @param url The map url to load
-     */
-    protected void doLoadMapFile(URL url) throws Exception {
-        this.cityMap.set(JavaFXApp.guiUseCase().getCityMap(url));
-        JavaFXApp.getCalculateTourUseCase().provideCityMap(cityMap.get());
-        deleteDeliveryDemandOfCourier();
-    }
 
     /**
      * Restore a previous city map state.
@@ -325,17 +314,6 @@ public class AppController {
         if (cityMap != null) {
             JavaFXApp.getCalculateTourUseCase().provideCityMap(cityMap);
         }
-    }
-
-    /**
-     * Load a deliveries file using the application service.
-     * Called by commands.
-     *
-     * @param url The deliveries file to load
-     */
-    protected void doLoadDeliveriesFile(URL url) throws Exception {
-        this.deliveriesDemand.set(JavaFXApp.guiUseCase().getDeliveriesDemand(cityMap.get(), url));
-        deleteDeliveryDemandOfCourier();
     }
 
     protected void doRestoreCouriers(List<Courier> courierList) {
@@ -423,6 +401,7 @@ public class AppController {
             showError("Cannot calculate tour", "Already running");
             return;
         }
+        double previousProgress = tourCalculationProgress.get();
         this.tourCalculationProgress.set(0.0001);
 
         new Thread(() -> {
@@ -434,48 +413,46 @@ public class AppController {
                     if (courier.getDeliveriesDemand() != null && !courier.getDeliveriesDemand().deliveries().isEmpty()) {
                         System.out.println("Calculating tour for courier " + courier.getId());
 
-                        TourSolution solution;
                         try {
-                            if (JavaFXApp.getCalculateTourUseCase().doesCalculatedTourNeedsToBeChanged(courier.getDeliveriesDemand())) {
+                            if (courier.getTourSolution() == null) {
                                 isThereAtLeastOneCourierWithTourNotAlreadyCalculated = true;
                                 JavaFXApp.getCalculateTourUseCase().findOptimalTour(courier.getDeliveriesDemand(), false);
+                                TourSolution solution = JavaFXApp.getCalculateTourUseCase().getOptimalTour();
+                                courierTourMap.put(courier, solution);
                             }
-                            solution = JavaFXApp.getCalculateTourUseCase().getOptimalTour();
                         } catch (RuntimeException e) {
                             Platform.runLater(() -> {
                                 showError("Error while calculating tour",
                                         (couriers.size() == 1 ? "Cannot calculate tour" : "Cannot calculate tour of courier " + courier.getId())
                                                 + ". Are both pickup and deposit adresses reachable?");
-                                this.tourCalculationProgress.set(0.0);
+                                this.tourCalculationProgress.set(previousProgress);
                             });
                             return;
                         }
-
-                        courierTourMap.put(courier, solution);
                         isThereAtLeastOneCourierWithDeliveries = true;
                     }
                 }
                 if (!isThereAtLeastOneCourierWithDeliveries) {
                     Platform.runLater(() -> {
                         showError("Cannot calculate tour", couriers.size() == 1 ? "Courier has no deliveries assigned." : "No couriers have deliveries assigned.");
-                        this.tourCalculationProgress.set(0.0);
+                        this.tourCalculationProgress.set(previousProgress);
                     });
                     return;
                 } else if (!isThereAtLeastOneCourierWithTourNotAlreadyCalculated) {
                     Platform.runLater(() -> {
                         showError("Already calculated", couriers.size() == 1 ? "Courier tour is already up to date." : "All couriers have up to date tours.");
-                        this.tourCalculationProgress.set(0.0);
+                        this.tourCalculationProgress.set(previousProgress);
                     });
                     return;
                 }
                 Platform.runLater(() -> {
-                    requestCommand(CommandResult.success(new CommandCalculateTour(this, courierTourMap, singleCourier)));
+                    requestCommand(CommandResult.success(new CommandCalculateTour(this, courierTourMap, singleCourier, previousProgress)));
                     this.tourCalculationProgress.set(1.0);
                 });
             } catch (Exception e) {
                 Platform.runLater(() -> {
                     showError("Error while calculating tour", e.getMessage() == null ? e.toString() : e.getMessage());
-                    this.tourCalculationProgress.set(0.0);
+                    this.tourCalculationProgress.set(previousProgress);
                 });
                 e.printStackTrace();
             }
@@ -672,17 +649,6 @@ public class AppController {
             commandManager.executeCommand(result.command());
         } else {
             showError(result.errorTitle(), result.errorMessage());
-        }
-    }
-
-    private void deleteDeliveryDemandOfCourier() {
-        for (Courier courier : couriers) {
-            if (courier.getDeliveriesDemand() != null) {
-                courier.getDeliveriesDemand().deliveries().clear();
-            }
-            if (courier.getTourSolution() != null) {
-                courier.deleteTourSolution();
-            }
         }
     }
 

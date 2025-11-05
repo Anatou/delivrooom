@@ -2,6 +2,7 @@ package fr.delivrooom.application.model;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -58,4 +59,9 @@ public record DeliveriesDemand(List<Delivery> deliveries, Intersection store) im
         this.deliveries.remove(delivery);
     }
 
+
+    @Override
+    public DeliveriesDemand clone() {
+        return new DeliveriesDemand(new ArrayList<>(this.deliveries), this.store);
+    }
 }

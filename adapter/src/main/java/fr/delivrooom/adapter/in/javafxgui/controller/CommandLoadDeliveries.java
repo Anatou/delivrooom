@@ -1,9 +1,13 @@
 package fr.delivrooom.adapter.in.javafxgui.controller;
 
+import fr.delivrooom.adapter.in.javafxgui.JavaFXApp;
 import fr.delivrooom.application.model.Courier;
 import fr.delivrooom.application.model.DeliveriesDemand;
+import fr.delivrooom.application.model.TourSolution;
+import javafx.util.Pair;
 
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -16,7 +20,8 @@ public class CommandLoadDeliveries implements Command {
     private final URL deliveriesUrl;
     private final State sourceState;
     private DeliveriesDemand previousDeliveries;
-    private Map<Courier, DeliveriesDemand> previousCourierDeliveries;
+    private double previousProgress = 0;
+    private HashMap<Courier, Pair<TourSolution, DeliveriesDemand>> previousCouriers;
 
     /**
      * Creates a command to load a deliveries demand file.
@@ -39,9 +44,21 @@ public class CommandLoadDeliveries implements Command {
     public void execute() {
         try {
             previousDeliveries = controller.deliveriesDemandProperty().getValue();
-            previousCourierDeliveries = controller.doCaptureCourierDeliveries();
-            controller.doLoadDeliveriesFile(deliveriesUrl);
+            previousProgress = controller.tourCalculationProgress.get();
+            previousCouriers = new HashMap<>();
+            for (Courier courier : controller.couriers) {
+                previousCouriers.put(courier, new Pair<>(courier.getTourSolution(), courier.getDeliveriesDemand() == null ? null : courier.getDeliveriesDemand().clone()));
+                if (courier.getDeliveriesDemand() != null) {
+                    courier.getDeliveriesDemand().deliveries().clear();
+                }
+                if (courier.getTourSolution() != null) {
+                    courier.deleteTourSolution();
+                }
+            }
+            controller.tourCalculationProgress.set(0);
             controller.transitionToState(new StateDeliveriesLoaded(controller));
+            controller.deliveriesDemand.set(JavaFXApp.guiUseCase().getDeliveriesDemand(controller.cityMap.get(), deliveriesUrl));
+            controller.couriers.invalidate();
         } catch (Exception e) {
             controller.showError("Error loading deliveries", e.getMessage());
             e.printStackTrace();
@@ -55,9 +72,15 @@ public class CommandLoadDeliveries implements Command {
     @Override
     public void undo() {
         try {
-            controller.doRestoreDeliveriesDemand(previousDeliveries);
-            controller.doRestoreCourierDeliveries(previousCourierDeliveries);
+            for (Map.Entry<Courier, Pair<TourSolution, DeliveriesDemand>> entry : previousCouriers.entrySet()) {
+                entry.getKey().setTourSolution(entry.getValue().getKey());
+                entry.getKey().setDeliveriesDemand(entry.getValue().getValue());
+            }
+            previousCouriers.clear();
+            controller.tourCalculationProgress.set(previousProgress);
             controller.transitionToState(sourceState);
+            controller.doRestoreDeliveriesDemand(previousDeliveries);
+            controller.couriers.invalidate();
         } catch (Exception e) {
             controller.showError("Error undoing deliveries load", e.getMessage());
             e.printStackTrace();

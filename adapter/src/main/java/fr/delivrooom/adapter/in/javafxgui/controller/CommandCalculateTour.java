@@ -14,6 +14,7 @@ public class CommandCalculateTour implements Command {
     private final AppController controller;
     private final HashMap<Courier, TourSolution> solutions;
     private final boolean singleCourier;
+    private final double previousProgress;
 
     private final HashMap<Courier, TourSolution> previousTourSolutions = new HashMap<>();
 
@@ -24,10 +25,11 @@ public class CommandCalculateTour implements Command {
      * @param solutions     A map of couriers to their calculated tour solutions.
      * @param singleCourier True if the calculation is for a single courier, false otherwise.
      */
-    public CommandCalculateTour(AppController controller, HashMap<Courier, TourSolution> solutions, boolean singleCourier) {
+    public CommandCalculateTour(AppController controller, HashMap<Courier, TourSolution> solutions, boolean singleCourier, double previousProgress) {
         this.controller = controller;
         this.solutions = solutions;
         this.singleCourier = singleCourier;
+        this.previousProgress = previousProgress;
     }
 
     /**
@@ -39,7 +41,7 @@ public class CommandCalculateTour implements Command {
         previousTourSolutions.clear();
         for (Courier courier : controller.couriersProperty().getValue()) {
             previousTourSolutions.put(courier, courier.getTourSolution());
-            if (!singleCourier) courier.deleteTourSolution();
+            //if (!singleCourier) courier.deleteTourSolution();
         }
         for (Map.Entry<Courier, TourSolution> entry : solutions.entrySet()) {
             entry.getKey().setTourSolution(entry.getValue());
@@ -52,11 +54,12 @@ public class CommandCalculateTour implements Command {
      */
     @Override
     public void undo() {
-        if (!singleCourier) {
-            for (Courier courier : controller.couriersProperty().getValue()) {
-                courier.deleteTourSolution();
-            }
-        }
+//        if (!singleCourier) {
+//            for (Courier courier : controller.couriersProperty().getValue()) {
+//                courier.deleteTourSolution();
+//            }
+//        }
+        controller.tourCalculationProgress.set(previousProgress);
         for (Map.Entry<Courier, TourSolution> entry : previousTourSolutions.entrySet()) {
             entry.getKey().setTourSolution(entry.getValue());
         }
