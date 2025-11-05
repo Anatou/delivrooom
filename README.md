@@ -16,6 +16,9 @@ cp config/src/main/resources/config.properties.template config/src/main/resource
 ```
 
 ## Run
+
+The app is started with Bootstrap.java from the config module. It starts the GUI and links the services without breaking the encapsulation.
+
 Run the app with maven running the `javafx:run` goal on the `config` module after installing on the root one.
 ```bash
 ./mvnw clean install
@@ -32,7 +35,9 @@ For a detailed explanation, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Features
 
-- **Map Visualization**: Loads and displays intersections from XML map files onto an interactive map.
-- **Delivery Management**: Loads delivery points from XML files and visualizes them on the map.
-- **Tour Calculation**: Computes and displays optimized delivery routes.
+- **Map Visualization**: Loads and displays intersections from XML map files onto an interactive map with satellite images.
+- **Delivery Management**: Loads delivery points from XML files or creates them manually and visualizes them on the map with icons.
+- **Tour Calculation**: Computes and displays optimized delivery routes for each courier.
 - **Undo/Redo**: All actions are fully reversible.
+- **Multi-courier**: Multiple courier are managed individually to compute their own tour.
+- **Tour saving**: Tours can be saved and loaded from *.vrooom* files with all the needed information.
