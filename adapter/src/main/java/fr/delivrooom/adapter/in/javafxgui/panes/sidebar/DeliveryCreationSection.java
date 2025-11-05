@@ -89,8 +89,8 @@ public class DeliveryCreationSection extends VBox {
         buttonConfirmAddDelivery.setOnAction(e -> {
             int tDuration;
             int dDuration;
-            tDuration = durationSpinnerTakeout.getValue();
-            dDuration = durationSpinnerDelivery.getValue();
+            tDuration = durationSpinnerTakeout.getValue()*60;
+            dDuration = durationSpinnerDelivery.getValue()*60;
             if (takeout != null && delivery != null) {
 
 
