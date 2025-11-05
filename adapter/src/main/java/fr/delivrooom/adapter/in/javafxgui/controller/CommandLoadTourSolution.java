@@ -1,9 +1,11 @@
 package fr.delivrooom.adapter.in.javafxgui.controller;
 
 import fr.delivrooom.application.model.*;
+import javafx.util.Pair;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Command to load a tour solution from a file.
@@ -15,10 +17,11 @@ public class CommandLoadTourSolution implements Command {
     private final AppController controller;
     private final State sourceState;
 
+    private double previousProgress;
     private final CityMap sourceCityMap;
     private final DeliveriesDemand sourceDeliveriesDemand;
 
-    private final List<Courier> sourceCouriers;
+    private HashMap<Courier, Pair<TourSolution, DeliveriesDemand>> previousCouriers;
 
     private final String filename;
 
@@ -32,12 +35,11 @@ public class CommandLoadTourSolution implements Command {
      * @param sourceCouriers         The list of couriers before loading, for undo.
      * @param filename               The path to the file to load the tour solution from.
      */
-    public CommandLoadTourSolution(AppController controller, State sourceState, CityMap sourceCityMap, DeliveriesDemand sourceDeliveriesDemand, List<Courier> sourceCouriers, String filename) {
+    public CommandLoadTourSolution(AppController controller, State sourceState, CityMap sourceCityMap, DeliveriesDemand sourceDeliveriesDemand, String filename) {
         this.controller = controller;
         this.sourceState = sourceState;
         this.sourceCityMap = sourceCityMap;
         this.sourceDeliveriesDemand = sourceDeliveriesDemand;
-        this.sourceCouriers = sourceCouriers;
         this.filename = filename;
     }
 
@@ -55,13 +57,21 @@ public class CommandLoadTourSolution implements Command {
             return;
         }
 
+        previousCouriers = new HashMap<>();
+        for (Courier courier : controller.couriers) {
+            previousCouriers.put(courier, new Pair<>(courier.getTourSolution(), courier.getDeliveriesDemand()));
+        }
+
+        previousProgress = controller.tourCalculationProgress.get();
         controller.doRestoreCityMap(tourSolutionSerialiser.cityMap());
         controller.doRestoreDeliveriesDemand(tourSolutionSerialiser.demand());
         controller.doRestoreCouriers(tourSolutionSerialiser.couriersAndSolutions());
+        controller.tourCalculationProgress.set(previousProgress);
+        controller.deliveriesDemand.invalidate();
+
 
         StateDeliveriesLoaded newState = new StateDeliveriesLoaded(controller);
         controller.transitionToState(newState);
-
     }
 
     /**
@@ -71,7 +81,16 @@ public class CommandLoadTourSolution implements Command {
     public void undo() {
         controller.doRestoreCityMap(sourceCityMap);
         controller.doRestoreDeliveriesDemand(sourceDeliveriesDemand);
-        controller.couriersProperty().setAll(sourceCouriers);
+
+        for (Map.Entry<Courier, Pair<TourSolution, DeliveriesDemand>> entry : previousCouriers.entrySet()) {
+            entry.getKey().setTourSolution(entry.getValue().getKey());
+            entry.getKey().setDeliveriesDemand(entry.getValue().getValue());
+        }
+        controller.couriersProperty().setAll(previousCouriers.keySet());
+        previousCouriers.clear();
+        controller.deliveriesDemand.invalidate();
+
+        controller.tourCalculationProgress.set(previousProgress);
         controller.transitionToState(sourceState);
     }
 

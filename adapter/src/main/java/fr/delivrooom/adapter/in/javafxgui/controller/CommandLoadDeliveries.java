@@ -20,6 +20,7 @@ public class CommandLoadDeliveries implements Command {
     private final URL deliveriesUrl;
     private final State sourceState;
     private DeliveriesDemand previousDeliveries;
+    private double previousProgress = 0;
     private HashMap<Courier, Pair<TourSolution, DeliveriesDemand>> previousCouriers;
 
     /**
@@ -43,6 +44,7 @@ public class CommandLoadDeliveries implements Command {
     public void execute() {
         try {
             previousDeliveries = controller.deliveriesDemandProperty().getValue();
+            previousProgress = controller.tourCalculationProgress.get();
             previousCouriers = new HashMap<>();
             for (Courier courier : controller.couriers) {
                 previousCouriers.put(courier, new Pair<>(courier.getTourSolution(), courier.getDeliveriesDemand()));
@@ -53,6 +55,7 @@ public class CommandLoadDeliveries implements Command {
                     courier.deleteTourSolution();
                 }
             }
+            controller.tourCalculationProgress.set(0);
             controller.transitionToState(new StateDeliveriesLoaded(controller));
             controller.deliveriesDemand.set(JavaFXApp.guiUseCase().getDeliveriesDemand(controller.cityMap.get(), deliveriesUrl));
             controller.couriers.invalidate();
@@ -74,6 +77,7 @@ public class CommandLoadDeliveries implements Command {
                 entry.getKey().setDeliveriesDemand(entry.getValue().getValue());
             }
             previousCouriers.clear();
+            controller.tourCalculationProgress.set(previousProgress);
             controller.transitionToState(sourceState);
             controller.doRestoreDeliveriesDemand(previousDeliveries);
             controller.couriers.invalidate();

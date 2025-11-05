@@ -3,7 +3,6 @@ package fr.delivrooom.adapter.in.javafxgui.controller;
 import fr.delivrooom.application.model.*;
 
 import java.net.URL;
-import java.util.List;
 
 /**
  * State interface for the State design pattern implementing Command Factory pattern.
@@ -128,5 +127,5 @@ public interface State {
      * @param filename               The path to the file to load the tour solution from.
      * @return A {@link CommandResult} containing the load command or an error.
      */
-    CommandResult createLoadTourCommand(CityMap sourceCityMap, DeliveriesDemand sourceDeliveriesDemand, List<Courier> sourceCouriers, String filename);
+    CommandResult createLoadTourCommand(CityMap sourceCityMap, DeliveriesDemand sourceDeliveriesDemand, String filename);
 }

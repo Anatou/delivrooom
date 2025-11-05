@@ -94,7 +94,7 @@ public record StateSelectIntersection(AppController controller) implements State
         }
     }
 
-    public CommandResult createLoadTourCommand(CityMap sourceCityMap, DeliveriesDemand sourceDeliveriesDemand, List<Courier> sourceCouriers, String filename) {
-        return CommandResult.success( new CommandLoadTourSolution(controller, this, sourceCityMap, sourceDeliveriesDemand, sourceCouriers, filename) );
+    public CommandResult createLoadTourCommand(CityMap sourceCityMap, DeliveriesDemand sourceDeliveriesDemand, String filename) {
+        return CommandResult.success(new CommandLoadTourSolution(controller, this, sourceCityMap, sourceDeliveriesDemand, filename));
     }
 }

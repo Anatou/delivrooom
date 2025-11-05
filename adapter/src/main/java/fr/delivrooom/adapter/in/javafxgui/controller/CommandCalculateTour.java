@@ -14,6 +14,7 @@ public class CommandCalculateTour implements Command {
     private final AppController controller;
     private final HashMap<Courier, TourSolution> solutions;
     private final boolean singleCourier;
+    private double previousProgress = 0;
 
     private final HashMap<Courier, TourSolution> previousTourSolutions = new HashMap<>();
 
@@ -41,6 +42,7 @@ public class CommandCalculateTour implements Command {
             previousTourSolutions.put(courier, courier.getTourSolution());
             //if (!singleCourier) courier.deleteTourSolution();
         }
+        this.previousProgress = controller.tourCalculationProgress.get();
         for (Map.Entry<Courier, TourSolution> entry : solutions.entrySet()) {
             entry.getKey().setTourSolution(entry.getValue());
         }
@@ -57,6 +59,7 @@ public class CommandCalculateTour implements Command {
 //                courier.deleteTourSolution();
 //            }
 //        }
+        controller.tourCalculationProgress.set(previousProgress);
         for (Map.Entry<Courier, TourSolution> entry : previousTourSolutions.entrySet()) {
             entry.getKey().setTourSolution(entry.getValue());
         }

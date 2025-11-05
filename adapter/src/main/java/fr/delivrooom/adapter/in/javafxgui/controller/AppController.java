@@ -264,7 +264,7 @@ public class AppController {
      * @param file The file containing the tour solution.
      */
     public void requestLoadTourSolution(File file) {
-        CommandResult result = getState().createLoadTourCommand(cityMap.get(), deliveriesDemand.get(), couriers.get(), file.getAbsolutePath());
+        CommandResult result = getState().createLoadTourCommand(cityMap.get(), deliveriesDemand.get(), file.getAbsolutePath());
         requestCommand(result);
     }
 
