@@ -47,7 +47,7 @@ public abstract class TemplateTSP implements TSP {
         this.calls = 0;
         this.consideredPossibilities = 0;
         this.maxPossibilities = this.orderedPermutationCount(g.getNbSommets() - 1, demand.deliveries().size());
-        System.out.println("Calculated max possibilities : " + maxPossibilities);
+        //System.out.println("Calculated max possibilities : " + maxPossibilities);
 
         meilleureSolution = new Long[g.getNbSommets()];
         HashSet<Long> reachableNodes = new HashSet<>();
@@ -64,10 +64,10 @@ public abstract class TemplateTSP implements TSP {
         // add the warehouse as a visited node
         visitedNodes.add(demand.store().getId());
         branchAndBound(demand.store().getId(), reachableNodes, visitedNodes, 0.f);
-        System.out.println("Number of calls: " + calls);
+        //System.out.println("Number of calls: " + calls);
 
-        System.out.println("Total number of possibilities considered : " + this.consideredPossibilities);
-        System.out.println("Final Progress " + (float) (this.consideredPossibilities / this.maxPossibilities * 100) + "%");
+        //System.out.println("Total number of possibilities considered : " + this.consideredPossibilities);
+        //System.out.println("Final Progress " + (float) (this.consideredPossibilities / this.maxPossibilities * 100) + "%");
     }
 
 
@@ -77,7 +77,7 @@ public abstract class TemplateTSP implements TSP {
         //System.out.println("branchAndBound call " + calls + " (" + (double)consideredPossibilities/maxPossibilities*100 + "%) : \n - currentNode : " + currentNode + "\n - reachableNodes : "+ reachableNodes + "\n - visitedNodes : " + visitedNodes + "\n - visitedCost : " + visitedCost + "\n - bestCost : " + bestCost);
 
         if (System.currentTimeMillis() - tpsDebut > tpsLimite) {
-            System.out.println("Timeout reached after " + tpsLimite + " ms and " + calls + " calls.");
+            //System.out.println("Timeout reached after " + tpsLimite + " ms and " + calls + " calls.");
             return;
         }
         if (reachableNodes.isEmpty()) { // every delivery point has been visited
